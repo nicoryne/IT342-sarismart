@@ -2,6 +2,10 @@ package me.sarismart.backend.Entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import java.util.List;
+import java.util.ArrayList;
+import me.sarismart.backend.Entity.User;
+import me.sarismart.backend.Entity.Product;
 
 @Entity
 @Getter
@@ -19,4 +23,10 @@ public class Store {
     
     @Column(nullable = false)
     private String location;
+
+    @OneToMany
+    private List<User> workers = new ArrayList<>();
+
+    @OneToMany(mappedBy = "store", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Product> products = new ArrayList<>();
 }

@@ -2,6 +2,7 @@ package me.sarismart.backend.Service;
 
 import me.sarismart.backend.Entity.Store;
 import me.sarismart.backend.Repository.StoreRepository;
+import me.sarismart.backend.Repository.UserRepository;
 import me.sarismart.backend.Entity.Product;
 import me.sarismart.backend.Entity.Report;
 import me.sarismart.backend.Entity.Sale;
@@ -17,6 +18,9 @@ public class StoreService {
 
     @Autowired
     private StoreRepository storeRepository;
+
+    @Autowired
+    private UserRepository userRepository;
 
     public List<Store> getAllStores() {
         return storeRepository.findAll();
@@ -42,67 +46,133 @@ public class StoreService {
         return storeRepository.save(existingStore);
     }
 
+    // Next methods needs revisions
+    // to be implemented based on the actual logic and requirements
     public void assignWorker(Long storeId, Long workerId) {
-        // Logic to assign a worker to a store
+        Store store = storeRepository.findById(storeId)
+                .orElseThrow(() -> new RuntimeException("Store not found"));
+        User worker = userRepository.findById(workerId)
+                .orElseThrow(() -> new RuntimeException("Worker not found"));
+        store.getWorkers().add(worker);
+        storeRepository.save(store);
     }
 
     public void removeWorker(Long storeId, Long workerId) {
-        // Logic to remove a worker from a store
+        Store store = storeRepository.findById(storeId)
+                .orElseThrow(() -> new RuntimeException("Store not found"));
+        User worker = userRepository.findById(workerId)
+                .orElseThrow(() -> new RuntimeException("Worker not found"));
+        store.getWorkers().remove(worker);
+        storeRepository.save(store);
     }
 
     public List<User> listWorkers(Long storeId) {
-        // Logic to list workers assigned to a store
-        return List.of(); // Placeholder
+        Store store = storeRepository.findById(storeId)
+                .orElseThrow(() -> new RuntimeException("Store not found"));
+        return store.getWorkers();
     }
 
     public List<Product> listProducts(Long storeId) {
-        // Logic to list products in a store
-        return List.of(); // Placeholder
+        Store store = storeRepository.findById(storeId)
+                .orElseThrow(() -> new RuntimeException("Store not found"));
+        return store.getProducts();
     }
 
     public Product createProduct(Long storeId, Product product) {
-        // Logic to create a product in a store
-        return product; // Placeholder
+        Store store = storeRepository.findById(storeId)
+                .orElseThrow(() -> new RuntimeException("Store not found"));
+        product.setStore(store);
+        store.getProducts().add(product);
+        storeRepository.save(store);
+        return product;
     }
 
-    public Product modifyProduct(Long storeId, Long productId, Product product) {
-        // Logic to modify a product in a store
-        return product; // Placeholder
+    public void modifyProduct(Long storeId, Long productId, Product product) {
+        Store store = storeRepository.findById(storeId)
+                .orElseThrow(() -> new RuntimeException("Store not found"));
+        Product existingProduct = store.getProducts().stream()
+                .filter(p -> p.getId().equals(productId))
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("Product not found"));
+        existingProduct.setName(product.getName());
+        existingProduct.setPrice(product.getPrice());
+        existingProduct.setStock(product.getStock());
+        storeRepository.save(store);
     }
 
     public void deleteProduct(Long storeId, Long productId) {
-        // Logic to delete a product in a store
+        Store store = storeRepository.findById(storeId)
+                .orElseThrow(() -> new RuntimeException("Store not found"));
+        Product product = store.getProducts().stream()
+                .filter(p -> p.getId().equals(productId))
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("Product not found"));
+        store.getProducts().remove(product);
+        storeRepository.save(store);
     }
 
     public void adjustStock(Long storeId, Long productId, int quantity) {
-        // Logic to adjust stock for a product
+        Store store = storeRepository.findById(storeId)
+                .orElseThrow(() -> new RuntimeException("Store not found"));
+        Product product = store.getProducts().stream()
+                .filter(p -> p.getId().equals(productId))
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("Product not found"));
+        product.setStock(product.getStock() + quantity);
+        storeRepository.save(store);
     }
 
     public void createSale(Long storeId, Sale sale) {
-        // Logic to create a sale transaction
+        Store store = storeRepository.findById(storeId)
+                .orElseThrow(() -> new RuntimeException("Store not found"));
+        sale.setStore(store);
+        store.getSales().add(sale);
+        storeRepository.save(store);
     }
 
     public Sale getSale(Long storeId, Long saleId) {
-        // Logic to retrieve a sale transaction
-        return new Sale(); // Placeholder
+        Store store = storeRepository.findById(storeId)
+                .orElseThrow(() -> new RuntimeException("Store not found"));
+        return store.getSales().stream()
+                .filter(s -> s.getId().equals(saleId))
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("Sale not found"));
     }
 
     public List<Sale> listSales(Long storeId) {
-        // Logic to list sales in a store
-        return List.of(); // Placeholder
+        Store store = storeRepository.findById(storeId)
+                .orElseThrow(() -> new RuntimeException("Store not found"));
+        return store.getSales();
     }
 
     public void refundSale(Long storeId, Long saleId) {
-        // Logic to refund a sale transaction
+        Store store = storeRepository.findById(storeId)
+                .orElseThrow(() -> new RuntimeException("Store not found"));
+        Sale sale = store.getSales().stream()
+                .filter(s -> s.getId().equals(saleId))
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("Sale not found"));
+        store.getSales().remove(sale);
+        storeRepository.save(store);
     }
 
     public List<Product> restockAlert(Long storeId) {
-        // Logic to retrieve low-stock products
-        return List.of(); // Placeholder
+        Store store = storeRepository.findById(storeId)
+                .orElseThrow(() -> new RuntimeException("Store not found"));
+        return store.getProducts().stream()
+                .filter(product -> product.getStock() < product.getReorderLevel())
+                .toList();
     }
 
     public void setReorderLevel(Long storeId, Long productId, int level) {
-        // Logic to set reorder level for a product
+        Store store = storeRepository.findById(storeId)
+                .orElseThrow(() -> new RuntimeException("Store not found"));
+        Product product = store.getProducts().stream()
+                .filter(p -> p.getId().equals(productId))
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("Product not found"));
+        product.setReorderLevel(level);
+        storeRepository.save(store);
     }
 
     public Report dailySales(Long storeId) {
@@ -116,7 +186,8 @@ public class StoreService {
     }
 
     public List<Product> inventoryStatus(Long storeId) {
-        // Logic to retrieve inventory status
-        return List.of(); // Placeholder
+        Store store = storeRepository.findById(storeId)
+                .orElseThrow(() -> new RuntimeException("Store not found"));
+        return store.getProducts();
     }
 }

@@ -2,6 +2,7 @@ package me.sarismart.backend.Entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import me.sarismart.backend.Entity.Store;
 
 @Entity
 @Getter
@@ -23,4 +24,8 @@ public class Product {
     private double price;
 
     private int stock;
+
+    @ManyToOne
+    @JoinColumn(name = "store_id", nullable = false)
+    private Store store;
 }
