@@ -25,6 +25,10 @@ public class Product {
 
     private int stock;
 
+    private String description;
+
+    private int reorderLevel;
+
     @ManyToOne
     @JoinColumn(name = "store_id", nullable = false)
     private Store store;

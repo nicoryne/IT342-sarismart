@@ -1,5 +1,6 @@
 package me.sarismart.backend.Entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import java.util.List;
@@ -27,6 +28,10 @@ public class Store {
     @OneToMany
     private List<User> workers = new ArrayList<>();
 
+    @JsonIgnore
     @OneToMany(mappedBy = "store", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Product> products = new ArrayList<>();
+
+    @OneToMany(mappedBy = "store", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Sale> sales = new ArrayList<>();
 }

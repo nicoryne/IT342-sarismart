@@ -87,7 +87,7 @@ public class StoreService {
         return product;
     }
 
-    public void modifyProduct(Long storeId, Long productId, Product product) {
+    public Product modifyProduct(Long storeId, Long productId, Product product) {
         Store store = storeRepository.findById(storeId)
                 .orElseThrow(() -> new RuntimeException("Store not found"));
         Product existingProduct = store.getProducts().stream()
@@ -98,6 +98,7 @@ public class StoreService {
         existingProduct.setPrice(product.getPrice());
         existingProduct.setStock(product.getStock());
         storeRepository.save(store);
+        return existingProduct;
     }
 
     public void deleteProduct(Long storeId, Long productId) {
