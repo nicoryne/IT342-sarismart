@@ -1,4 +1,9 @@
 package edu.cit.sarismart
 
-class SariSmartApplication {
+import android.app.Application
+import dagger.hilt.android.HiltAndroidApp
+
+@HiltAndroidApp
+class SariSmartApplication : Application() {
+    
 }
