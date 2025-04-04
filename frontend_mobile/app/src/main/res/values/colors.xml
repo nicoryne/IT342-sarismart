@@ -7,4 +7,9 @@
     <color name="teal_700">#FF018786</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+
+    <!--SariSmart Colors-->
+    <color name="ss_teal">#009393</color>
+    <color name="ss_petrol">#016171</color>
+    <color name="ss_aqua">#00E0C6</color>
 </resources>
