@@ -1,3 +1,21 @@
 <resources>
-    <string name="app_name">sarismart</string>
+
+    <!--Global-->
+    <string name="app_name">SariSmart</string>
+
+    <!--Login -->
+    <string name="login_header">Login to SariSmart</string>
+    <string name="login_subtitle">Welcome back, Kamusta?</string>
+    <string name="login_guest_hyperlink">Continue as guest</string>
+    <string name="login_email_header">Email Address</string>
+    <string name="login_email_temp">example@gmail.com</string>
+    <string name="login_password_header">Password</string>
+    <string name="login_password_temp">Password</string>
+    <string name="login_forgot_hyperlink">Forgot Password?</string>
+    <string name="login_btn_login">Login</string>
+    <string name="login_subtitle_alt">Or continue with</string>
+    <string name="login_btn_fb">Sign In with Facebook</string>
+    <string name="login_btn_google">Sign In with Google</string>
+    <string name="login_subtitle_noaccount">Don\'t have an account?</string>
+    <string name="login_signup_hyperlink">Sign Up</string>
 </resources>
