@@ -1,6 +1,6 @@
-package edu.cit.sarismart.repository.data
+package edu.cit.sarismart.data.repository
 
-import edu.cit.sarismart.repository.domain.LoginRepository
+import edu.cit.sarismart.domain.repository.LoginRepository
 
 class LoginRepositoryImpl : LoginRepository {
 

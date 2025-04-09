@@ -3,7 +3,7 @@ package edu.cit.sarismart.ui.auth
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import edu.cit.sarismart.repository.domain.LoginRepository
+import edu.cit.sarismart.domain.repository.LoginRepository
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

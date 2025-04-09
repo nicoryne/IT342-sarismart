@@ -1,18 +1,74 @@
 package edu.cit.sarismart.ui
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import edu.cit.sarismart.ui.auth.LoginScreen
+import edu.cit.sarismart.ui.onboarding.OnboardingScreen
+import kotlinx.coroutines.flow.collectLatest
 
 @Composable
-fun MainScreen() {
-    val navController = rememberNavController();
+fun MainScreen(viewModel: MainViewModel = hiltViewModel()) {
+    val navController = rememberNavController()
+    
+    NavHost(navController = navController, startDestination = "start") {
+        composable("start") {
+            StartScreen(navController, viewModel)
+        }
 
-    NavHost(navController = navController, startDestination = "login") {
+        composable("onboarding") {
+            OnboardingScreen(
+                onFinish = {
+                    viewModel.completeOnboarding()
+                    navController.navigate("login") {
+                        popUpTo("start") { inclusive = true }
+                    }
+                },
+                onSkip = {
+                    viewModel.completeOnboarding()
+                    navController.navigate("login") {
+                        popUpTo("start") { inclusive = true }
+                    }
+                }
+            )
+        }
+
         composable("login") {
             LoginScreen()
+        }
+    }
+}
+
+@Composable
+fun StartScreen(navController: NavHostController, viewModel: MainViewModel) {
+    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        CircularProgressIndicator()
+    }
+
+    LaunchedEffect(key1 = true) {
+        viewModel.checkOnboardingStatus()
+
+        viewModel.onboardingCompleted.collectLatest { completed ->
+            if (completed) {
+                navController.navigate("login") {
+                    popUpTo("start") { inclusive = true }
+                }
+            } else {
+                navController.navigate("onboarding") {
+                    popUpTo("start") { inclusive = true }
+                }
+            }
         }
     }
 }
