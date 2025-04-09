@@ -87,6 +87,16 @@ dependencies {
     // Google Font
     implementation(libs.androidx.ui.text.google.fonts)
 
+    // Lottie
+    implementation(libs.lottie.compose)
+
+    // Splash Screen
+    implementation(libs.androidx.core.splashscreen)
+
+    // Data Store
+    implementation(libs.androidx.datastore.preferences)
+
+
 }
 
 kapt {

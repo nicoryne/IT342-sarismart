@@ -4,8 +4,8 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import edu.cit.sarismart.repository.domain.LoginRepository
-import edu.cit.sarismart.repository.data.LoginRepositoryImpl
+import edu.cit.sarismart.domain.repository.LoginRepository
+import edu.cit.sarismart.data.repository.LoginRepositoryImpl
 
 @Module
 @InstallIn(SingletonComponent::class)
