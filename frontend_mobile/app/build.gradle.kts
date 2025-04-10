@@ -20,6 +20,8 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        manifestPlaceholders["MAPS_API_KEY"] = project.findProperty("maps.api.key") ?: ""
     }
 
     buildTypes {
@@ -96,7 +98,12 @@ dependencies {
     // Data Store
     implementation(libs.androidx.datastore.preferences)
 
+    // Google Maps
+    implementation(libs.maps.compose)
+    implementation(libs.play.services.maps)
 
+    // Location Services
+    implementation(libs.play.services.location)
 }
 
 kapt {
