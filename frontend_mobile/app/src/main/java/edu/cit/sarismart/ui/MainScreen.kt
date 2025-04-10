@@ -14,6 +14,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import edu.cit.sarismart.ui.auth.LoginScreen
 import edu.cit.sarismart.ui.auth.RegisterScreen
+import edu.cit.sarismart.ui.guest.GuestMapScreen
 import edu.cit.sarismart.ui.onboarding.OnboardingScreen
 import kotlinx.coroutines.flow.collectLatest
 
@@ -43,11 +44,11 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel()) {
             )
         }
 
-
         composable("login") {
             LoginScreen(
                 onCreateAccountClick = { navController.navigate("register") },
-                onForgotPasswordClick = { /* TODO: Navigate to forgot password */ }
+                onForgotPasswordClick = { /* TODO: Navigate to forgot password */ },
+                onNavigateToGuest = { navController.navigate("guest") }
             )
         }
 
@@ -59,6 +60,12 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel()) {
                         popUpTo("register") { inclusive = true }
                     }
                 }
+            )
+        }
+
+        composable("guest") {
+            GuestMapScreen(
+                onNavigateToLogin = { navController.navigate("login") }
             )
         }
     }
