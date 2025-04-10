@@ -3,7 +3,7 @@ package edu.cit.sarismart.ui.auth
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import edu.cit.sarismart.domain.repository.LoginRepository
+import edu.cit.sarismart.domain.repository.AuthRepository
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -12,7 +12,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class LoginViewModel @Inject constructor(
-    private val loginRepository: LoginRepository
+    private val authRepository: AuthRepository
 ) : ViewModel() {
 
     private val _email = MutableStateFlow("")
@@ -44,7 +44,7 @@ class LoginViewModel @Inject constructor(
             _isLoading.value = true
             delay(1000)
 
-            val success = loginRepository.login(_email.value, _password.value)
+            val success = authRepository.login(_email.value, _password.value)
             _isLoading.value = false
 
             // TODO: after success navigation
