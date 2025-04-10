@@ -35,7 +35,8 @@ import edu.cit.sarismart.R
 fun LoginScreen(
     viewModel: LoginViewModel = hiltViewModel(),
     onCreateAccountClick: () -> Unit = {},
-    onForgotPasswordClick: () -> Unit = {}
+    onForgotPasswordClick: () -> Unit = {},
+    onNavigateToGuest: () -> Unit = {}
 ) {
     val email by viewModel.email.collectAsState()
     val password by viewModel.password.collectAsState()
@@ -238,7 +239,7 @@ fun LoginScreen(
 
             // Continue as Guest Button
             OutlinedButton(
-                onClick = { viewModel.onContinueAsGuestClicked() },
+                onClick = { viewModel.onContinueAsGuestClicked(); onNavigateToGuest() },
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp),
                 colors = ButtonDefaults.outlinedButtonColors(
