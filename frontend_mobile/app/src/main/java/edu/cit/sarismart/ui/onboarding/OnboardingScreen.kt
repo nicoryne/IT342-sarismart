@@ -56,7 +56,7 @@ fun OnboardingScreen(
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
     ) {
-        // App name at the top
+        // app name at the top
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -71,7 +71,7 @@ fun OnboardingScreen(
             )
         }
 
-        // Pager content
+        // pager content
         HorizontalPager(
             state = pagerState,
             modifier = Modifier
@@ -81,13 +81,13 @@ fun OnboardingScreen(
             OnboardingPage(page = pages[position])
         }
 
-        // Bottom navigation
+        // bottom navigation
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 24.dp, vertical = 20.dp)
         ) {
-            // Skip button
+            // skip button
             if (pagerState.currentPage < pages.size - 1) {
                 TextButton(
                     onClick = onSkip,
@@ -101,7 +101,7 @@ fun OnboardingScreen(
                 }
             }
 
-            // Page indicators
+            // page indicators
             Row(
                 modifier = Modifier.align(Alignment.Center),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -121,7 +121,7 @@ fun OnboardingScreen(
                 }
             }
 
-            // Next or Get Started button
+            // next or Get Started button
             Button(
                 onClick = {
                     if (pagerState.currentPage < pages.size - 1) {
@@ -155,7 +155,7 @@ fun OnboardingPage(page: OnboardingPage) {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        // Image
+        // image
         Image(
             painter = painterResource(id = page.imageRes),
             contentDescription = null,
@@ -164,7 +164,7 @@ fun OnboardingPage(page: OnboardingPage) {
                 .padding(bottom = 32.dp)
         )
 
-        // Title
+        // title
         Text(
             text = page.titleLine1,
             style = MaterialTheme.typography.titleLarge,
@@ -182,7 +182,7 @@ fun OnboardingPage(page: OnboardingPage) {
             color = MaterialTheme.colorScheme.primary
         )
 
-        // Description
+        // description
         Text(
             text = page.description,
             style = MaterialTheme.typography.bodyMedium,

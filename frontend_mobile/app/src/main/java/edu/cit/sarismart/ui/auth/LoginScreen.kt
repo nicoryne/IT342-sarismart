@@ -12,6 +12,7 @@ import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.*
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -20,6 +21,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Fill
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -28,31 +30,60 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.fragment.app.FragmentActivity
 import androidx.hilt.navigation.compose.hiltViewModel
 import edu.cit.sarismart.R
+import edu.cit.sarismart.util.BiometricUtil
 
 @Composable
 fun LoginScreen(
     viewModel: LoginViewModel = hiltViewModel(),
     onCreateAccountClick: () -> Unit = {},
     onForgotPasswordClick: () -> Unit = {},
-    onNavigateToGuest: () -> Unit = {}
+    onNavigateToGuest: () -> Unit = {},
+    onNavigateToHome: () -> Unit = {}
 ) {
     val email by viewModel.email.collectAsState()
     val password by viewModel.password.collectAsState()
     val isPasswordVisible by viewModel.isPasswordVisible.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
+    val isBiometricAvailable by viewModel.isBiometricAvailable.collectAsState()
+
+    val context = LocalContext.current
+    val activity = context as? FragmentActivity
+
+    LaunchedEffect(key1 = true) {
+        viewModel.navigationEvent.collect { event ->
+            when (event) {
+                LoginNavigationEvent.NavigateToHome -> onNavigateToHome()
+                LoginNavigationEvent.NavigateToGuestMap -> onNavigateToGuest()
+                LoginNavigationEvent.NavigateToForgotPassword -> onForgotPasswordClick()
+                LoginNavigationEvent.ShowBiometricPrompt -> {
+                    activity?.let {
+                        BiometricUtil.showBiometricPrompt(
+                            activity = it,
+                            title = "Login to SariSmart",
+                            subtitle = "Use your fingerprint or face to log in",
+                            onSuccess = { viewModel.onBiometricAuthSuccess() },
+                            onError = { _, _ -> /* handle error */ },
+                            onFailed = { /* handle failure */ }
+                        )
+                    }
+                }
+            }
+        }
+    }
 
     Box (
         modifier = Modifier.fillMaxSize()
     ) {
-        // Background Pattern
+        // background pattern
         BackgroundPattern(
             primaryColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f),
             secondaryColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
         )
 
-        // Actual Screen
+        // actual screen
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -62,7 +93,7 @@ fun LoginScreen(
             Spacer(modifier = Modifier.height(48.dp))
 
 
-            // Login Title
+            // login Title
             Text(
                 text = "Login to SariSmart",
                 style = MaterialTheme.typography.headlineSmall,
@@ -80,7 +111,7 @@ fun LoginScreen(
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            // Email Field
+            // email field
             OutlinedTextField(
                 value = email,
                 onValueChange = { viewModel.onEmailChanged(it) },
@@ -100,7 +131,7 @@ fun LoginScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Password Field
+            // password field
             OutlinedTextField(
                 value = password,
                 onValueChange = { viewModel.onPasswordChanged(it) },
@@ -126,7 +157,7 @@ fun LoginScreen(
                 singleLine = true
             )
 
-            // Forgot Password
+            // forgot password
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -146,7 +177,7 @@ fun LoginScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Login Button
+            // login button
             Button(
                 onClick = { viewModel.onLoginClicked() },
                 enabled = !isLoading,
@@ -172,9 +203,35 @@ fun LoginScreen(
                 }
             }
 
+            if (isBiometricAvailable) {
+                Spacer(modifier = Modifier.height(16.dp))
+
+                OutlinedButton(
+                    onClick = { viewModel.onBiometricLoginClicked() },
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = ButtonDefaults.outlinedButtonColors(
+                        contentColor = MaterialTheme.colorScheme.primary,
+                    ),
+                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary)
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_fingerprint),
+                        contentDescription = "Fingerprint",
+                        modifier = Modifier.size(20.dp),
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        "Login with Biometrics",
+                        fontWeight = FontWeight.Medium
+                    )
+                }
+            }
+
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Or continue with
+            // or continue with
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
@@ -197,12 +254,12 @@ fun LoginScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Social Login Buttons
+            // social login button
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                // Google Sign In
+                // google sign in
                 ElevatedButton(
                     onClick = { viewModel.onLoginWithGoogleClicked() },
                     modifier = Modifier.weight(1f),
@@ -218,7 +275,7 @@ fun LoginScreen(
                     Text("Google")
                 }
 
-                // Facebook Sign In
+                // facebook sign in
                 ElevatedButton(
                     onClick = { viewModel.onLoginWithFacebookClicked() },
                     modifier = Modifier.weight(1f),
@@ -237,7 +294,7 @@ fun LoginScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Continue as Guest Button
+            // continue as guest
             OutlinedButton(
                 onClick = { viewModel.onContinueAsGuestClicked(); onNavigateToGuest() },
                 modifier = Modifier.fillMaxWidth(),
@@ -255,7 +312,7 @@ fun LoginScreen(
 
             Spacer(modifier = Modifier.weight(1f))
 
-            // Create Account
+            // create account
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -293,7 +350,7 @@ fun BackgroundPattern(
             val width = size.width
             val height = size.height
 
-            // Top right curved shape
+            // top right curved shape
             val path1 = Path().apply {
                 moveTo(width * 0.7f, 0f)
                 cubicTo(
@@ -306,7 +363,7 @@ fun BackgroundPattern(
             }
             drawPath(path1, primaryColor, style = Fill)
 
-            // Bottom left blob
+            // bottom left blob
             val path2 = Path().apply {
                 moveTo(0f, height * 0.7f)
                 cubicTo(
@@ -319,7 +376,7 @@ fun BackgroundPattern(
             }
             drawPath(path2, primaryColor, style = Fill)
 
-            // Middle right accent
+            // middle right accent
             val path3 = Path().apply {
                 moveTo(width * 0.85f, height * 0.45f)
                 cubicTo(
@@ -332,7 +389,7 @@ fun BackgroundPattern(
             }
             drawPath(path3, secondaryColor, style = Fill)
 
-            // Draw scattered circles
+            // draw scattered circles
             val circlePositions = listOf(
                 // top-left
                 Offset(width * 0.1f, height * 0.1f) to 40f,
@@ -354,7 +411,7 @@ fun BackgroundPattern(
                 )
             }
 
-            // Draw small dots pattern
+            // draw small dots pattern
             for (i in 0 until 40) {
                 val x = (width * (0.1f + 0.8f * (i % 8) / 8f))
                 val y = (height * (0.1f + 0.8f * (i / 8) / 5f))

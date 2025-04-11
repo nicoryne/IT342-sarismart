@@ -8,6 +8,10 @@ class AuthRepositoryImpl : AuthRepository {
         TODO("Not yet implemented")
     }
 
+    override fun loginWithBiometric(): Boolean {
+        TODO("Not yet implemented")
+    }
+
     override fun register(
         name: String,
         email: String,
@@ -17,7 +21,19 @@ class AuthRepositoryImpl : AuthRepository {
         TODO("Not yet implemented")
     }
 
+    override fun resetPassword(email: String): Boolean {
+        TODO("Not yet implemented")
+    }
+
     override fun logout(): Boolean {
+        TODO("Not yet implemented")
+    }
+
+    override fun isBiometricEnabled(): Boolean {
+        TODO("Not yet implemented")
+    }
+
+    override fun setBiometricEnabled(enabled: Boolean) {
         TODO("Not yet implemented")
     }
 }
