@@ -1,5 +1,6 @@
 package me.sarismart.backend.Service;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
@@ -9,11 +10,17 @@ import java.util.Map;
 
 @Service
 public class SupabaseAuthService {
-    private final String SUPABASE_URL = "https://mpvwyygeoesopxralxxl.supabase.co";
-    private final String API_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1wdnd5eWdlb2Vzb3B4cmFseHhsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM3NDg2OTYsImV4cCI6MjA1OTMyNDY5Nn0.db_Loy9LCRmmMxMYgX2iAGvqvOnxD_34jrQzIbnlw9Q";
+    
+    private final String SUPABASE_URL;
+    private final String API_KEY;
 
     @Autowired
     private RestTemplate restTemplate;
+
+    public SupabaseAuthService(@Value("${SUPABASE_URL}") String SUPABASE_URL, @Value("${API_KEY}") String API_KEY) {
+        this.SUPABASE_URL = SUPABASE_URL;
+        this.API_KEY = API_KEY;
+    }
 
     public ResponseEntity<String> signUp(String email, String password) {
         String url = SUPABASE_URL + "/auth/v1/signup";
