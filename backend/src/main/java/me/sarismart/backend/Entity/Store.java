@@ -5,8 +5,6 @@ import jakarta.persistence.*;
 import lombok.*;
 import java.util.List;
 import java.util.ArrayList;
-import me.sarismart.backend.Entity.User;
-import me.sarismart.backend.Entity.Product;
 
 @Entity
 @Getter
