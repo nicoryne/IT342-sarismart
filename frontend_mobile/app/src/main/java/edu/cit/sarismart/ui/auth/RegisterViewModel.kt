@@ -62,7 +62,7 @@ class RegisterViewModel @Inject constructor(
     fun onPasswordChanged(value: String) {
         _password.value = value
         validatePassword()
-        validateVerifyPassword() // Also validate verify password when password changes
+        validateVerifyPassword() // also validate verify password when password changes
     }
 
     fun onVerifyPasswordChanged(value: String) {
@@ -129,7 +129,7 @@ class RegisterViewModel @Inject constructor(
 
         viewModelScope.launch {
             _isLoading.value = true
-            delay(1000) // Simulate network delay
+            delay(1000) // simulate network delay
 
             val success = authRepository.register(
                 _name.value,
@@ -146,7 +146,7 @@ class RegisterViewModel @Inject constructor(
     fun onRegisterWithGoogleClicked() {
         viewModelScope.launch {
             _isLoading.value = true
-            delay(1000) // Simulate network delay
+            delay(1000) // simulate network delay
 
             // TODO: Implement Google registration
 
@@ -157,7 +157,7 @@ class RegisterViewModel @Inject constructor(
     fun onRegisterWithFacebookClicked() {
         viewModelScope.launch {
             _isLoading.value = true
-            delay(1000) // Simulate network delay
+            delay(1000) // simulate network delay
 
             // TODO: Implement Facebook registration
 

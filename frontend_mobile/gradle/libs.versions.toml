@@ -1,5 +1,7 @@
 [versions]
 agp = "8.9.1"
+biometric = "1.20.0-alpha"
+biometricKtx = "1.4.0-alpha02"
 coreSplashscreen = "1.0.1"
 datastorePreferences = "1.1.4"
 fragmentKtx = "1.8.6"
@@ -22,6 +24,8 @@ playServicesMaps = "19.1.0"
 uiTextGoogleFonts = "1.7.8"
 
 [libraries]
+androidx-biometric = { module = "androidx.biometric:biometric", version.ref = "biometric" }
+androidx-biometric-ktx = { module = "androidx.biometric:biometric-ktx", version.ref = "biometricKtx" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-core-splashscreen = { module = "androidx.core:core-splashscreen", version.ref = "coreSplashscreen" }
 androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastorePreferences" }

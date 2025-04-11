@@ -48,7 +48,8 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel()) {
             LoginScreen(
                 onCreateAccountClick = { navController.navigate("register") },
                 onForgotPasswordClick = { /* TODO: Navigate to forgot password */ },
-                onNavigateToGuest = { navController.navigate("guest") }
+                onNavigateToGuest = { navController.navigate("guest") },
+                onNavigateToHome = { /* TODO: Navigate to user home */}
             )
         }
 

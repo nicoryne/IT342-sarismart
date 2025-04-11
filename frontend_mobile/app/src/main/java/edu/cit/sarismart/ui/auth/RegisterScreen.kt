@@ -53,13 +53,13 @@ fun RegisterScreen(
     Box(
         modifier = Modifier.fillMaxSize()
     ) {
-        // Background Pattern
+        // background pattern
         BackgroundPattern(
             primaryColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f),
             secondaryColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
         )
 
-        // Actual Screen
+        // actual screen
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -69,7 +69,7 @@ fun RegisterScreen(
         ) {
             Spacer(modifier = Modifier.height(48.dp))
 
-            // Register Title
+            // register title
             Text(
                 text = "Create Account",
                 style = MaterialTheme.typography.headlineSmall,
@@ -87,7 +87,7 @@ fun RegisterScreen(
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            // Name Field
+            // name field
             OutlinedTextField(
                 value = name,
                 onValueChange = { viewModel.onNameChanged(it) },
@@ -116,7 +116,7 @@ fun RegisterScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Email Field
+            // email field
             OutlinedTextField(
                 value = email,
                 onValueChange = { viewModel.onEmailChanged(it) },
@@ -145,7 +145,7 @@ fun RegisterScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Password Field
+            // password field
             OutlinedTextField(
                 value = password,
                 onValueChange = { viewModel.onPasswordChanged(it) },
@@ -181,7 +181,7 @@ fun RegisterScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Verify Password Field
+            // verify password field
             OutlinedTextField(
                 value = verifyPassword,
                 onValueChange = { viewModel.onVerifyPasswordChanged(it) },
@@ -217,7 +217,7 @@ fun RegisterScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Register Button
+            // register button
             Button(
                 onClick = { viewModel.onRegisterClicked() },
                 enabled = !isLoading,
@@ -246,7 +246,7 @@ fun RegisterScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Or continue with
+            // or continue with
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
@@ -271,12 +271,12 @@ fun RegisterScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Social Login Buttons
+            // social login buttons
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                // Google Sign In
+                // google sign in
                 ElevatedButton(
                     onClick = { viewModel.onRegisterWithGoogleClicked() },
                     modifier = Modifier.weight(1f),
@@ -292,7 +292,7 @@ fun RegisterScreen(
                     Text("Google")
                 }
 
-                // Facebook Sign In
+                // facebook sign in
                 ElevatedButton(
                     onClick = { viewModel.onRegisterWithFacebookClicked() },
                     modifier = Modifier.weight(1f),
@@ -311,7 +311,7 @@ fun RegisterScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Already have an account
+            // already have an account
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
