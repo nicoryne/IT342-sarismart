@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import me.sarismart.backend.Entity.AuthRequest;
+import me.sarismart.backend.DTO.AuthRequest;
 import me.sarismart.backend.Service.SupabaseAuthService;
 
 @RestController
