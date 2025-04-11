@@ -29,13 +29,5 @@ public class UserService {
     public void deleteUser(Long id) {
         userRepository.deleteById(id);
     }
-
-    public String authenticateUser(String username, String password) {
-        User user = userRepository.findByEmail(username);
-        if (user != null && user.getPassword().equals(password)) {
-            return "Authentication successful";
-        }
-        return "Invalid credentials";
-    }
 }
 
