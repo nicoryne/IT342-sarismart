@@ -6,10 +6,11 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import java.security.Key;
 import java.util.Date;
+import org.springframework.stereotype.Component;
 
-
+@Component
 public class JwtUtil {
-    private final String SECRET_KEY = "b8X5NqGetlstNWr5boMOSX5hQx+x8z/mvnlh5YCEl6+cUa/ytWJlgQ2U7U0GHVzzLVgOpAbJwvvmOglu9j7Xsw==";
+    private final String SECRET_KEY="b8X5NqGetlstNWr5boMOSX5hQx+x8z/mvnlh5YCEl6+cUa/ytWJlgQ2U7U0GHVzzLVgOpAbJwvvmOglu9j7Xsw==";
 
     public Claims validateToken(String token) {
         try {

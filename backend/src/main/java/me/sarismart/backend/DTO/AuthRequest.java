@@ -1,4 +1,4 @@
-package me.sarismart.backend.Entity;
+package me.sarismart.backend.DTO;
 
 import lombok.*;
 
