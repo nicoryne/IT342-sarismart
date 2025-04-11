@@ -14,7 +14,7 @@ public class SupabaseAuthService {
     private final String SUPABASE_URL;
     private final String API_KEY;
 
-    @Autowired
+   
     private RestTemplate restTemplate;
 
     public SupabaseAuthService(@Value("${SUPABASE_URL}") String SUPABASE_URL, @Value("${API_KEY}") String API_KEY) {
