@@ -16,8 +16,6 @@ export default function RegisterPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [formData, setFormData] = useState({
-    firstName: "",
-    lastName: "",
     email: "",
     password: "",
     confirmPassword: "",
@@ -39,18 +37,40 @@ export default function RegisterPage() {
     setFormData((prev) => ({ ...prev, agreeTerms: checked }))
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-
-    // Validate passwords match
+  
     if (formData.password !== formData.confirmPassword) {
       setPasswordError("Passwords do not match")
       return
     }
-
-    console.log("Registration form submitted:", formData)
-    // In a real application, you would handle registration here
+  
+    try {
+      const response = await fetch("http://localhost:8080/api/v1/auth/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: formData.email,
+          password: formData.password,
+        }),
+      })
+  
+      const responseText = await response.text()
+  
+      if (!response.ok) {
+        console.error("Backend returned:", response.status, responseText)
+        throw new Error(responseText || "Registration failed")
+      }
+  
+      alert("Registration successful: " + responseText)
+    } catch (err: any) {
+      console.error("Registration error:", err)
+      alert(err.message)
+    }
   }
+  
 
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword)
@@ -70,31 +90,6 @@ export default function RegisterPage() {
 
         <div className="rounded-lg border bg-white p-6 shadow-sm">
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="firstName">First Name</Label>
-                <Input
-                  id="firstName"
-                  name="firstName"
-                  placeholder="John"
-                  required
-                  value={formData.firstName}
-                  onChange={handleChange}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="lastName">Last Name</Label>
-                <Input
-                  id="lastName"
-                  name="lastName"
-                  placeholder="Doe"
-                  required
-                  value={formData.lastName}
-                  onChange={handleChange}
-                />
-              </div>
-            </div>
-
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <Input
