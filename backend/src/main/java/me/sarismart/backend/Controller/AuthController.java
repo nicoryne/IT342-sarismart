@@ -11,17 +11,17 @@ import me.sarismart.backend.Entity.AuthRequest;
 import me.sarismart.backend.Service.SupabaseAuthService;
 
 @RestController
-@RequestMapping("/auth")
+@RequestMapping("api/v1/auth")
 public class AuthController {
     @Autowired
     private SupabaseAuthService supabaseAuthService;
 
-    @PostMapping("/signup")
+    @PostMapping("/register")
     public ResponseEntity<String> signUp(@RequestBody AuthRequest authRequest) {
         return supabaseAuthService.signUp(authRequest.getEmail(), authRequest.getPassword());
     }
 
-    @PostMapping("/signin")
+    @PostMapping("/login")
     public ResponseEntity<String> signIn(@RequestBody AuthRequest authRequest) {
         return supabaseAuthService.signIn(authRequest.getEmail(), authRequest.getPassword());
     }
