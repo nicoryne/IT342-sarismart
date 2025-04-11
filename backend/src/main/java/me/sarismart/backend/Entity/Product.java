@@ -2,7 +2,6 @@ package me.sarismart.backend.Entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import me.sarismart.backend.Entity.Store;
 
 @Entity
 @Getter
