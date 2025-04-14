@@ -2,6 +2,7 @@ package me.sarismart.backend.Entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import java.util.List;
 
 @Entity
 @Getter
@@ -13,9 +14,13 @@ public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    
-    @Column(nullable = false, unique = true)
+
     private String email;
-    
+
+    private String supabaseUid;
+
     private String fullName;
+
+    @OneToMany(mappedBy = "user")
+    private List<StoreRole> storeRoles;
 }
