@@ -26,7 +26,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import edu.cit.sarismart.R
-import edu.cit.sarismart.features.auth.ui.login.BackgroundPattern
+import edu.cit.sarismart.features.auth.ui.BackgroundPattern
+
 
 @Composable
 fun RegisterScreen(

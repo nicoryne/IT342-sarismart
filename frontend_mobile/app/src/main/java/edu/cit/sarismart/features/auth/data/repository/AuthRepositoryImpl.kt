@@ -1,7 +1,10 @@
 package edu.cit.sarismart.features.auth.data.repository
 
 import android.util.Log
+import edu.cit.sarismart.core.data.PreferencesManager
+import edu.cit.sarismart.core.data.TokenManager
 import edu.cit.sarismart.features.auth.data.models.AuthRequest
+import edu.cit.sarismart.features.auth.data.models.AuthResponse
 import edu.cit.sarismart.features.auth.domain.AuthApiService
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -9,18 +12,24 @@ import retrofit2.Response
 import javax.inject.Inject
 
 
-class AuthRepositoryImpl @Inject constructor(private val authApiService: AuthApiService) : AuthRepository {
+class AuthRepositoryImpl @Inject constructor(private val authApiService: AuthApiService, private val tokenManager: TokenManager, private val preferencesManager: PreferencesManager) : AuthRepository {
 
     override suspend fun login(email: String, password: String): Boolean {
         val authRequest = AuthRequest(email, password)
 
         return withContext(Dispatchers.IO) {
             try {
-                val response: Response<String> = authApiService.login(authRequest)
+                val response: Response<AuthResponse> = authApiService.login(authRequest)
 
                 if (response.isSuccessful) {
-                    val token = response.body()
-                    Log.i("AUTHENTICATION", "Login Successful")
+                    val body = response.body()
+                    val token = body?.accessToken
+                    Log.i("AUTHENTICATION", "Login Successful.")
+
+                    if (token != null) {
+                        tokenManager.saveToken(token)
+                    }
+
                     true
                 } else {
                     Log.e("AUTHENTICATION", "Login Failed. Code: ${response.code()} Message: ${response.message()}")
@@ -75,7 +84,18 @@ class AuthRepositoryImpl @Inject constructor(private val authApiService: AuthApi
     }
 
     override suspend fun logout(): Boolean {
-        TODO("Not yet implemented")
+
+        if (tokenManager.getToken.toString().isEmpty()) {
+            return false
+        }
+
+        // clearing preferences
+        preferencesManager.clear()
+
+        // clearing token
+        tokenManager.deleteToken()
+
+        return true
     }
 
     override fun isBiometricEnabled(): Boolean {

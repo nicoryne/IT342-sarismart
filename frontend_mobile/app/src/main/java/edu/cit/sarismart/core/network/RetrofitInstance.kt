@@ -11,7 +11,7 @@ import javax.inject.Singleton
 object RetrofitInstance {
 
     val loggingInterceptor = HttpLoggingInterceptor().apply {
-        level = HttpLoggingInterceptor.Level.BODY
+        level = HttpLoggingInterceptor.Level.BASIC
     }
 
     val okHttpClient = OkHttpClient.Builder()

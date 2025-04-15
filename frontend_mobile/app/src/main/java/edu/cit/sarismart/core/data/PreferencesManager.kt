@@ -20,8 +20,15 @@ class PreferencesManager @Inject constructor(
 ) {
     private val dataStore = context.dataStore
 
+    suspend fun clear() {
+        dataStore.edit { preferences ->
+            preferences.clear()
+        }
+    }
+
     companion object {
         private val ONBOARDING_COMPLETED = booleanPreferencesKey("onboarding_completed")
+
     }
 
     suspend fun setOnboardingCompleted(completed: Boolean) {
