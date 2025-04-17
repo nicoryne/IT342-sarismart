@@ -23,6 +23,7 @@ public class SecurityConfig {
                         .permitAll()
                         .requestMatchers("/api/v1/stores/**").hasRole("STORE_OWNER")
                         .anyRequest().authenticated())
+                .csrf(csrf -> csrf.disable())
                 .addFilterBefore(jwtAuthFilter,
                         org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter.class);
 

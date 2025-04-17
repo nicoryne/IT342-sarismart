@@ -107,6 +107,15 @@ dependencies {
 
     // Biometrics
     implementation(libs.androidx.biometric.ktx)
+
+    // Retrofit
+    implementation(libs.retrofit)
+    implementation(libs.converter.gson)
+
+    // OkHttp
+    implementation(platform(libs.okhttp.bom))
+    implementation(libs.okhttp)
+    implementation(libs.logging.interceptor)
 }
 
 kapt {

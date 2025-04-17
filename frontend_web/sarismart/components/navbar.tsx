@@ -2,14 +2,11 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
+
 import { Button } from "@/components/ui/button"
 
 export default function Navbar() {
   const pathname = usePathname()
-
-  // 👇 hide Navbar if we're inside the dashboard section
-  const isDashboard = pathname.startsWith("/dashboard")
-  if (isDashboard) return null
 
   const isActive = (path: string) => pathname === path
 
