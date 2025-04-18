@@ -21,6 +21,7 @@ fun UserBottomNavigation(
                 icon = {
                     Icon(
                         painter = painterResource(id = tab.iconResId),
+
                         contentDescription = tab.title,
                         tint = if (selectedTab == tab)
                             Color(0xFF009393)

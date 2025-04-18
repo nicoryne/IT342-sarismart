@@ -40,6 +40,10 @@ class LoginViewModel @Inject constructor(
     private val _navigationEvent = MutableSharedFlow<LoginNavigationEvent>()
     val navigationEvent: SharedFlow<LoginNavigationEvent> = _navigationEvent
 
+    internal val _loginError = MutableStateFlow("")
+    val loginError: StateFlow<String> = _loginError
+
+
     init {
         checkBiometricAvailability()
     }
@@ -66,14 +70,13 @@ class LoginViewModel @Inject constructor(
             _isLoading.value = true
             delay(1000)
 
-            val success = authRepository.login(_email.value, _password.value)
+            val res = authRepository.login(_email.value, _password.value)
             _isLoading.value = false
 
-            if (success) {
+            if (res.success) {
                 _navigationEvent.emit(LoginNavigationEvent.NavigateToHome)
             } else {
-                // Handle login failure
-                Log.e("Login", "Login Failure!")
+                _loginError.value = res.message
             }
         }
     }
@@ -89,10 +92,10 @@ class LoginViewModel @Inject constructor(
             _isLoading.value = true
             delay(1000)
 
-            val success = authRepository.loginWithBiometric()
+            val res = authRepository.loginWithBiometric()
             _isLoading.value = false
 
-            if (success) {
+            if (res.success) {
                 _navigationEvent.emit(LoginNavigationEvent.NavigateToHome)
             }
         }

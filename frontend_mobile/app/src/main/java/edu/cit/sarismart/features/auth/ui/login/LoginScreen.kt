@@ -14,6 +14,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -31,6 +33,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import edu.cit.sarismart.R
 import edu.cit.sarismart.core.util.BiometricUtil
 import edu.cit.sarismart.features.auth.ui.BackgroundPattern
+import kotlinx.coroutines.launch
+
 
 @Composable
 fun LoginScreen(
@@ -45,9 +49,25 @@ fun LoginScreen(
     val isPasswordVisible by viewModel.isPasswordVisible.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
     val isBiometricAvailable by viewModel.isBiometricAvailable.collectAsState()
+    val loginError by viewModel.loginError.collectAsState()
+
+    val snackbarHostState = remember { SnackbarHostState() }
+    val coroutineScope = rememberCoroutineScope()
 
     val context = LocalContext.current
     val activity = context as? FragmentActivity
+
+    LaunchedEffect(loginError) {
+        if (loginError.isNotBlank()) {
+            coroutineScope.launch {
+                snackbarHostState.showSnackbar(
+                    message = loginError,
+                    duration = SnackbarDuration.Short
+                )
+                viewModel._loginError.value = ""
+            }
+        }
+    }
 
     LaunchedEffect(key1 = true) {
         viewModel.navigationEvent.collect { event ->
@@ -70,6 +90,10 @@ fun LoginScreen(
             }
         }
     }
+
+
+    // snackbar
+    SnackbarHost(hostState = snackbarHostState)
 
     Box (
         modifier = Modifier.fillMaxSize()
@@ -332,4 +356,5 @@ fun LoginScreen(
             }
         }
     }
+
 }

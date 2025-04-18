@@ -45,8 +45,8 @@ class CoreNavigationViewModel @Inject constructor(
 
     fun logout() {
         viewModelScope.launch {
-            val result = authRepository.logout()
-            _logoutSuccess.value = result
+            val res = authRepository.logout()
+            _logoutSuccess.value = res.success
         }
     }
 

@@ -80,7 +80,7 @@ fun CoreNavigationController(viewModel: CoreNavigationViewModel = hiltViewModel(
         // Register
         composable("register") {
             RegisterScreen(
-                onLoginClick = { navController.navigateUp() },
+                onNavigateToLogin = { navController.navigateUp() },
                 onSuccessfulRegistration = {
                     navController.navigate("login") {
                         popUpTo("register") { inclusive = true }
