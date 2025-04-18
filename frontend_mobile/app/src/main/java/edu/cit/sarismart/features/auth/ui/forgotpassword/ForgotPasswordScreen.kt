@@ -26,7 +26,7 @@ import edu.cit.sarismart.features.auth.ui.BackgroundPattern
 
 @Composable
 fun ForgotPasswordScreen(
-    viewModel: ForgotPasswordViewModel = hiltViewModel(),
+    viewModel: ForgotPasswordViewModel = hiltViewModel<ForgotPasswordViewModel>(),
     onNavigateBack: () -> Unit = {}
 ) {
     val email by viewModel.email.collectAsState()

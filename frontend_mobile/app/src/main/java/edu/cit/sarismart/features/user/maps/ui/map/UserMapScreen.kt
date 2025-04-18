@@ -180,7 +180,7 @@ fun UserMapScreen(
             },
             modifier = Modifier
                 .align(Alignment.BottomEnd)
-                .padding(horizontal = 24.dp, vertical = 100.dp),
+                .padding(24.dp),
             containerColor = MaterialTheme.colorScheme.primary
         ) {
             Icon(

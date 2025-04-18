@@ -38,7 +38,7 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun LoginScreen(
-    viewModel: LoginViewModel = hiltViewModel(),
+    viewModel: LoginViewModel = hiltViewModel<LoginViewModel>(),
     onCreateAccountClick: () -> Unit = {},
     onForgotPasswordClick: () -> Unit = {},
     onNavigateToGuest: () -> Unit = {},

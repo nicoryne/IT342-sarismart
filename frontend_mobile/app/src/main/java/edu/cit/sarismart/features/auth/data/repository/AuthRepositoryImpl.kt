@@ -1,8 +1,7 @@
 package edu.cit.sarismart.features.auth.data.repository
 
-import android.util.Log
 import edu.cit.sarismart.core.data.PreferencesManager
-import edu.cit.sarismart.core.data.TokenManager
+import edu.cit.sarismart.core.data.AccessTokenManager
 import edu.cit.sarismart.features.auth.data.models.AuthRequest
 import edu.cit.sarismart.features.auth.data.models.AuthResponse
 import edu.cit.sarismart.features.auth.data.models.ClientResponse
@@ -13,7 +12,7 @@ import retrofit2.Response
 import javax.inject.Inject
 
 
-class AuthRepositoryImpl @Inject constructor(private val authApiService: AuthApiService, private val tokenManager: TokenManager, private val preferencesManager: PreferencesManager) : AuthRepository {
+class AuthRepositoryImpl @Inject constructor(private val authApiService: AuthApiService, private val accessTokenManager: AccessTokenManager, private val preferencesManager: PreferencesManager) : AuthRepository {
 
     override suspend fun login(email: String, password: String): ClientResponse {
         val authRequest = AuthRequest(email, password)
@@ -26,7 +25,7 @@ class AuthRepositoryImpl @Inject constructor(private val authApiService: AuthApi
                     val token = body?.accessToken
 
                     if (token != null) {
-                        tokenManager.saveToken(token)
+                        accessTokenManager.saveToken(token)
                     }
 
                     ClientResponse(true, "Login Successful.")
@@ -79,7 +78,7 @@ class AuthRepositoryImpl @Inject constructor(private val authApiService: AuthApi
 
     override suspend fun logout(): ClientResponse {
 
-        if (tokenManager.getToken.toString().isEmpty()) {
+        if (accessTokenManager.getToken.toString().isEmpty()) {
             return ClientResponse(false, "User session not found.")
         }
 
@@ -87,7 +86,7 @@ class AuthRepositoryImpl @Inject constructor(private val authApiService: AuthApi
         preferencesManager.clear()
 
         // clearing token
-        tokenManager.deleteToken()
+        accessTokenManager.deleteToken()
 
         return ClientResponse(true, "Logout success.")
     }

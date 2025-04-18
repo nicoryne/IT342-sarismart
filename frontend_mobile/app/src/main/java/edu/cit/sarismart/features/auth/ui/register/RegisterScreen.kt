@@ -37,7 +37,7 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun RegisterScreen(
-    viewModel: RegisterViewModel = hiltViewModel(),
+    viewModel: RegisterViewModel = hiltViewModel<RegisterViewModel>(),
     onNavigateToLogin: () -> Unit = {},
     onSuccessfulRegistration: () -> Unit = {}
 ) {
