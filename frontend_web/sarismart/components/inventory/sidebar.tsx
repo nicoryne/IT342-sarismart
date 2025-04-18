@@ -34,12 +34,10 @@ const handleSignOut = async () => {
   return (
     <div className="hidden w-64 flex-col bg-white shadow-sm md:flex">
       <div className="flex h-16 items-center border-b px-6">
-        <Link href="/" className="flex items-center gap-2">
           <span className="text-xl font-bold">
             <span className="text-[#008080]">Sari</span>
             <span>Smart</span>
           </span>
-        </Link>
       </div>
       <div className="flex flex-1 flex-col py-4">
         <nav className="space-y-1 px-2">

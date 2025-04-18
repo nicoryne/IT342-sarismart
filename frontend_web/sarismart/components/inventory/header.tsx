@@ -2,11 +2,16 @@
 
 import { useState } from "react"
 import Image from "next/image"
-import { Bell, ChevronDown, Menu, MessageSquare, Search, Store } from "lucide-react"
+import { ChevronDown, Menu, Store } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { useStores } from "@/hooks/use-stores"
 
 export default function InventoryHeader() {
@@ -14,7 +19,8 @@ export default function InventoryHeader() {
   const { stores } = useStores()
 
   return (
-    <header className="flex h-16 items-center justify-between border-b bg-white px-4 md:px-6">
+    <header className="relative flex h-16 items-center justify-between border-b bg-white px-4 md:px-6">
+      {/* Left Section */}
       <div className="flex items-center md:hidden">
         <Button variant="ghost" size="icon" className="mr-2">
           <Menu className="h-6 w-6" />
@@ -22,23 +28,21 @@ export default function InventoryHeader() {
         </Button>
       </div>
 
-      <div className="flex items-center gap-4">
-        <div className="relative w-full max-w-md">
-          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
-          <Input type="search" placeholder="Search..." className="w-full pl-8" />
-        </div>
-
-        {/* Store Selector */}
+      {/* Center Section - Store Selector */}
+      <div className="absolute left-1/2 transform -translate-x-1/2">
         <div className="flex items-center">
           <Store className="mr-2 h-5 w-5 text-[#008080]" />
           <Select
             value={selectedStore}
             onValueChange={(value) => {
               setSelectedStore(value)
-              // Add a visual feedback when store changes
+              // Visual feedback (basic toast)
               const toast = document.createElement("div")
-              toast.className = "fixed top-4 right-4 bg-[#008080] text-white px-4 py-2 rounded shadow-lg z-50"
-              toast.textContent = `Switched to ${value === "all" ? "All Stores" : stores.find((s) => s.id === value)?.name}`
+              toast.className =
+                "fixed top-4 right-4 bg-[#008080] text-white px-4 py-2 rounded shadow-lg z-50"
+              toast.textContent = `Switched to ${
+                value === "all" ? "All Stores" : stores.find((s) => s.id === value)?.name
+              }`
               document.body.appendChild(toast)
               setTimeout(() => {
                 toast.style.opacity = "0"
@@ -62,17 +66,8 @@ export default function InventoryHeader() {
         </div>
       </div>
 
-      <div className="flex items-center gap-4">
-        <Button variant="ghost" size="icon" className="relative">
-          <MessageSquare className="h-5 w-5" />
-          <span className="sr-only">Messages</span>
-          <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-[#008080]"></span>
-        </Button>
-        <Button variant="ghost" size="icon" className="relative">
-          <Bell className="h-5 w-5" />
-          <span className="sr-only">Notifications</span>
-          <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-[#008080]"></span>
-        </Button>
+      {/* Right Section - Profile */}
+      <div className="flex items-center gap-4 ml-auto">
         <div className="flex items-center gap-2">
           <div className="relative h-8 w-8 overflow-hidden rounded-full">
             <Image

@@ -189,14 +189,6 @@ export default function RegisterPage() {
             </div>
 
             <div className="mt-6 grid grid-cols-2 gap-3">
-              <Button variant="outline" className="w-full">
-                <Github className="mr-2 h-4 w-4" />
-                GitHub
-              </Button>
-              <Button variant="outline" className="w-full">
-                <Facebook className="mr-2 h-4 w-4" />
-                Facebook
-              </Button>
               <Button variant="outline" className="col-span-2 w-full">
                 <Mail className="mr-2 h-4 w-4" />
                 Email
