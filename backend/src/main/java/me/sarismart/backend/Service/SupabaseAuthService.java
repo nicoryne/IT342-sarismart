@@ -20,7 +20,6 @@ public class SupabaseAuthService {
     @Autowired
     public SupabaseAuthService(AppConfig appConfig) {
         this.appConfig = appConfig;
-        this.restTemplate = new RestTemplate();
     }
 
     private final RestTemplate restTemplate = new RestTemplate();
