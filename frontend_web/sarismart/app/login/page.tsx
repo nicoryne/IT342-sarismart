@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Separator } from "@/components/ui/separator"
+import router from "next/router"
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false)
@@ -45,10 +46,12 @@ export default function LoginPage() {
       });
   
       if (response.ok) {
-        const data = await response.json(); // or .text() depending on your backend's response
+        const data = await response.json();
         console.log("✅ Login successful:", data);
   
         localStorage.setItem("token", data.access_token);
+        // Redirect to the dashboard
+        router.push("/dashboard");
       } else {
         const errorText = await response.text();
         console.error("❌ Login failed:", errorText);
