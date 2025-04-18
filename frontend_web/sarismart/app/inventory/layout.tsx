@@ -4,7 +4,7 @@ import InventorySidebar from "@/components/inventory/sidebar"
 import InventoryHeader from "@/components/inventory/header"
 import Verification from "@/components/inventory/verification"
 
-export default function DashboardLayout({ children }: { children: React.ReactNode }) {
+export default function InventoryLayout({ children }: { children: React.ReactNode }) {
   return (
     <Verification>
       <div className="flex min-h-screen bg-gray-50">

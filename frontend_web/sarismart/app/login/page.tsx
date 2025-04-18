@@ -11,7 +11,8 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Separator } from "@/components/ui/separator"
-import router from "next/router"
+import { useRouter } from "next/navigation"
+
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false)
@@ -20,6 +21,8 @@ export default function LoginPage() {
     password: "",
     rememberMe: false,
   })
+  const router = useRouter()
+
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
@@ -31,7 +34,7 @@ export default function LoginPage() {
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+    e.preventDefault()
   
     try {
       const response = await fetch("http://localhost:8080/api/v1/auth/login", {
@@ -43,25 +46,27 @@ export default function LoginPage() {
           email: formData.email,
           password: formData.password,
         }),
-      });
+      })
   
       if (response.ok) {
-        const data = await response.json();
-        console.log("✅ Login successful:", data);
+        const data = await response.json() // Or .text() if your backend sends plain text
+        console.log("✅ Login successful:", data)
   
-        localStorage.setItem("token", data.access_token);
-        // Redirect to the dashboard
-        router.push("/dashboard");
+        // Save token if needed
+        localStorage.setItem("token", data.access_token)
+  
+        // Redirect to dashboard or home
+        router.push("/dashboard")
       } else {
-        const errorText = await response.text();
-        console.error("❌ Login failed:", errorText);
-        alert("Login failed: " + errorText);
+        const errorText = await response.text()
+        console.error("❌ Login failed:", errorText)
+        alert("Login failed: " + errorText)
       }
     } catch (err) {
-      console.error("💥 Error:", err);
-      alert("Something went wrong!");
+      console.error("💥 Error:", err)
+      alert("Something went wrong!")
     }
-  };  
+  }  
   
 
   const togglePasswordVisibility = () => {
