@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -17,7 +16,7 @@ import edu.cit.sarismart.features.auth.ui.login.LoginScreen
 import edu.cit.sarismart.features.auth.ui.register.RegisterScreen
 import edu.cit.sarismart.features.guest.ui.GuestMapScreen
 import edu.cit.sarismart.features.onboarding.ui.OnboardingScreen
-import edu.cit.sarismart.features.user.UserNavigationController
+import edu.cit.sarismart.features.user.navigation.UserNavigationController
 import kotlinx.coroutines.flow.collectLatest
 
 @Composable
@@ -70,8 +69,8 @@ fun CoreNavigationController(viewModel: CoreNavigationViewModel = hiltViewModel(
         // Login
         composable("login") {
             LoginScreen(
-                onCreateAccountClick = { navController.navigate("register") },
-                onForgotPasswordClick = { navController.navigate("forgot_password") },
+                onNavigateToRegister = { navController.navigate("register") },
+                onNavigateToForgotPassword = { navController.navigate("forgot_password") },
                 onNavigateToGuest = { navController.navigate("guest") },
                 onNavigateToHome = { navController.navigate("user")}
             )
@@ -80,7 +79,7 @@ fun CoreNavigationController(viewModel: CoreNavigationViewModel = hiltViewModel(
         // Register
         composable("register") {
             RegisterScreen(
-                onLoginClick = { navController.navigateUp() },
+                onNavigateToLogin = { navController.navigateUp() },
                 onSuccessfulRegistration = {
                     navController.navigate("login") {
                         popUpTo("register") { inclusive = true }
@@ -103,22 +102,11 @@ fun CoreNavigationController(viewModel: CoreNavigationViewModel = hiltViewModel(
 
         // User
         composable("user") {
-            val logoutSuccess = viewModel.logoutSuccess.collectAsState()
-
             UserNavigationController (
-                onLogout = {
-                    viewModel.logout()
-                }
+                onNavigateToLogin = { navController.navigate("login") }
             )
 
-            LaunchedEffect(logoutSuccess) {
-                if (logoutSuccess.value == true) {
-                    navController.navigate("login") {
-                        popUpTo("user") { inclusive = true }
-                    }
-                    viewModel.resetLogoutState()
-                }
-            }
+
         }
 
     }

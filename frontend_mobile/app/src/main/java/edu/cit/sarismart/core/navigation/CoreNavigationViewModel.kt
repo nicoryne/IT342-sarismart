@@ -17,7 +17,6 @@ import javax.inject.Inject
 @HiltViewModel
 class CoreNavigationViewModel @Inject constructor(
     private val preferencesManager: PreferencesManager,
-    private val authRepository: AuthRepository
 ) : ViewModel() {
 
     val onboardingCompleted: Flow<Boolean> = preferencesManager.onboardingCompletedFlow
@@ -41,17 +40,6 @@ class CoreNavigationViewModel @Inject constructor(
         viewModelScope.launch {
             preferencesManager.setOnboardingCompleted(true)
         }
-    }
-
-    fun logout() {
-        viewModelScope.launch {
-            val result = authRepository.logout()
-            _logoutSuccess.value = result
-        }
-    }
-
-    fun resetLogoutState() {
-        _logoutSuccess.value = null
     }
 
 }

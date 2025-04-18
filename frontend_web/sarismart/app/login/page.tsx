@@ -29,11 +29,37 @@ export default function LoginPage() {
     setFormData((prev) => ({ ...prev, rememberMe: checked }))
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    console.log("Login form submitted:", formData)
-    // In a real application, you would handle authentication here
-  }
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+  
+    try {
+      const response = await fetch("http://localhost:8080/api/v1/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: formData.email,
+          password: formData.password,
+        }),
+      });
+  
+      if (response.ok) {
+        const data = await response.json(); // or .text() depending on your backend's response
+        console.log("✅ Login successful:", data);
+  
+        localStorage.setItem("token", data.access_token);
+      } else {
+        const errorText = await response.text();
+        console.error("❌ Login failed:", errorText);
+        alert("Login failed: " + errorText);
+      }
+    } catch (err) {
+      console.error("💥 Error:", err);
+      alert("Something went wrong!");
+    }
+  };  
+  
 
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword)

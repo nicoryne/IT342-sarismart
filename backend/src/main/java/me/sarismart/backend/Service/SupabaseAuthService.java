@@ -23,7 +23,7 @@ public class SupabaseAuthService {
         this.restTemplate = new RestTemplate();
     }
 
-    private RestTemplate restTemplate;
+    private final RestTemplate restTemplate = new RestTemplate();
 
     @Autowired
     private UserService userService;
@@ -34,33 +34,32 @@ public class SupabaseAuthService {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.set("apikey", appConfig.getApiKey());
-    
+
         Map<String, String> body = new HashMap<>();
         body.put("email", email);
         body.put("password", password);
-    
+
         HttpEntity<Map<String, String>> entity = new HttpEntity<>(body, headers);
-    
+
         ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.POST, entity, String.class);
-    
+
         if (response.getStatusCode() == HttpStatus.OK || response.getStatusCode() == HttpStatus.CREATED) {
             try {
                 JSONObject json = new JSONObject(response.getBody());
                 String supabaseUid = json.getJSONObject("user").getString("id");
                 String fullName = json.getJSONObject("user")
-                                      .optJSONObject("user_metadata")
-                                      .optString("full_name", "Unnamed");
-    
+                        .optJSONObject("user_metadata")
+                        .optString("full_name", "Unnamed");
+
                 userService.saveUserToDatabase(email, supabaseUid, fullName);
-    
+
             } catch (JSONException e) {
                 e.printStackTrace();
             }
         }
-    
+
         return response;
     }
-    
 
     public ResponseEntity<String> signIn(String email, String password) {
         String url = appConfig.getUrl() + "/auth/v1/token?grant_type=password";
