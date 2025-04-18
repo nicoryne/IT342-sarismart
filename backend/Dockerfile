@@ -1,27 +1,29 @@
 # Stage 1: Build the JAR
-FROM gradle:7.6.1-jdk21 AS builder
+FROM gradle:8.5-jdk21 AS builder
 
-# Set the working directory and copy the project files into the container
+# Set working directory
 WORKDIR /home/gradle/project
+
+# Copy all files to the container
 COPY . .
 
-# Make sure gradlew is executable
+# Make sure Gradle wrapper is executable
 RUN chmod +x gradlew
 
-# Run the Gradle build
+# Build the Spring Boot app
 RUN ./gradlew build --no-daemon
 
 # Stage 2: Run the JAR
-FROM openjdk:21-jdk-slim AS runtime
+FROM openjdk:21-jdk-slim
 
-# Set the working directory
+# Set working directory
 WORKDIR /app
 
-# Copy the built JAR from the builder stage
+# Copy the built JAR from the build stage
 COPY --from=builder /home/gradle/project/build/libs/*.jar app.jar
 
-# Expose the application port
+# Expose the app port
 EXPOSE 8080
 
-# Define the command to run the JAR
+# Run the app
 ENTRYPOINT ["java", "-jar", "app.jar"]
