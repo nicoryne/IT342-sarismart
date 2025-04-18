@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.json.JSONObject;
 import org.json.JSONException;
+import org.springframework.beans.factory.annotation.Value;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -13,8 +14,11 @@ import java.util.Map;
 @Service
 public class SupabaseAuthService {
     
-    private final String SUPABASE_URL = "https://mpvwyygeoesopxralxxl.supabase.co";
-    private final String API_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1wdnd5eWdlb2Vzb3B4cmFseHhsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM3NDg2OTYsImV4cCI6MjA1OTMyNDY5Nn0.db_Loy9LCRmmMxMYgX2iAGvqvOnxD_34jrQzIbnlw9Q";
+    @Value("${supabase.url}")
+    private String SUPABASE_URL;
+
+    @Value("${supabase.api.key}")
+    private String API_KEY;
 
     private RestTemplate restTemplate;
 
