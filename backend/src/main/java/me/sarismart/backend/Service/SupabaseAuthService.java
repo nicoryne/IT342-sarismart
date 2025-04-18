@@ -16,7 +16,7 @@ public class SupabaseAuthService {
     private final String SUPABASE_URL = "https://mpvwyygeoesopxralxxl.supabase.co";
     private final String API_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1wdnd5eWdlb2Vzb3B4cmFseHhsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM3NDg2OTYsImV4cCI6MjA1OTMyNDY5Nn0.db_Loy9LCRmmMxMYgX2iAGvqvOnxD_34jrQzIbnlw9Q";
 
-    private RestTemplate restTemplate;
+    private final RestTemplate restTemplate = new RestTemplate();
 
     @Autowired
     private UserService userService;
