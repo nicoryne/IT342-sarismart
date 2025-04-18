@@ -4,21 +4,24 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+
+import me.sarismart.backend.Config.AppConfig;
+
 import org.json.JSONObject;
 import org.json.JSONException;
-import org.springframework.beans.factory.annotation.Value;
 
 import java.util.HashMap;
 import java.util.Map;
 
 @Service
 public class SupabaseAuthService {
-    
-    @Value("${supabase.url}")
-    private String SUPABASE_URL;
+    private final AppConfig appConfig;
 
-    @Value("${supabase.api.key}")
-    private String API_KEY;
+    @Autowired
+    public SupabaseAuthService(AppConfig appConfig) {
+        this.appConfig = appConfig;
+        this.restTemplate = new RestTemplate();
+    }
 
     private RestTemplate restTemplate;
 
@@ -26,11 +29,11 @@ public class SupabaseAuthService {
     private UserService userService;
 
     public ResponseEntity<String> signUp(String email, String password) {
-        String url = SUPABASE_URL + "/auth/v1/signup";
+        String url = appConfig.getUrl() + "/auth/v1/signup";
     
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.set("apikey", API_KEY);
+        headers.set("apikey", appConfig.getApiKey());
     
         Map<String, String> body = new HashMap<>();
         body.put("email", email);
@@ -60,11 +63,11 @@ public class SupabaseAuthService {
     
 
     public ResponseEntity<String> signIn(String email, String password) {
-        String url = SUPABASE_URL + "/auth/v1/token?grant_type=password";
+        String url = appConfig.getUrl() + "/auth/v1/token?grant_type=password";
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.set("apikey", API_KEY);
+        headers.set("apikey", appConfig.getApiKey());
 
         Map<String, String> body = new HashMap<>();
         body.put("email", email);
