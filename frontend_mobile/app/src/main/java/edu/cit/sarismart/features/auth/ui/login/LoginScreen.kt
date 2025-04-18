@@ -39,8 +39,8 @@ import kotlinx.coroutines.launch
 @Composable
 fun LoginScreen(
     viewModel: LoginViewModel = hiltViewModel<LoginViewModel>(),
-    onCreateAccountClick: () -> Unit = {},
-    onForgotPasswordClick: () -> Unit = {},
+    onNavigateToRegister: () -> Unit = {},
+    onNavigateToForgotPassword: () -> Unit = {},
     onNavigateToGuest: () -> Unit = {},
     onNavigateToHome: () -> Unit = {}
 ) {
@@ -74,7 +74,6 @@ fun LoginScreen(
             when (event) {
                 LoginNavigationEvent.NavigateToHome -> onNavigateToHome()
                 LoginNavigationEvent.NavigateToGuestMap -> onNavigateToGuest()
-                LoginNavigationEvent.NavigateToForgotPassword -> onForgotPasswordClick()
                 LoginNavigationEvent.ShowBiometricPrompt -> {
                     activity?.let {
                         BiometricUtil.showBiometricPrompt(
@@ -188,7 +187,7 @@ fun LoginScreen(
                 Text(
                     text = "Forgot Password?",
                     modifier = Modifier
-                        .clickable(onClick = onForgotPasswordClick)
+                        .clickable(onClick = onNavigateToForgotPassword)
                         .padding(4.dp),
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.primary,
@@ -348,7 +347,7 @@ fun LoginScreen(
                 )
                 Text(
                     text = "Create Account",
-                    modifier = Modifier.clickable(onClick = onCreateAccountClick),
+                    modifier = Modifier.clickable(onClick = onNavigateToRegister),
                     style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.primary

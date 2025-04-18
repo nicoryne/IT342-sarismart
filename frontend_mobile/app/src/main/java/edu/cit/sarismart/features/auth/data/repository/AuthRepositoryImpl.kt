@@ -2,6 +2,7 @@ package edu.cit.sarismart.features.auth.data.repository
 
 import edu.cit.sarismart.core.data.PreferencesManager
 import edu.cit.sarismart.core.data.AccessTokenManager
+import edu.cit.sarismart.core.data.RefreshTokenManager
 import edu.cit.sarismart.features.auth.data.models.AuthRequest
 import edu.cit.sarismart.features.auth.data.models.AuthResponse
 import edu.cit.sarismart.features.auth.data.models.ClientResponse
@@ -12,7 +13,7 @@ import retrofit2.Response
 import javax.inject.Inject
 
 
-class AuthRepositoryImpl @Inject constructor(private val authApiService: AuthApiService, private val accessTokenManager: AccessTokenManager, private val preferencesManager: PreferencesManager) : AuthRepository {
+class AuthRepositoryImpl @Inject constructor(private val authApiService: AuthApiService, private val accessTokenManager: AccessTokenManager, private val refreshTokenManager: RefreshTokenManager, private val preferencesManager: PreferencesManager) : AuthRepository {
 
     override suspend fun login(email: String, password: String): ClientResponse {
         val authRequest = AuthRequest(email, password)
@@ -22,10 +23,15 @@ class AuthRepositoryImpl @Inject constructor(private val authApiService: AuthApi
 
                 if (response.isSuccessful) {
                     val body = response.body()
-                    val token = body?.accessToken
+                    val accessToken = body?.accessToken
+                    val refreshToken = body?.refreshToken
 
-                    if (token != null) {
-                        accessTokenManager.saveToken(token)
+                    if (accessToken != null) {
+                        accessTokenManager.saveToken(accessToken)
+                    }
+
+                    if (refreshToken != null) {
+                        refreshTokenManager.saveToken(refreshToken)
                     }
 
                     ClientResponse(true, "Login Successful.")
@@ -87,6 +93,7 @@ class AuthRepositoryImpl @Inject constructor(private val authApiService: AuthApi
 
         // clearing token
         accessTokenManager.deleteToken()
+        refreshTokenManager.deleteToken()
 
         return ClientResponse(true, "Logout success.")
     }

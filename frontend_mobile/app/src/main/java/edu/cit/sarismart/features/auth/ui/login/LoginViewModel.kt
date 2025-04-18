@@ -131,16 +131,10 @@ class LoginViewModel @Inject constructor(
         }
     }
 
-    fun onForgotPasswordClicked() {
-        viewModelScope.launch {
-            _navigationEvent.emit(LoginNavigationEvent.NavigateToForgotPassword)
-        }
-    }
 }
 
 sealed class LoginNavigationEvent {
     object NavigateToHome : LoginNavigationEvent()
     object NavigateToGuestMap : LoginNavigationEvent()
-    object NavigateToForgotPassword : LoginNavigationEvent()
     object ShowBiometricPrompt : LoginNavigationEvent()
 }

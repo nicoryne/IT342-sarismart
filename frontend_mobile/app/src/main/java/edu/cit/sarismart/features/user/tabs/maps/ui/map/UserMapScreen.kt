@@ -1,4 +1,4 @@
-package edu.cit.sarismart.features.user.maps.ui.map
+package edu.cit.sarismart.features.user.tabs.maps.ui.map
 
 import android.Manifest
 import android.content.pm.PackageManager
