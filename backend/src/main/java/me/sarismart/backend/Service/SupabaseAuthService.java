@@ -4,6 +4,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+
+import me.sarismart.backend.Config.AppConfig;
+
 import org.json.JSONObject;
 import org.json.JSONException;
 
@@ -12,9 +15,13 @@ import java.util.Map;
 
 @Service
 public class SupabaseAuthService {
+    private final AppConfig appConfig;
 
-    private final String SUPABASE_URL = "https://mpvwyygeoesopxralxxl.supabase.co";
-    private final String API_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1wdnd5eWdlb2Vzb3B4cmFseHhsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM3NDg2OTYsImV4cCI6MjA1OTMyNDY5Nn0.db_Loy9LCRmmMxMYgX2iAGvqvOnxD_34jrQzIbnlw9Q";
+    @Autowired
+    public SupabaseAuthService(AppConfig appConfig) {
+        this.appConfig = appConfig;
+        this.restTemplate = new RestTemplate();
+    }
 
     private final RestTemplate restTemplate = new RestTemplate();
 
@@ -22,11 +29,11 @@ public class SupabaseAuthService {
     private UserService userService;
 
     public ResponseEntity<String> signUp(String email, String password) {
-        String url = SUPABASE_URL + "/auth/v1/signup";
+        String url = appConfig.getUrl() + "/auth/v1/signup";
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.set("apikey", API_KEY);
+        headers.set("apikey", appConfig.getApiKey());
 
         Map<String, String> body = new HashMap<>();
         body.put("email", email);
@@ -55,11 +62,11 @@ public class SupabaseAuthService {
     }
 
     public ResponseEntity<String> signIn(String email, String password) {
-        String url = SUPABASE_URL + "/auth/v1/token?grant_type=password";
+        String url = appConfig.getUrl() + "/auth/v1/token?grant_type=password";
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.set("apikey", API_KEY);
+        headers.set("apikey", appConfig.getApiKey());
 
         Map<String, String> body = new HashMap<>();
         body.put("email", email);

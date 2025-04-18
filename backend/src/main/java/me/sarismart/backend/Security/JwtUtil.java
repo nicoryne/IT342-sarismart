@@ -4,17 +4,26 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import me.sarismart.backend.Config.AppConfig;
+
 import java.security.Key;
 import java.util.Date;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 public class JwtUtil {
-    private final String SECRET_KEY="b8X5NqGetlstNWr5boMOSX5hQx+x8z/mvnlh5YCEl6+cUa/ytWJlgQ2U7U0GHVzzLVgOpAbJwvvmOglu9j7Xsw==";
+    private final AppConfig appConfig;
+
+    @Autowired
+    public JwtUtil(AppConfig appConfig) {
+        this.appConfig = appConfig;
+    }
 
     public Claims validateToken(String token) {
         try {
-            Key key = Keys.hmacShaKeyFor(SECRET_KEY.getBytes());
+            Key key = Keys.hmacShaKeyFor(appConfig.getSecretKey().getBytes());
             return Jwts.parserBuilder()
                     .setSigningKey(key)
                     .build()
