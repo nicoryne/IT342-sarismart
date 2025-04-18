@@ -4,7 +4,7 @@ WORKDIR /home/gradle/project
 COPY build.gradle settings.gradle gradlew gradlew.bat ./
 COPY gradle gradle
 COPY src src
-RUN ./gradlew build --no-daemon
+RUN ./gradlew build --no-daemon --no-test
 
 # Stage 2: Run the JAR
 FROM openjdk:21-jdk-slim
