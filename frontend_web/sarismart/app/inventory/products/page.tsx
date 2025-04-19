@@ -3,25 +3,26 @@
 import type React from "react"
 
 import { useState } from "react"
-import { Download, Filter, Plus, SlidersHorizontal, X } from "lucide-react"
+import { Filter, Plus, X } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Separator } from "@/components/ui/separator"
-import { Badge } from "@/components/ui/badge"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Label } from "@/components/ui/label"
 import { Checkbox } from "@/components/ui/checkbox"
 import { useStores } from "@/hooks/use-stores"
-import Image from "next/image"
 
 export default function ProductsPage() {
-  const [selectedStore, setSelectedStore] = useState("all")
-  const [category, setCategory] = useState("all")
-  const [isAddProductOpen, setIsAddProductOpen] = useState(false)
+  // STEP 1: Set up state for filtering and product management
+  const [selectedStore, setSelectedStore] = useState("all") // Currently selected store
+  const [category, setCategory] = useState("all") // Selected category filter
+  const [isAddProductOpen, setIsAddProductOpen] = useState(false) // Controls the Add Product modal visibility
+
+  // STEP 2: State for the new product form
   const [newProduct, setNewProduct] = useState({
     name: "",
     sku: "",
@@ -33,9 +34,10 @@ export default function ProductsPage() {
     description: "",
   })
 
+  // STEP 3: Get store data and filtering functions from the custom hook
   const { stores, filterProductsByStore } = useStores()
 
-  // Add this function to handle form input changes
+  // STEP 4: Handle form input changes for the Add Product form
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target
     setNewProduct((prev) => ({
@@ -44,20 +46,27 @@ export default function ProductsPage() {
     }))
   }
 
-  // Add this function to handle form submission
+  // STEP 5: Handle form submission for adding a new product
   const handleAddProduct = (e: React.FormEvent) => {
     e.preventDefault()
+
+    // STEP 6: In a real implementation, this would make an API call to create a product in the database
+    // Example: const response = await fetch('/api/products', {
+    //   method: 'POST',
+    //   headers: { 'Content-Type': 'application/json' },
+    //   body: JSON.stringify(productData)
+    // });
 
     // Create a copy of the product data with an auto-generated SKU
     const productData = {
       ...newProduct,
-      sku: "PRD-008", // In a real app, this would be generated on the server
+      sku: "PRD-001", // In a real app, this would be generated on the server
     }
 
     console.log("New product data:", productData)
     // Here you would typically send the data to your backend
 
-    // Show success message
+    // STEP 7: Show success message
     const toast = document.createElement("div")
     toast.className = "fixed top-4 right-4 bg-green-600 text-white px-4 py-2 rounded shadow-lg z-50"
     toast.textContent = `Product ${newProduct.name} added successfully`
@@ -68,7 +77,7 @@ export default function ProductsPage() {
       setTimeout(() => document.body.removeChild(toast), 500)
     }, 2000)
 
-    // Reset form and close modal
+    // STEP 8: Reset form and close modal
     setNewProduct({
       name: "",
       sku: "",
@@ -82,7 +91,9 @@ export default function ProductsPage() {
     setIsAddProductOpen(false)
   }
 
-  // Get inventory data for the selected store
+  // STEP 9: Get inventory data for the selected store
+  // In a real implementation, this would fetch data from your backend API
+  // Example: useEffect(() => { async function fetchData() { const response = await fetch(`/api/stores/${selectedStore}/inventory`); const data = await response.json(); setStoreInventory(data); } fetchData(); }, [selectedStore]);
   const storeInventory = filterProductsByStore(selectedStore)
 
   return (
@@ -93,20 +104,18 @@ export default function ProductsPage() {
           <p className="text-muted-foreground">Manage your product catalog and inventory across all stores</p>
         </div>
         <div className="flex items-center gap-2">
+          {/* STEP 10: Button to open the Add Product modal */}
           <Button className="bg-[#008080] hover:bg-[#005F6B]" onClick={() => setIsAddProductOpen(true)}>
             <Plus className="mr-2 h-4 w-4" />
             Add Product
           </Button>
-          <Button variant="outline">
-            <Download className="mr-2 h-4 w-4" />
-            Export
-          </Button>
         </div>
 
-        {/* Custom Modal Implementation */}
+        {/* STEP 11: Add Product Modal - Only shown when isAddProductOpen is true */}
         {isAddProductOpen && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
             <div className="relative w-full max-w-[500px] rounded-lg bg-white p-5 shadow-lg">
+              {/* STEP 12: Close button for the modal */}
               <button
                 className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none"
                 onClick={() => setIsAddProductOpen(false)}
@@ -120,6 +129,7 @@ export default function ProductsPage() {
                 <p className="text-sm text-muted-foreground">Fill in the product details below.</p>
               </div>
 
+              {/* STEP 13: Form with onSubmit handler to process the form submission */}
               <form onSubmit={handleAddProduct}>
                 <div className="grid gap-3 py-2">
                   <div className="grid grid-cols-2 gap-3">
@@ -136,12 +146,13 @@ export default function ProductsPage() {
                     </div>
                     <div className="space-y-1">
                       <Label htmlFor="sku">SKU (Auto-generated)</Label>
-                      <Input id="sku" name="sku" value="PRD-008" disabled className="bg-gray-100" />
+                      <Input id="sku" name="sku" value="PRD-001" disabled className="bg-gray-100" />
                     </div>
                   </div>
                   <div className="grid grid-cols-2 gap-3">
                     <div className="space-y-1">
                       <Label htmlFor="category">Category</Label>
+                      {/* STEP 14: Category dropdown */}
                       <Select
                         value={newProduct.category}
                         onValueChange={(value) => setNewProduct((prev) => ({ ...prev, category: value }))}
@@ -150,6 +161,8 @@ export default function ProductsPage() {
                           <SelectValue placeholder="Select category" />
                         </SelectTrigger>
                         <SelectContent>
+                          {/* STEP 15: In a real implementation, these would be fetched from an API */}
+                          {/* Example: const [categories, setCategories] = useState([]); useEffect(() => { async function fetchCategories() { const response = await fetch('/api/categories'); const data = await response.json(); setCategories(data); } fetchCategories(); }, []); */}
                           <SelectItem value="electronics">Electronics</SelectItem>
                           <SelectItem value="clothing">Clothing</SelectItem>
                           <SelectItem value="food">Food & Beverage</SelectItem>
@@ -160,6 +173,7 @@ export default function ProductsPage() {
                     </div>
                     <div className="space-y-1">
                       <Label htmlFor="supplier">Supplier</Label>
+                      {/* STEP 16: Supplier dropdown */}
                       <Select
                         value={newProduct.supplier}
                         onValueChange={(value) => setNewProduct((prev) => ({ ...prev, supplier: value }))}
@@ -168,11 +182,10 @@ export default function ProductsPage() {
                           <SelectValue placeholder="Select supplier" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="techgadgets">TechGadgets Inc.</SelectItem>
-                          <SelectItem value="fashionwear">FashionWear Co.</SelectItem>
-                          <SelectItem value="gourmetfoods">GourmetFoods Ltd.</SelectItem>
-                          <SelectItem value="homestyle">HomeStyle Co.</SelectItem>
-                          <SelectItem value="audiopro">AudioPro Ltd.</SelectItem>
+                          {/* STEP 17: In a real implementation, these would be fetched from an API */}
+                          {/* Example: const [suppliers, setSuppliers] = useState([]); useEffect(() => { async function fetchSuppliers() { const response = await fetch('/api/suppliers'); const data = await response.json(); setSuppliers(data); } fetchSuppliers(); }, []); */}
+                          <SelectItem value="supplier1">Supplier 1</SelectItem>
+                          <SelectItem value="supplier2">Supplier 2</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
@@ -225,6 +238,7 @@ export default function ProductsPage() {
                   </div>
                   <div className="space-y-1">
                     <Label>Store Availability</Label>
+                    {/* STEP 18: Store availability checkboxes */}
                     <div className="grid grid-cols-2 gap-1 pt-1 sm:grid-cols-3">
                       {stores.map((store) => (
                         <div key={store.id} className="flex items-center gap-1.5">
@@ -253,8 +267,9 @@ export default function ProductsPage() {
 
       <Separator className="my-6" />
 
-      {/* Product Inventory Overview */}
+      {/* STEP 19: Product Inventory Overview Cards */}
       <div className="mb-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {/* STEP 20: Total Products Card */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Total Products</CardTitle>
@@ -273,13 +288,16 @@ export default function ProductsPage() {
             </svg>
           </CardHeader>
           <CardContent>
+            {/* STEP 21: Display total products count from backend data */}
             <div className="text-2xl font-bold">{storeInventory.totalProducts}</div>
             <p className="text-xs text-muted-foreground">
-              <span className="text-[#40E0D0]">+12 items</span> from last month
+              {/* STEP 22: In a real implementation, this would show actual growth data from your backend */}
+              <span className="text-[#40E0D0]">+0 items</span> from last month
             </p>
           </CardContent>
         </Card>
 
+        {/* STEP 23: Categories Card */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Categories</CardTitle>
@@ -299,13 +317,16 @@ export default function ProductsPage() {
             </svg>
           </CardHeader>
           <CardContent>
+            {/* STEP 24: Display categories count from backend data */}
             <div className="text-2xl font-bold">{storeInventory.categories}</div>
             <p className="text-xs text-muted-foreground">
-              <span className="text-[#40E0D0]">+3 categories</span> from last month
+              {/* STEP 25: In a real implementation, this would show actual growth data from your backend */}
+              <span className="text-[#40E0D0]">+0 categories</span> from last month
             </p>
           </CardContent>
         </Card>
 
+        {/* STEP 26: Low Stock Items Card */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Low Stock Items</CardTitle>
@@ -326,13 +347,16 @@ export default function ProductsPage() {
             </svg>
           </CardHeader>
           <CardContent>
+            {/* STEP 27: Display low stock count from backend data */}
             <div className="text-2xl font-bold">{storeInventory.lowStock}</div>
             <p className="text-xs text-muted-foreground">
-              <span className="text-red-500">+8 items</span> from last week
+              {/* STEP 28: In a real implementation, this would show actual growth data from your backend */}
+              <span className="text-red-500">+0 items</span> from last week
             </p>
           </CardContent>
         </Card>
 
+        {/* STEP 29: Inventory Value Card */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Inventory Value</CardTitle>
@@ -350,37 +374,36 @@ export default function ProductsPage() {
             </svg>
           </CardHeader>
           <CardContent>
+            {/* STEP 30: Display inventory value from backend data */}
             <div className="text-2xl font-bold">{storeInventory.inventoryValue}</div>
             <p className="text-xs text-muted-foreground">
-              <span className="text-[#40E0D0]">+5.1%</span> from last month
+              {/* STEP 31: In a real implementation, this would show actual growth data from your backend */}
+              <span className="text-[#40E0D0]">+0%</span> from last month
             </p>
           </CardContent>
         </Card>
       </div>
 
+      {/* STEP 32: Product filtering controls */}
       <div className="flex flex-col space-y-4 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
         <div className="flex items-center gap-2">
+          {/* STEP 33: Search input for filtering products */}
           <div className="relative w-full md:w-[300px]">
             <Filter className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input type="search" placeholder="Search products..." className="w-full pl-8 md:w-[300px]" />
           </div>
-          <Button variant="outline" size="icon" className="ml-auto md:ml-0 flex-shrink-0">
-            <Filter className="h-4 w-4" />
-            <span className="sr-only">Filter</span>
-          </Button>
-          <Button variant="outline" size="icon" className="flex-shrink-0">
-            <SlidersHorizontal className="h-4 w-4" />
-            <span className="sr-only">Advanced filters</span>
-          </Button>
         </div>
 
         <div className="flex items-center gap-2">
+          {/* STEP 34: Category filter dropdown */}
           <Select value={category} onValueChange={setCategory}>
             <SelectTrigger className="w-[180px]">
               <SelectValue placeholder="Category" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Categories</SelectItem>
+              {/* STEP 35: In a real implementation, these would be fetched from an API */}
+              {/* Example: const [categories, setCategories] = useState([]); useEffect(() => { async function fetchCategories() { const response = await fetch('/api/categories'); const data = await response.json(); setCategories(data); } fetchCategories(); }, []); */}
               <SelectItem value="electronics">Electronics</SelectItem>
               <SelectItem value="clothing">Clothing</SelectItem>
               <SelectItem value="food">Food & Beverage</SelectItem>
@@ -388,6 +411,7 @@ export default function ProductsPage() {
             </SelectContent>
           </Select>
 
+          {/* STEP 36: Stock status filter dropdown */}
           <Select defaultValue="all">
             <SelectTrigger className="w-[180px]">
               <SelectValue placeholder="Stock Status" />
@@ -402,6 +426,7 @@ export default function ProductsPage() {
         </div>
       </div>
 
+      {/* STEP 37: Product tabs for different views */}
       <Tabs defaultValue="all" className="mt-6">
         <TabsList>
           <TabsTrigger value="all">All Products</TabsTrigger>
@@ -410,6 +435,7 @@ export default function ProductsPage() {
           <TabsTrigger value="out-of-stock">Out of Stock</TabsTrigger>
         </TabsList>
 
+        {/* STEP 38: All Products Tab */}
         <TabsContent value="all" className="mt-4">
           <Card>
             <CardContent className="p-0">
@@ -428,137 +454,64 @@ export default function ProductsPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {[
-                    {
-                      sku: "PRD-001",
-                      name: "Wireless Headphones",
-                      image: "/placeholder.svg?height=40&width=40",
-                      category: "Electronics",
-                      supplier: "TechGadgets Inc.",
-                      stock: 45,
-                      reorderPoint: 20,
-                      price: "$89.99",
-                      status: "In Stock",
-                    },
-                    {
-                      sku: "PRD-002",
-                      name: "Smart Watch",
-                      image: "/placeholder.svg?height=40&width=40",
-                      category: "Electronics",
-                      supplier: "TechGadgets Inc.",
-                      stock: 18,
-                      reorderPoint: 15,
-                      price: "$199.99",
-                      status: "Low Stock",
-                    },
-                    {
-                      sku: "PRD-003",
-                      name: "Cotton T-Shirt",
-                      image: "/placeholder.svg?height=40&width=40",
-                      category: "Clothing",
-                      supplier: "FashionWear Co.",
-                      stock: 120,
-                      reorderPoint: 30,
-                      price: "$24.99",
-                      status: "In Stock",
-                    },
-                    {
-                      sku: "PRD-004",
-                      name: "Organic Coffee",
-                      image: "/placeholder.svg?height=40&width=40",
-                      category: "Food & Beverage",
-                      supplier: "GourmetFoods Ltd.",
-                      stock: 0,
-                      reorderPoint: 25,
-                      price: "$12.99",
-                      status: "Out of Stock",
-                    },
-                    {
-                      sku: "PRD-005",
-                      name: "Ceramic Mug Set",
-                      image: "/placeholder.svg?height=40&width=40",
-                      category: "Home Goods",
-                      supplier: "HomeStyle Co.",
-                      stock: 32,
-                      reorderPoint: 20,
-                      price: "$34.99",
-                      status: "In Stock",
-                    },
-                  ].map((product) => (
-                    <TableRow key={product.sku}>
-                      <TableCell className="font-medium">{product.sku}</TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-3">
-                          <div className="h-10 w-10 overflow-hidden rounded-md">
-                            <Image
-                              src={product.image || "/placeholder.svg"}
-                              alt={product.name}
-                              width={40}
-                              height={40}
-                              className="h-full w-full object-cover"
-                            />
-                          </div>
-                          <div className="font-medium">{product.name}</div>
-                        </div>
-                      </TableCell>
-                      <TableCell>{product.category}</TableCell>
-                      <TableCell>{product.supplier}</TableCell>
-                      <TableCell className="text-center">{product.stock}</TableCell>
-                      <TableCell className="text-center">{product.reorderPoint}</TableCell>
-                      <TableCell className="text-right">{product.price}</TableCell>
-                      <TableCell>
-                        <Badge
-                          className={
-                            product.status === "In Stock"
-                              ? "bg-green-100 text-green-800"
-                              : product.status === "Low Stock"
-                                ? "bg-yellow-100 text-yellow-800"
-                                : "bg-red-100 text-red-800"
-                          }
-                        >
-                          {product.status}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <Button variant="ghost" size="sm">
-                          Edit
-                        </Button>
+                  {/* STEP 39: In a real implementation, this would map over products fetched from an API */}
+                  {/* Example: const [products, setProducts] = useState([]); useEffect(() => { async function fetchProducts() { const response = await fetch(`/api/stores/${selectedStore}/products`); const data = await response.json(); setProducts(data); } fetchProducts(); }, [selectedStore, category]); */}
+                  <TableRow>
+                    <TableCell colSpan={9} className="text-center py-8 text-muted-foreground">
+                      No products found. Add products to see them here.
+                      <div className="mt-2">
                         <Button
-                          variant="ghost"
                           size="sm"
-                          className={product.stock < product.reorderPoint ? "" : "hidden"}
+                          className="bg-[#008080] hover:bg-[#005F6B]"
+                          onClick={() => setIsAddProductOpen(true)}
                         >
-                          Reorder
+                          <Plus className="mr-2 h-4 w-4" />
+                          Add Product
                         </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
+                      </div>
+                    </TableCell>
+                  </TableRow>
                 </TableBody>
               </Table>
             </CardContent>
           </Card>
         </TabsContent>
 
+        {/* STEP 40: Active Products Tab */}
         <TabsContent value="active" className="mt-4">
           <Card>
             <CardContent className="p-6">
-              <div className="text-center text-muted-foreground">Active products content</div>
+              <div className="text-center text-muted-foreground">
+                {/* STEP 41: In a real implementation, this would show active products */}
+                {/* Example: const [activeProducts, setActiveProducts] = useState([]); useEffect(() => { async function fetchActiveProducts() { const response = await fetch(`/api/stores/${selectedStore}/products/active`); const data = await response.json(); setActiveProducts(data); } fetchActiveProducts(); }, [selectedStore]); */}
+                No active products found.
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
 
+        {/* STEP 42: Low Stock Tab */}
         <TabsContent value="low-stock" className="mt-4">
           <Card>
             <CardContent className="p-6">
-              <div className="text-center text-muted-foreground">Low stock products content</div>
+              <div className="text-center text-muted-foreground">
+                {/* STEP 43: In a real implementation, this would show low stock products */}
+                {/* Example: const [lowStockProducts, setLowStockProducts] = useState([]); useEffect(() => { async function fetchLowStockProducts() { const response = await fetch(`/api/stores/${selectedStore}/products/low-stock`); const data = await response.json(); setLowStockProducts(data); } fetchLowStockProducts(); }, [selectedStore]); */}
+                No low stock products found.
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
 
+        {/* STEP 44: Out of Stock Tab */}
         <TabsContent value="out-of-stock" className="mt-4">
           <Card>
             <CardContent className="p-6">
-              <div className="text-center text-muted-foreground">Out of stock products content</div>
+              <div className="text-center text-muted-foreground">
+                {/* STEP 45: In a real implementation, this would show out of stock products */}
+                {/* Example: const [outOfStockProducts, setOutOfStockProducts] = useState([]); useEffect(() => { async function fetchOutOfStockProducts() { const response = await fetch(`/api/stores/${selectedStore}/products/out-of-stock`); const data = await response.json(); setOutOfStockProducts(data); } fetchOutOfStockProducts(); }, [selectedStore]); */}
+                No out of stock products found.
+              </div>
             </CardContent>
           </Card>
         </TabsContent>

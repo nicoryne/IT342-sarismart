@@ -1,68 +1,77 @@
+// Add detailed comments to explain the store management implementation
+
 "use client"
 
 import { useState } from "react"
 
-// Update the store type definition to be more explicit
+// Define the Store interface
 interface Store {
   id: string
   name: string
   location: string
 }
 
-// Sample store data
-const storeData: Store[] = [
+// STEP 1: Set up initial store data
+// In a real implementation, this would be fetched from an API or database
+// Example: const fetchStores = async () => { const response = await fetch('/api/stores'); return response.json(); }
+const initialStores: Store[] = [
+  // This is placeholder data - in production, this would come from your backend
   { id: "store1", name: "Downtown Branch", location: "City Center" },
-  { id: "store2", name: "Westside Mall", location: "West District" },
-  { id: "store3", name: "Eastside Plaza", location: "East District" },
-  { id: "store4", name: "North Point", location: "North District" },
-  { id: "store5", name: "South Center", location: "South District" },
 ]
 
 export function useStores() {
-  const [stores, setStores] = useState<Store[]>(storeData)
+  // STEP 2: Create state to manage the stores data
+  const [stores, setStores] = useState<Store[]>(initialStores)
 
+  // STEP 3: Function to add a new store
   const addStore = (newStore: { name: string; location: string }) => {
-    // Generate a new ID based on the number of existing stores
+    // STEP 4: In a real implementation, this would make an API call to create a store in the database
+    // Example: const response = await fetch('/api/stores', { method: 'POST', body: JSON.stringify(newStore) });
+
+    // STEP 5: Generate a new ID based on the number of existing stores
     const newId = `store${stores.length + 1}`
 
-    // Add the new store to the stores array
+    // STEP 6: Add the new store to the stores array
     setStores([...stores, { id: newId, ...newStore }])
   }
 
+  // STEP 7: Function to filter products by store
   const filterProductsByStore = (storeId: string) => {
-    // For demo purposes, we'll just return different counts based on the store
+    // STEP 8: In a real implementation, this would fetch actual product data filtered by store
+    // Example: const response = await fetch(`/api/stores/${storeId}/products`);
+
     return {
-      totalProducts: storeId === "all" ? 1248 : Math.floor(Math.random() * 300) + 100,
-      categories: storeId === "all" ? 32 : Math.floor(Math.random() * 15) + 5,
-      lowStock: storeId === "all" ? 42 : Math.floor(Math.random() * 10) + 2,
-      inventoryValue: storeId === "all" ? "$1.2M" : `$${(Math.random() * 400000 + 100000).toFixed(0)}`,
+      // These values would come from your backend in production
+      totalProducts: 0,
+      categories: 0,
+      lowStock: 0,
+      inventoryValue: "$0",
     }
   }
 
+  // STEP 9: Function to filter transactions by store
   const filterTransactionsByStore = (storeId: string, allTransactions: any[]) => {
-    if (storeId === "all") {
-      return allTransactions
-    }
+    // STEP 10: In a real implementation, this would fetch actual transaction data filtered by store
+    // Example: const response = await fetch(`/api/stores/${storeId}/transactions`);
 
-    // For demo purposes, we'll just return a subset of transactions
-    return allTransactions.filter((_, index) => {
-      // Use the store ID to create a deterministic but different subset for each store
-      const storeNum = Number.parseInt(storeId.replace("store", ""))
-      return index % 5 === (storeNum - 1) % 5 || index % 3 === (storeNum - 1) % 3
-    })
+    // Return empty array as placeholder - would be replaced with actual data in production
+    return []
   }
 
+  // STEP 11: Function to filter insights by store
   const filterInsightsByStore = (storeId: string) => {
+    // STEP 12: In a real implementation, this would fetch actual insights data for the store
+    // Example: const response = await fetch(`/api/stores/${storeId}/insights`);
+
     return {
-      revenueGrowth: storeId === "all" ? "+24.5%" : `+${(Math.random() * 30).toFixed(1)}%`,
-      turnover: storeId === "all" ? "4.3x" : `${(Math.random() * 5 + 2).toFixed(1)}x`,
-      topCategory:
-        storeId === "all"
-          ? "Electronics"
-          : ["Electronics", "Clothing", "Food & Beverage", "Home Goods"][Math.floor(Math.random() * 4)],
+      // These values would come from your backend in production
+      revenueGrowth: "0%",
+      turnover: "0x",
+      topCategory: "None",
     }
   }
 
+  // STEP 13: Return all the functions and data needed by components
   return {
     stores,
     addStore,
