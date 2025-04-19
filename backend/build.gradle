@@ -42,6 +42,10 @@ dependencies {
 	runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.5'
 }
 
+tasks.named('bootJar') {
+    mainClass = 'me.sarismart.backend.SarismartBackendApiApplication'
+}
+
 tasks.named('test') {
 	useJUnitPlatform()
 }
