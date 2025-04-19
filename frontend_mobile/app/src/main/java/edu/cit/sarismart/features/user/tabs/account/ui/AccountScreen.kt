@@ -1,8 +1,9 @@
-package edu.cit.sarismart.features.user.tabs.account.ui
+    package edu.cit.sarismart.features.user.tabs.account.ui
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -48,6 +49,14 @@ fun AccountScreen (
         ) {
 
             Header("My Account", onNavigateToNotifications)
+
+            Column (
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f)
+            ) {
+
+            }
 
             OutlinedButton(
                 onClick = { viewModel.onLogoutClicked()},
