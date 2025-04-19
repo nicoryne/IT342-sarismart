@@ -28,7 +28,7 @@ public class AuthController {
 
     @Operation(summary = "Sign Up", description = "Register a new user")
     @PostMapping("/register")
-    public ResponseEntity<String> signUp(@RequestBody AuthRequest authRequest) {
+    public ResponseEntity<Object> signUp(@RequestBody AuthRequest authRequest) {
         System.out.println("Registering user: " + authRequest.getEmail());
         try {
             return supabaseAuthService.signUp(authRequest.getEmail(), authRequest.getPassword());
@@ -41,7 +41,7 @@ public class AuthController {
 
     @Operation(summary = "Sign In", description = "Authenticate a user")
     @PostMapping("/login")
-    public ResponseEntity<String> signIn(@RequestBody AuthRequest authRequest) {
+    public ResponseEntity<Object> signIn(@RequestBody AuthRequest authRequest) {
         return supabaseAuthService.signIn(authRequest.getEmail(), authRequest.getPassword());
     }
 }
