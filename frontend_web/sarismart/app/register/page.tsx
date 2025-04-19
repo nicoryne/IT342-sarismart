@@ -19,6 +19,8 @@ export default function RegisterPage() {
   const router = useRouter()
   const [formData, setFormData] = useState({
     email: "",
+    fullName: "",
+    phone: "",
     password: "",
     confirmPassword: "",
     agreeTerms: false,
@@ -50,6 +52,8 @@ export default function RegisterPage() {
         body: JSON.stringify({
           email: formData.email,
           password: formData.password,
+          fullName: formData.fullName,
+          phone: formData.phone,
         }),
       })
   
@@ -95,6 +99,32 @@ export default function RegisterPage() {
                 placeholder="name@example.com"
                 required
                 value={formData.email}
+                onChange={handleChange}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="email">Full Name</Label>
+              <Input
+                id="fullName"
+                name="fullName"
+                type="text"
+                placeholder="Juan De la Cruz"
+                required
+                value={formData.fullName}
+                onChange={handleChange}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="email">Phone Number</Label>
+              <Input
+                id="phone"
+                name="phone"
+                type="tel"
+                placeholder="0917 123 4567"
+                required
+                value={formData.phone}
                 onChange={handleChange}
               />
             </div>
