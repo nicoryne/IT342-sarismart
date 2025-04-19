@@ -6,6 +6,11 @@ plugins {
     id("com.google.devtools.ksp")
     id("com.google.dagger.hilt.android")
     id("org.jetbrains.kotlin.kapt")
+    id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
+}
+
+secrets {
+
 }
 
 android {
@@ -35,6 +40,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
         dataBinding = false
         viewBinding = false
     }

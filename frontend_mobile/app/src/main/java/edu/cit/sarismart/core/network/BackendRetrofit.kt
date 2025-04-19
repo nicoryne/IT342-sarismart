@@ -1,5 +1,6 @@
 package edu.cit.sarismart.core.network
 
+import edu.cit.sarismart.BuildConfig
 import edu.cit.sarismart.core.util.Constants
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -8,7 +9,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 import javax.inject.Singleton
 
 @Singleton
-object RetrofitInstance {
+object BackendRetrofit {
 
     val loggingInterceptor = HttpLoggingInterceptor().apply {
         level = HttpLoggingInterceptor.Level.BASIC
@@ -18,15 +19,15 @@ object RetrofitInstance {
         .addInterceptor(loggingInterceptor)
         .build()
 
-    private val retrofit by lazy {
+    private val backendRetrofit by lazy {
         Retrofit.Builder()
-            .baseUrl(Constants.BASE_URL)
+            .baseUrl(Constants.BACKEND_API_URL)
             .client(okHttpClient)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
     }
 
     val instance: Retrofit
-        get() = retrofit
+        get() = backendRetrofit
 
 }

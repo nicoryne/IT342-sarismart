@@ -284,6 +284,9 @@ fun LoginScreen(
                     onClick = { viewModel.onLoginWithGoogleClicked() },
                     modifier = Modifier.weight(1f),
                     shape = RoundedCornerShape(12.dp),
+                    colors = ButtonDefaults.elevatedButtonColors(
+                        containerColor = Color.White
+                    )
                 ) {
                     Icon(
                         painter = painterResource(id = R.drawable.ic_google),
@@ -300,6 +303,9 @@ fun LoginScreen(
                     onClick = { viewModel.onLoginWithFacebookClicked() },
                     modifier = Modifier.weight(1f),
                     shape = RoundedCornerShape(12.dp),
+                    colors = ButtonDefaults.elevatedButtonColors(
+                        containerColor = Color.White
+                    )
                 ) {
                     Icon(
                         painter = painterResource(id = R.drawable.ic_facebook),
