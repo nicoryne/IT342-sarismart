@@ -29,7 +29,6 @@ export default function RegisterPage() {
     const { name, value } = e.target
     setFormData((prev) => ({ ...prev, [name]: value }))
 
-    // Clear password error when user types in password fields
     if (name === "password" || name === "confirmPassword") {
       setPasswordError("")
     }
@@ -43,7 +42,7 @@ export default function RegisterPage() {
     e.preventDefault()
   
     try {
-      const response = await fetch("http://localhost:8080/api/v1/auth/login", {
+      const response = await fetch("https://sarismart-backend.onrender.com/api/v1/auth/register", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -55,20 +54,16 @@ export default function RegisterPage() {
       })
   
       if (!response.ok) {
-        throw new Error("Login failed")
+        throw new Error("Sign up failed")
       }
   
       const data = await response.json()
-      console.log("Login successful:", data)
+      console.log("Sign Up successful:", data)
   
-      // You can store token in localStorage or cookies here:
       localStorage.setItem("token", data.access_token)
-  
-      // Redirect user to dashboard or another page
       router.push("/dashboard") 
     } catch (error) {
-      console.error("Login error:", error)
-      // You can show error to user via a toast or inline message
+      console.error("Sign Up error:", error)
     }
   }
   

@@ -2,8 +2,15 @@
 
 import { useState } from "react"
 
+// Update the store type definition to be more explicit
+interface Store {
+  id: string
+  name: string
+  location: string
+}
+
 // Sample store data
-const storeData = [
+const storeData: Store[] = [
   { id: "store1", name: "Downtown Branch", location: "City Center" },
   { id: "store2", name: "Westside Mall", location: "West District" },
   { id: "store3", name: "Eastside Plaza", location: "East District" },
@@ -12,7 +19,15 @@ const storeData = [
 ]
 
 export function useStores() {
-  const [stores] = useState(storeData)
+  const [stores, setStores] = useState<Store[]>(storeData)
+
+  const addStore = (newStore: { name: string; location: string }) => {
+    // Generate a new ID based on the number of existing stores
+    const newId = `store${stores.length + 1}`
+
+    // Add the new store to the stores array
+    setStores([...stores, { id: newId, ...newStore }])
+  }
 
   const filterProductsByStore = (storeId: string) => {
     // For demo purposes, we'll just return different counts based on the store
@@ -50,6 +65,7 @@ export function useStores() {
 
   return {
     stores,
+    addStore,
     filterProductsByStore,
     filterTransactionsByStore,
     filterInsightsByStore,

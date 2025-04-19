@@ -37,7 +37,7 @@ export default function LoginPage() {
     e.preventDefault()
   
     try {
-      const response = await fetch("http://localhost:8080/api/v1/auth/login", {
+      const response = await fetch("https://sarismart-backend.onrender.com/api/v1/auth/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -49,22 +49,17 @@ export default function LoginPage() {
       })
   
       if (response.ok) {
-        const data = await response.json() // Or .text() if your backend sends plain text
+        const data = await response.json()
         console.log("✅ Login successful:", data)
   
-        // Save token if needed
         localStorage.setItem("token", data.access_token)
-  
-        // Redirect to dashboard or home
         router.push("/dashboard")
       } else {
         const errorText = await response.text()
         console.error("❌ Login failed:", errorText)
-        alert("Login failed: " + errorText)
       }
     } catch (err) {
       console.error("💥 Error:", err)
-      alert("Something went wrong!")
     }
   }  
   
