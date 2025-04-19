@@ -43,6 +43,7 @@ public class SupabaseAuthService {
         try {
             ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.POST, entity, String.class);
         
+            // Print status and body for debugging in Render
             System.out.println("Supabase signUp response status: " + response.getStatusCode());
             System.out.println("Supabase signUp response body: " + response.getBody());
         
@@ -92,7 +93,7 @@ public class SupabaseAuthService {
         try {
             ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.POST, entity, String.class);
     
-            // Print status and body for debugging
+            // Print status and body for debugging in Render
             System.out.println("Supabase signIn response status: " + response.getStatusCode());
             System.out.println("Supabase signIn response body: " + response.getBody());
     
