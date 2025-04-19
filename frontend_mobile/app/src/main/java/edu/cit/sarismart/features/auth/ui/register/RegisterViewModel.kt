@@ -5,8 +5,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import edu.cit.sarismart.features.auth.data.repository.AuthRepository
+import edu.cit.sarismart.features.auth.ui.login.LoginNavigationEvent
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -49,6 +52,12 @@ class RegisterViewModel @Inject constructor(
 
     private val _verifyPasswordError = MutableStateFlow<String?>(null)
     val verifyPasswordError: StateFlow<String?> = _verifyPasswordError
+
+    private val _navigationEvent = MutableSharedFlow<RegisterNavigationEvent>()
+    val navigationEvent: SharedFlow<RegisterNavigationEvent> = _navigationEvent
+
+    internal val _registerError = MutableStateFlow("")
+    val registerError: StateFlow<String> = _registerError
 
     fun onNameChanged(value: String) {
         _name.value = value
@@ -132,7 +141,7 @@ class RegisterViewModel @Inject constructor(
             _isLoading.value = true
             delay(1000) // simulate network delay
 
-            val success = authRepository.register(
+            val res = authRepository.register(
                 _name.value,
                 _email.value,
                 _password.value,
@@ -140,7 +149,11 @@ class RegisterViewModel @Inject constructor(
             )
             _isLoading.value = false
 
-            // TODO: Handle registration success/failure and navigation
+            if (res.success) {
+                _navigationEvent.emit(RegisterNavigationEvent.SuccessfulRegistration)
+            } else {
+                _registerError.value = res.message
+            }
         }
     }
 
@@ -165,4 +178,8 @@ class RegisterViewModel @Inject constructor(
             _isLoading.value = false
         }
     }
+}
+
+sealed class RegisterNavigationEvent {
+    object SuccessfulRegistration : RegisterNavigationEvent()
 }
