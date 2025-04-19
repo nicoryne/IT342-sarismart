@@ -31,7 +31,8 @@ public class AuthController {
     public ResponseEntity<Object> signUp(@RequestBody AuthRequest authRequest) {
         System.out.println("Registering user: " + authRequest.getEmail());
         try {
-            return supabaseAuthService.signUp(authRequest.getEmail(), authRequest.getPassword());
+            return supabaseAuthService.signUp(authRequest.getEmail(), authRequest.getPassword(), 
+                                               authRequest.getPhone(), authRequest.getFullName());
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)

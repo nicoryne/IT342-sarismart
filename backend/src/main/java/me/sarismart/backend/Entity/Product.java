@@ -15,6 +15,9 @@ public class Product {
     private Long id;
 
     @Column(nullable = false)
+    private String barcode;
+
+    @Column(nullable = false)
     private String name;
 
     private String category;
@@ -24,6 +27,8 @@ public class Product {
 
     private int stock;
 
+    private int sold;
+    
     private String description;
 
     private int reorderLevel;

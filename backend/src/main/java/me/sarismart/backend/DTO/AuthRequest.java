@@ -9,4 +9,6 @@ import lombok.*;
 public class AuthRequest {
     private String email;
     private String password;
+    private String phone;
+    private String fullName;
 }

@@ -27,18 +27,28 @@ public class SupabaseAuthService {
     @Autowired
     private UserService userService;
 
-    public ResponseEntity<Object> signUp(String email, String password) {
+    public ResponseEntity<Object> signUp(String email, String password, String phone, String fullName) {
         String url = appConfig.getUrl() + "/auth/v1/signup";
         
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.set("apikey", appConfig.getApiKey());
     
-        Map<String, String> body = new HashMap<>();
+        Map<String, String> data = new HashMap<>();
+        data.put("full_name", fullName);
+        data.put("phone", phone);
+
+        Map<String, Object> options = new HashMap<>();
+        options.put("data", data);
+
+        Map<String, Object> body = new HashMap<>();
         body.put("email", email);
         body.put("password", password);
+        body.put("options", options);
+        
+        System.out.println("Request body: " + new JSONObject(body));
     
-        HttpEntity<Map<String, String>> entity = new HttpEntity<>(body, headers);
+        HttpEntity<Map<String, Object>> entity = new HttpEntity<>(body, headers);
     
         try {
             ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.POST, entity, String.class);
@@ -47,29 +57,27 @@ public class SupabaseAuthService {
             System.out.println("Supabase signUp response status: " + response.getStatusCode());
             System.out.println("Supabase signUp response body: " + response.getBody());
         
-            if (response.getStatusCode() == HttpStatus.OK || response.getStatusCode() == HttpStatus.CREATED) {
-                try {
-                    JSONObject json = new JSONObject(response.getBody());
-                    String supabaseUid = json.getJSONObject("user").getString("id");
-                    String fullName = json.getJSONObject("user")
-                            .optJSONObject("user_metadata")
-                            .optString("full_name", "Unnamed");
-        
-                    userService.saveUserToDatabase(email, supabaseUid, fullName);
-        
-                    return ResponseEntity.status(HttpStatus.CREATED)
-                                         .contentType(MediaType.APPLICATION_JSON)
-                                         .body(json.toMap());
-        
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                                         .body(Map.of("error", "Error parsing Supabase response: " + e.getMessage()));
-                }
-            } else {
+            if (response.getStatusCode() != HttpStatus.OK && response.getStatusCode() != HttpStatus.CREATED) {
                 return ResponseEntity.status(response.getStatusCode())
                                      .body(Map.of("error", "Failed to sign up user", "details", response.getBody()));
             }
+
+            try {
+                JSONObject json = new JSONObject(response.getBody());
+                String supabaseUid = json.getJSONObject("user").getString("id");
+    
+                userService.saveUserToDatabase(email, supabaseUid, fullName, phone);
+    
+                return ResponseEntity.status(HttpStatus.CREATED)
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .body(json.toMap());
+    
+            } catch (JSONException e) {
+                e.printStackTrace();
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                                        .body(Map.of("error", "Error parsing Supabase response: " + e.getMessage()));
+            }
+
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
