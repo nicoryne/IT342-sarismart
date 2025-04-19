@@ -1,10 +1,11 @@
 package edu.cit.sarismart.features.auth.data.repository
 
-import android.util.Log
 import edu.cit.sarismart.core.data.PreferencesManager
-import edu.cit.sarismart.core.data.TokenManager
+import edu.cit.sarismart.core.data.AccessTokenManager
+import edu.cit.sarismart.core.data.RefreshTokenManager
 import edu.cit.sarismart.features.auth.data.models.AuthRequest
 import edu.cit.sarismart.features.auth.data.models.AuthResponse
+import edu.cit.sarismart.features.auth.data.models.ClientResponse
 import edu.cit.sarismart.features.auth.domain.AuthApiService
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -12,38 +13,41 @@ import retrofit2.Response
 import javax.inject.Inject
 
 
-class AuthRepositoryImpl @Inject constructor(private val authApiService: AuthApiService, private val tokenManager: TokenManager, private val preferencesManager: PreferencesManager) : AuthRepository {
+class AuthRepositoryImpl @Inject constructor(private val authApiService: AuthApiService, private val accessTokenManager: AccessTokenManager, private val refreshTokenManager: RefreshTokenManager, private val preferencesManager: PreferencesManager) : AuthRepository {
 
-    override suspend fun login(email: String, password: String): Boolean {
+    override suspend fun login(email: String, password: String): ClientResponse {
         val authRequest = AuthRequest(email, password)
-
         return withContext(Dispatchers.IO) {
             try {
                 val response: Response<AuthResponse> = authApiService.login(authRequest)
 
                 if (response.isSuccessful) {
                     val body = response.body()
-                    val token = body?.accessToken
-                    Log.i("AUTHENTICATION", "Login Successful.")
+                    val accessToken = body?.accessToken
+                    val refreshToken = body?.refreshToken
 
-                    if (token != null) {
-                        tokenManager.saveToken(token)
+                    if (accessToken != null) {
+                        accessTokenManager.saveToken(accessToken)
                     }
 
-                    true
+                    if (refreshToken != null) {
+                        refreshTokenManager.saveToken(refreshToken)
+                    }
+
+                    ClientResponse(true, "Login Successful.")
+                } else if (response.code() == 403) {
+                    ClientResponse(false, "Please try again. Invalid login credentials.")
                 } else {
-                    Log.e("AUTHENTICATION", "Login Failed. Code: ${response.code()} Message: ${response.message()}")
-                    false
+                    ClientResponse(false, "Please try again. Server timed out.")
                 }
             } catch (e: Exception) {
-                Log.e("AUTHENTICATION", "Login Error: ${e.message}")
-                false
+                ClientResponse(false, e.message.toString())
             }
         }
     }
 
 
-    override suspend fun loginWithBiometric(): Boolean {
+    override suspend fun loginWithBiometric(): ClientResponse {
         TODO("Not yet implemented")
     }
 
@@ -52,12 +56,11 @@ class AuthRepositoryImpl @Inject constructor(private val authApiService: AuthApi
         email: String,
         password: String,
         verifyPassword: String
-    ): Boolean {
+    ): ClientResponse {
         val authRequest = AuthRequest(email, password)
 
         if(password != verifyPassword) {
-            Log.e("AUTHENTICATION", "Registration Failed. Passwords do not match.")
-            return false;
+            return ClientResponse(false, "Registration Failed. Passwords do not match.")
         }
 
         return withContext(Dispatchers.IO) {
@@ -65,37 +68,34 @@ class AuthRepositoryImpl @Inject constructor(private val authApiService: AuthApi
                 val response: Response<String> = authApiService.register(authRequest)
 
                 if (response.isSuccessful) {
-                    val token = response.body()
-                    Log.i("AUTHENTICATION", "Registration Successful")
-                    true
+                    ClientResponse(true, "Registration Successful.")
                 } else {
-                    Log.e("AUTHENTICATION", "Registration Failed. Code: ${response.code()} Message: ${response.message()}")
-                    false
+                    ClientResponse(false, "Please try again. Server timed out.")
                 }
             } catch (e: Exception) {
-                Log.e("AUTHENTICATION", "Registration Error: ${e.message}")
-                false
+                ClientResponse(true, e.message.toString())
             }
         }
     }
 
-    override suspend fun resetPassword(email: String): Boolean {
+    override suspend fun resetPassword(email: String): ClientResponse {
         TODO("Not yet implemented")
     }
 
-    override suspend fun logout(): Boolean {
+    override suspend fun logout(): ClientResponse {
 
-        if (tokenManager.getToken.toString().isEmpty()) {
-            return false
+        if (accessTokenManager.getToken.toString().isEmpty()) {
+            return ClientResponse(false, "User session not found.")
         }
 
         // clearing preferences
         preferencesManager.clear()
 
         // clearing token
-        tokenManager.deleteToken()
+        accessTokenManager.deleteToken()
+        refreshTokenManager.deleteToken()
 
-        return true
+        return ClientResponse(true, "Logout success.")
     }
 
     override fun isBiometricEnabled(): Boolean {

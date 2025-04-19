@@ -1,4 +1,4 @@
-package edu.cit.sarismart.features.user
+package edu.cit.sarismart.features.user.navigation
 
 import edu.cit.sarismart.R
 

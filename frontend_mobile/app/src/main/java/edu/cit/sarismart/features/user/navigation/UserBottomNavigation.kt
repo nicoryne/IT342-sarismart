@@ -1,4 +1,4 @@
-package edu.cit.sarismart.features.user
+package edu.cit.sarismart.features.user.navigation
 
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -21,6 +21,7 @@ fun UserBottomNavigation(
                 icon = {
                     Icon(
                         painter = painterResource(id = tab.iconResId),
+
                         contentDescription = tab.title,
                         tint = if (selectedTab == tab)
                             Color(0xFF009393)

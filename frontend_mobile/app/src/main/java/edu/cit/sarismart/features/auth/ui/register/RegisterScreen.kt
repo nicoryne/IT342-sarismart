@@ -11,8 +11,11 @@ import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -26,13 +29,16 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import edu.cit.sarismart.R
+import edu.cit.sarismart.core.util.BiometricUtil
 import edu.cit.sarismart.features.auth.ui.BackgroundPattern
+import edu.cit.sarismart.features.auth.ui.login.LoginNavigationEvent
+import kotlinx.coroutines.launch
 
 
 @Composable
 fun RegisterScreen(
-    viewModel: RegisterViewModel = hiltViewModel(),
-    onLoginClick: () -> Unit = {},
+    viewModel: RegisterViewModel = hiltViewModel<RegisterViewModel>(),
+    onNavigateToLogin: () -> Unit = {},
     onSuccessfulRegistration: () -> Unit = {}
 ) {
     val name by viewModel.name.collectAsState()
@@ -49,7 +55,32 @@ fun RegisterScreen(
     val passwordError by viewModel.passwordError.collectAsState()
     val verifyPasswordError by viewModel.verifyPasswordError.collectAsState()
 
+    val registerError by viewModel.registerError.collectAsState()
+
     val scrollState = rememberScrollState()
+
+    val snackbarHostState = remember { SnackbarHostState() }
+    val coroutineScope = rememberCoroutineScope()
+
+    LaunchedEffect(registerError) {
+        if (registerError.isNotEmpty()) {
+            coroutineScope.launch {
+                snackbarHostState.showSnackbar(
+                    message = registerError,
+                    duration = SnackbarDuration.Short
+                )
+                viewModel._registerError.value = ""
+            }
+        }
+    }
+
+    LaunchedEffect(key1 = true) {
+        viewModel.navigationEvent.collect { event ->
+            when (event) {
+                RegisterNavigationEvent.SuccessfulRegistration -> onSuccessfulRegistration()
+            }
+        }
+    }
 
     Box(
         modifier = Modifier.fillMaxSize()
@@ -327,7 +358,7 @@ fun RegisterScreen(
                 )
                 Text(
                     text = "Login",
-                    modifier = Modifier.clickable(onClick = onLoginClick),
+                    modifier = Modifier.clickable(onClick = onNavigateToLogin),
                     style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.primary
@@ -335,4 +366,7 @@ fun RegisterScreen(
             }
         }
     }
+
+    // snackbar
+    SnackbarHost(hostState = snackbarHostState)
 }

@@ -1,4 +1,4 @@
-package edu.cit.sarismart.features.user
+package edu.cit.sarismart.features.user.navigation
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -14,7 +14,7 @@ import androidx.navigation.compose.rememberNavController
 
 @Composable
 fun UserNavigationController(
-    onLogout: () -> Unit
+    onNavigateToLogin: () -> Unit
 ) {
     val navController = rememberNavController()
     var selectedTab by remember { mutableStateOf(UserTabs.MAPS) }
@@ -35,7 +35,7 @@ fun UserNavigationController(
         ) {
             UserNavigationHost (
                 navController = navController,
-                onLogout = onLogout
+                onNavigateToLogin
             )
         }
     }
