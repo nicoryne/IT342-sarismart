@@ -31,7 +31,7 @@ public class Store {
 
     @ManyToOne
     @JoinColumn(name = "owner_id", nullable = false)
-    private User storeOwnerId;
+    private User owner;
 
     @OneToMany
     private List<User> workers = new ArrayList<>();

@@ -4,6 +4,7 @@ import me.sarismart.backend.Entity.User;
 import me.sarismart.backend.Repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import java.util.Optional;
 
 @Service
 public class UserService {
@@ -33,7 +34,7 @@ public class UserService {
         return userRepository.findByEmail(email);
     }
 
-    public User getUserBySupabaseUid(String uid) {
+    public Optional<User> getUserBySupabaseUid(String uid) {
         return userRepository.findBySupabaseUid(uid);
     }
 }

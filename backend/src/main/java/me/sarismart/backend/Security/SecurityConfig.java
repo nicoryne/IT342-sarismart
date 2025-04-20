@@ -36,12 +36,12 @@ public class SecurityConfig {
                                 "/api/v1/auth/**",
                                 "/v3/api-docs/**",
                                 "/swagger-ui/**",
-                                "/swagger-ui.html")
+                                "/swagger-ui.html",
+                                "/api/v1/stores/**")
                         .permitAll()
                         .requestMatchers(
-                                "/api/v1/stores/**",
                                 "/api/v1/products/**")
-                        .authenticated()
+                        .hasAuthority("authenticated")
                         .anyRequest().authenticated())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
