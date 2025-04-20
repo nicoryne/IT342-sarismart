@@ -41,7 +41,7 @@ public class StoreController {
     // Method: stores.getStoresByOwnerId
     @Operation(summary = "Get Stores by Owner ID", description = "Retrieve stores owned by a specific user")
     @GetMapping("/owner/{ownerId}")
-    public List<Store> getStoresByOwnerId(@PathVariable Long ownerId) {
+    public List<Store> getStoresByOwnerId(@PathVariable String ownerId) {
         return storeService.getStoresByOwnerId(ownerId);
     }
 

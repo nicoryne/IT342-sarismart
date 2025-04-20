@@ -7,5 +7,5 @@ import java.util.List;
 
 @Repository
 public interface StoreRepository extends JpaRepository<Store, Long> {
-    List<Store> findByOwnerId(Long ownerId);
+    List<Store> findByOwner_SupabaseUid(String supabaseUid);
 }

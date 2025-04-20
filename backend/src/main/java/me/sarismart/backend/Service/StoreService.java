@@ -35,8 +35,8 @@ public class StoreService {
                 return storeRepository.findById(id);
         }
 
-        public List<Store> getStoresByOwnerId(Long ownerId) {
-                return storeRepository.findByOwnerId(ownerId);
+        public List<Store> getStoresByOwnerId(String ownerId) {
+                return storeRepository.findByOwner_SupabaseUid(ownerId);
         }
 
         public Store createStore(StoreRequest store) {
