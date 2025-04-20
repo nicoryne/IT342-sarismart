@@ -8,7 +8,7 @@ import retrofit2.http.POST
 import retrofit2.http.Path
 import retrofit2.http.Query
 
-interface ChatService {
+interface ChatApiService {
 
     @POST("v1beta/models/{model}:generateContent")
     suspend fun chat(@Path("model") model: String, @Body chatRequest: ChatRequest, @Query("key") key: String): Response<ChatResponse>

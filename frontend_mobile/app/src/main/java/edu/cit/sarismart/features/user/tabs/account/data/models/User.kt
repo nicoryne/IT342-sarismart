@@ -2,7 +2,7 @@ package edu.cit.sarismart.features.user.tabs.account.data.models
 
 import com.google.gson.annotations.SerializedName
 
-data class User(
+data class User (
     val id: String,
     val aud: String,
     val role: String,
