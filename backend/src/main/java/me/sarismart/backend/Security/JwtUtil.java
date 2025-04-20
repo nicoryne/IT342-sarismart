@@ -18,6 +18,9 @@ public class JwtUtil {
     @Autowired
     public JwtUtil(AppConfig appConfig) {
         this.appConfig = appConfig;
+        System.out.println("AppConfig URL: " + appConfig.getUrl());
+        System.out.println("AppConfig API Key: " + appConfig.getApiKey()); 
+        System.out.println("AppConfig Secret Key: " + appConfig.getSecretKey());
     }
 
     public Claims validateToken(String token) {
