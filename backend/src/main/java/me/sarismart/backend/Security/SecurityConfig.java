@@ -41,7 +41,7 @@ public class SecurityConfig {
                 .requestMatchers(
                     "/api/v1/stores/**",
                     "/api/v1/products/**"
-                    ).authenticated()
+                    ).hasRole("authenticated")
                 .anyRequest().authenticated()
             )
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
