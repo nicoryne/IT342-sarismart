@@ -4,6 +4,7 @@ import me.sarismart.backend.Entity.Store;
 import me.sarismart.backend.Repository.SaleRepository;
 import me.sarismart.backend.Repository.StoreRepository;
 import me.sarismart.backend.Repository.UserRepository;
+import me.sarismart.backend.DTO.StoreRequest;
 import me.sarismart.backend.Entity.Product;
 import me.sarismart.backend.Entity.Report;
 import me.sarismart.backend.Entity.Sale;
@@ -34,8 +35,23 @@ public class StoreService {
                 return storeRepository.findById(id);
         }
 
-        public Store createStore(Store store) {
-                return storeRepository.save(store);
+        public List<Store> getStoresByOwnerId(Long ownerId) {
+                return storeRepository.findByOwnerId(ownerId);
+        }
+
+        public Store createStore(StoreRequest store) {
+                User owner = userRepository.findBySupabaseUid(store.getOwnerId())
+                        .orElseThrow(() -> new RuntimeException("Owner not found"));
+                
+                Store newStore = new Store();
+                newStore.setStoreName(store.getStoreName());
+                newStore.setLocation(store.getLocation());
+                newStore.setLatitude(store.getLatitude());
+                newStore.setLongitude(store.getLongitude());
+                newStore.setOwner(owner);
+
+                storeRepository.save(newStore);
+                return newStore;
         }
 
         public void deleteStore(Long id) {
