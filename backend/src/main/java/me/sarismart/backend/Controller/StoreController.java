@@ -168,7 +168,7 @@ public class StoreController {
         return storeService.monthlySales(storeId);
     }
 
-    // Method: stores.reports.monthlySales
+    // Method: stores.reports.inventory
     @Operation(summary = "Get Inventory Status Report", description = "Retrieve the inventory status report for a store")
     @GetMapping("/{storeId}/reports/inventory")
     public List<Product> inventoryStatus(@PathVariable Long storeId) {

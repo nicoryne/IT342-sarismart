@@ -39,8 +39,9 @@ public class SecurityConfig {
                                 "/swagger-ui.html")
                         .permitAll()
                         .requestMatchers(
-                                "/api/v1/stores/**")
-                        .hasRole("STORE_OWNER")
+                                "/api/v1/stores/**",
+                                "/api/v1/products/**")
+                        .authenticated()
                         .anyRequest().authenticated())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)

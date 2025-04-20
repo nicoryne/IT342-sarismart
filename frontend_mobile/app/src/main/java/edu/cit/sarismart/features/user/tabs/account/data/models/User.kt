@@ -1,4 +1,4 @@
-package edu.cit.sarismart.features.auth.data.models
+package edu.cit.sarismart.features.user.tabs.account.data.models
 
 import com.google.gson.annotations.SerializedName
 

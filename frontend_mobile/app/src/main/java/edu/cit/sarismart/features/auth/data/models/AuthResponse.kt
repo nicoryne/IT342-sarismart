@@ -1,6 +1,7 @@
 package edu.cit.sarismart.features.auth.data.models
 
 import com.google.gson.annotations.SerializedName
+import edu.cit.sarismart.features.user.tabs.account.data.models.User
 
 data class AuthResponse(
     @SerializedName("access_token") val accessToken: String,

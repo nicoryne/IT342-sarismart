@@ -11,6 +11,7 @@ import edu.cit.sarismart.features.auth.data.repository.AuthRepositoryImpl
 import edu.cit.sarismart.features.auth.data.repository.AuthRepository
 import edu.cit.sarismart.features.auth.domain.AuthApiService
 import retrofit2.Retrofit
+import javax.inject.Named
 import javax.inject.Singleton
 
 @Module
@@ -20,12 +21,12 @@ object AuthModule {
     @Provides
     @Singleton
     fun provideAuthRepository(
-        retrofit: Retrofit,
+        @Named("BackendRetrofit") backendRetrofit: Retrofit,
         accessTokenManager: AccessTokenManager,
         preferencesManager: PreferencesManager,
         refreshTokenManager: RefreshTokenManager): AuthRepository {
         return AuthRepositoryImpl(
-            retrofit.create<AuthApiService>(AuthApiService::class.java),
+            backendRetrofit.create<AuthApiService>(AuthApiService::class.java),
             accessTokenManager,
             refreshTokenManager,
             preferencesManager

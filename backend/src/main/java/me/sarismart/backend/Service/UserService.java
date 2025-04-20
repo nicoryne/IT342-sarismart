@@ -15,7 +15,7 @@ public class UserService {
         return userRepository.existsByEmail(email);
     }
 
-    public User saveUserToDatabase(String email, String supabaseUid, String fullName) {
+    public User saveUserToDatabase(String email, String supabaseUid, String fullName, String phone) {
         if (existsByEmail(email)) {
             return userRepository.findByEmail(email);
         }
@@ -24,6 +24,7 @@ public class UserService {
         user.setEmail(email);
         user.setSupabaseUid(supabaseUid);
         user.setFullName(fullName);
+        user.setPhone(phone);
 
         return userRepository.save(user);
     }
