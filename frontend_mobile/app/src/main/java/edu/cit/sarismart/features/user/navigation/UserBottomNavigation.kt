@@ -3,6 +3,7 @@ package edu.cit.sarismart.features.user.navigation
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -23,7 +24,7 @@ fun UserBottomNavigation(
     Surface(
         tonalElevation = 8.dp,
         shadowElevation = 10.dp,
-        color = Color.White,
+        color = MaterialTheme.colorScheme.background,
         modifier = Modifier.shadow(10.dp)
     ) {
         NavigationBar(
@@ -56,7 +57,7 @@ fun UserBottomNavigation(
                         unselectedTextColor = Color(0xFF4F4F4F),
                         selectedIconColor = Color(0xFF009393),
                         selectedTextColor = Color(0xFF009393),
-                        indicatorColor = Color.White
+                        indicatorColor = Color.Transparent
                     )
                 )
             }

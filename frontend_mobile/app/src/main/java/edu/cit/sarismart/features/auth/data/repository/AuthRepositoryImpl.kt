@@ -1,5 +1,7 @@
 package edu.cit.sarismart.features.auth.data.repository
 
+import android.util.Log
+import androidx.compose.runtime.collectAsState
 import edu.cit.sarismart.core.data.PreferencesManager
 import edu.cit.sarismart.core.data.AccessTokenManager
 import edu.cit.sarismart.core.data.RefreshTokenManager
@@ -8,6 +10,8 @@ import edu.cit.sarismart.features.auth.data.models.AuthResponse
 import edu.cit.sarismart.features.auth.data.models.ClientResponse
 import edu.cit.sarismart.features.auth.domain.AuthApiService
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import retrofit2.Response
 import javax.inject.Inject
@@ -48,7 +52,7 @@ class AuthRepositoryImpl @Inject constructor(private val authApiService: AuthApi
 
 
     override suspend fun loginWithBiometric(): ClientResponse {
-        TODO("Not yet implemented")
+        return ClientResponse(true, "Test Success.")
     }
 
     override suspend fun register(
@@ -57,11 +61,12 @@ class AuthRepositoryImpl @Inject constructor(private val authApiService: AuthApi
         password: String,
         verifyPassword: String
     ): ClientResponse {
-        val authRequest = AuthRequest(email, password)
 
         if(password != verifyPassword) {
             return ClientResponse(false, "Registration Failed. Passwords do not match.")
         }
+
+        val authRequest = AuthRequest(email, password)
 
         return withContext(Dispatchers.IO) {
             try {
@@ -83,8 +88,9 @@ class AuthRepositoryImpl @Inject constructor(private val authApiService: AuthApi
     }
 
     override suspend fun logout(): ClientResponse {
+        val token = runBlocking { accessTokenManager.getToken.first() }
 
-        if (accessTokenManager.getToken.toString().isEmpty()) {
+        if (token.isNullOrEmpty()) {
             return ClientResponse(false, "User session not found.")
         }
 
@@ -99,10 +105,7 @@ class AuthRepositoryImpl @Inject constructor(private val authApiService: AuthApi
     }
 
     override fun isBiometricEnabled(): Boolean {
-        TODO("Not yet implemented")
-    }
-
-    override fun setBiometricEnabled(enabled: Boolean) {
-        TODO("Not yet implemented")
+        val token = runBlocking { refreshTokenManager.getToken.first() }
+        return !token.isNullOrEmpty()
     }
 }

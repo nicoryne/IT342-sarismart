@@ -90,6 +90,12 @@ fun LoginScreen(
         }
     }
 
+    LaunchedEffect(isBiometricAvailable) {
+        if(isBiometricAvailable) {
+            viewModel.onBiometricLoginClicked()
+        }
+    }
+
 
     // snackbar
     SnackbarHost(hostState = snackbarHostState)
@@ -285,7 +291,7 @@ fun LoginScreen(
                     modifier = Modifier.weight(1f),
                     shape = RoundedCornerShape(12.dp),
                     colors = ButtonDefaults.elevatedButtonColors(
-                        containerColor = Color.White
+                        containerColor = MaterialTheme.colorScheme.background
                     )
                 ) {
                     Icon(
@@ -304,7 +310,7 @@ fun LoginScreen(
                     modifier = Modifier.weight(1f),
                     shape = RoundedCornerShape(12.dp),
                     colors = ButtonDefaults.elevatedButtonColors(
-                        containerColor = Color.White
+                        containerColor = MaterialTheme.colorScheme.background
                     )
                 ) {
                     Icon(

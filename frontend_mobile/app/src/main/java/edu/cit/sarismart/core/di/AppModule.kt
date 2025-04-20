@@ -7,8 +7,6 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import edu.cit.sarismart.core.data.PreferencesManager
-import edu.cit.sarismart.core.network.BackendRetrofit
-import edu.cit.sarismart.core.network.GeminiRetrofit
 import retrofit2.Retrofit
 import javax.inject.Named
 import javax.inject.Singleton
@@ -26,19 +24,5 @@ object AppModule {
     @Provides
     fun provideContext(@ApplicationContext context: Context): Context {
         return context
-    }
-
-    @Provides
-    @Singleton
-    @Named("BackendRetrofit")
-    fun provideBackendRetrofit(): Retrofit {
-        return BackendRetrofit.instance
-    }
-
-    @Provides
-    @Singleton
-    @Named("GeminiRetrofit")
-    fun provideGeminiRetrofit(): Retrofit {
-        return GeminiRetrofit.instance
     }
 }

@@ -15,6 +15,4 @@ interface AuthRepository {
     suspend fun logout(): ClientResponse
 
     fun isBiometricEnabled(): Boolean
-
-    fun setBiometricEnabled(enabled: Boolean)
 }

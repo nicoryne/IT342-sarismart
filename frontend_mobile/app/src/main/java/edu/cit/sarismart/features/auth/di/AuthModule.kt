@@ -7,6 +7,7 @@ import dagger.hilt.components.SingletonComponent
 import edu.cit.sarismart.core.data.PreferencesManager
 import edu.cit.sarismart.core.data.AccessTokenManager
 import edu.cit.sarismart.core.data.RefreshTokenManager
+import edu.cit.sarismart.core.network.BackendRetrofitClient
 import edu.cit.sarismart.features.auth.data.repository.AuthRepositoryImpl
 import edu.cit.sarismart.features.auth.data.repository.AuthRepository
 import edu.cit.sarismart.features.auth.domain.AuthApiService
@@ -21,7 +22,7 @@ object AuthModule {
     @Provides
     @Singleton
     fun provideAuthRepository(
-        @Named("BackendRetrofit") backendRetrofit: Retrofit,
+        @BackendRetrofitClient backendRetrofit: Retrofit,
         accessTokenManager: AccessTokenManager,
         preferencesManager: PreferencesManager,
         refreshTokenManager: RefreshTokenManager): AuthRepository {

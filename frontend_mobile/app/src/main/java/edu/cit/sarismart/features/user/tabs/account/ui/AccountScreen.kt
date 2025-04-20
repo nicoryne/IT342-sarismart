@@ -40,7 +40,6 @@ fun AccountScreen (
         }
     }
 
-
     Box(
         modifier = Modifier.fillMaxSize()
     ) {
