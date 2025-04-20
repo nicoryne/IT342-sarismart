@@ -5,6 +5,7 @@ import androidx.compose.runtime.collectAsState
 import edu.cit.sarismart.core.data.PreferencesManager
 import edu.cit.sarismart.core.data.AccessTokenManager
 import edu.cit.sarismart.core.data.RefreshTokenManager
+import edu.cit.sarismart.core.data.UserDetailsManager
 import edu.cit.sarismart.features.auth.data.models.AuthRequest
 import edu.cit.sarismart.features.auth.data.models.AuthResponse
 import edu.cit.sarismart.features.auth.data.models.ClientResponse
@@ -17,7 +18,7 @@ import retrofit2.Response
 import javax.inject.Inject
 
 
-class AuthRepositoryImpl @Inject constructor(private val authApiService: AuthApiService, private val accessTokenManager: AccessTokenManager, private val refreshTokenManager: RefreshTokenManager, private val preferencesManager: PreferencesManager) : AuthRepository {
+class AuthRepositoryImpl @Inject constructor(private val authApiService: AuthApiService, private val accessTokenManager: AccessTokenManager, private val refreshTokenManager: RefreshTokenManager, private val preferencesManager: PreferencesManager, private val userDetailsManager: UserDetailsManager) : AuthRepository {
 
     override suspend fun login(email: String, password: String): ClientResponse {
         val authRequest = AuthRequest(email, password)
@@ -26,9 +27,13 @@ class AuthRepositoryImpl @Inject constructor(private val authApiService: AuthApi
                 val response: Response<AuthResponse> = authApiService.login(authRequest)
 
                 if (response.isSuccessful) {
+                    // logout just incase
+                    logout()
+
                     val body = response.body()
                     val accessToken = body?.accessToken
                     val refreshToken = body?.refreshToken
+                    val user = body?.user
 
                     if (accessToken != null) {
                         accessTokenManager.saveToken(accessToken)
@@ -38,14 +43,21 @@ class AuthRepositoryImpl @Inject constructor(private val authApiService: AuthApi
                         refreshTokenManager.saveToken(refreshToken)
                     }
 
+                    if (user != null) {
+                        Log.i("AuthRepositoryImpl", "Saving User: $user")
+                        userDetailsManager.saveUserDetails(user)
+                        Log.i("AuthRepositoryImpl", "User Details: $user")
+                    }
+
                     ClientResponse(true, "Login Successful.")
                 } else if (response.code() == 403) {
                     ClientResponse(false, "Please try again. Invalid login credentials.")
                 } else {
-                    ClientResponse(false, "Please try again. Server timed out.")
+                    ClientResponse(false, "Please try again. Account might not exist.")
                 }
             } catch (e: Exception) {
-                ClientResponse(false, e.message.toString())
+                Log.e("AuthRepositoryImpl", "Error: ${e.message}")
+                ClientResponse(false, "Please try again. Server might be down.")
             }
         }
     }
@@ -100,6 +112,9 @@ class AuthRepositoryImpl @Inject constructor(private val authApiService: AuthApi
         // clearing token
         accessTokenManager.deleteToken()
         refreshTokenManager.deleteToken()
+
+        // clearing user details
+        userDetailsManager.clear()
 
         return ClientResponse(true, "Logout success.")
     }

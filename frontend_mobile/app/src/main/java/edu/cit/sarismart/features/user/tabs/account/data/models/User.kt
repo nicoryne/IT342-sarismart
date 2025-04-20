@@ -1,12 +1,9 @@
 package edu.cit.sarismart.features.user.tabs.account.data.models
 
-import com.google.gson.annotations.SerializedName
-
 data class User (
     val id: String,
-    val aud: String,
-    val role: String,
+    val aud: String?,
     val email: String,
-    @SerializedName("email_confirmed_at") val emailConfirmedAt: String?,
-    val phone: String,
+    val phone: String?,
+    val fullName: String?
 )

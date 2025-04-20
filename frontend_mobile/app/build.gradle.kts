@@ -13,6 +13,7 @@ secrets {
 
 }
 
+
 android {
     namespace = "edu.cit.sarismart"
     compileSdk = 35
@@ -101,6 +102,8 @@ dependencies {
 
     // Data Store
     implementation(libs.androidx.datastore.preferences)
+    implementation(libs.androidx.datastore)
+
 
     // Google Maps
     implementation(libs.maps.compose)
@@ -122,9 +125,12 @@ dependencies {
     implementation(libs.logging.interceptor)
 }
 
+
 kapt {
     correctErrorTypes = true
 }
+
+
 
 
 

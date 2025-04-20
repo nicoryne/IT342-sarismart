@@ -79,7 +79,7 @@ fun LoginScreen(
                         BiometricUtil.showBiometricPrompt(
                             activity = it,
                             title = "Login to SariSmart",
-                            subtitle = "Use your fingerprint or face to log in",
+                            subtitle = "Use your fingerprint to log in",
                             onSuccess = { viewModel.onBiometricAuthSuccess() },
                             onError = { _, _ -> /* handle error */ },
                             onFailed = { /* handle failure */ }
