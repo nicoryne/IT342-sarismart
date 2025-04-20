@@ -11,14 +11,16 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Separator } from "@/components/ui/separator"
+import { useRouter } from "next/navigation"
 
 export default function RegisterPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+  const router = useRouter()
   const [formData, setFormData] = useState({
-    firstName: "",
-    lastName: "",
     email: "",
+    fullName: "",
+    phone: "",
     password: "",
     confirmPassword: "",
     agreeTerms: false,
@@ -29,7 +31,6 @@ export default function RegisterPage() {
     const { name, value } = e.target
     setFormData((prev) => ({ ...prev, [name]: value }))
 
-    // Clear password error when user types in password fields
     if (name === "password" || name === "confirmPassword") {
       setPasswordError("")
     }
@@ -39,18 +40,37 @@ export default function RegisterPage() {
     setFormData((prev) => ({ ...prev, agreeTerms: checked }))
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-
-    // Validate passwords match
-    if (formData.password !== formData.confirmPassword) {
-      setPasswordError("Passwords do not match")
-      return
+  
+    try {
+      const response = await fetch("https://sarismart-backend.onrender.com/api/v1/auth/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: formData.email,
+          password: formData.password,
+          fullName: formData.fullName,
+          phone: formData.phone,
+        }),
+      })
+  
+      if (!response.ok) {
+        throw new Error("Sign up failed")
+      }
+  
+      const data = await response.json()
+      console.log("Sign Up successful:", data)
+  
+      localStorage.setItem("token", data.access_token)
+      router.push("/dashboard") 
+    } catch (error) {
+      console.error("Sign Up error:", error)
     }
-
-    console.log("Registration form submitted:", formData)
-    // In a real application, you would handle registration here
   }
+  
 
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword)
@@ -70,31 +90,6 @@ export default function RegisterPage() {
 
         <div className="rounded-lg border bg-white p-6 shadow-sm">
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="firstName">First Name</Label>
-                <Input
-                  id="firstName"
-                  name="firstName"
-                  placeholder="John"
-                  required
-                  value={formData.firstName}
-                  onChange={handleChange}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="lastName">Last Name</Label>
-                <Input
-                  id="lastName"
-                  name="lastName"
-                  placeholder="Doe"
-                  required
-                  value={formData.lastName}
-                  onChange={handleChange}
-                />
-              </div>
-            </div>
-
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <Input
@@ -104,6 +99,32 @@ export default function RegisterPage() {
                 placeholder="name@example.com"
                 required
                 value={formData.email}
+                onChange={handleChange}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="email">Full Name</Label>
+              <Input
+                id="fullName"
+                name="fullName"
+                type="text"
+                placeholder="Juan De la Cruz"
+                required
+                value={formData.fullName}
+                onChange={handleChange}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="email">Phone Number</Label>
+              <Input
+                id="phone"
+                name="phone"
+                type="tel"
+                placeholder="0917 123 4567"
+                required
+                value={formData.phone}
                 onChange={handleChange}
               />
             </div>
@@ -193,14 +214,6 @@ export default function RegisterPage() {
             </div>
 
             <div className="mt-6 grid grid-cols-2 gap-3">
-              <Button variant="outline" className="w-full">
-                <Github className="mr-2 h-4 w-4" />
-                GitHub
-              </Button>
-              <Button variant="outline" className="w-full">
-                <Facebook className="mr-2 h-4 w-4" />
-                Facebook
-              </Button>
               <Button variant="outline" className="col-span-2 w-full">
                 <Mail className="mr-2 h-4 w-4" />
                 Email

@@ -1,6 +1,7 @@
 package me.sarismart.backend.Controller;
 
 import me.sarismart.backend.Entity.Store;
+import me.sarismart.backend.DTO.StoreRequest;
 import me.sarismart.backend.Entity.Product;
 import me.sarismart.backend.Entity.Sale;
 import me.sarismart.backend.Entity.Report;
@@ -26,7 +27,7 @@ public class StoreController {
     // Method: stores.create
     @Operation(summary = "Create Store", description = "Create a new store")
     @PostMapping
-    public Store createStore(@RequestBody Store store) {
+    public Store createStore(@RequestBody StoreRequest store) {
         return storeService.createStore(store);
     }
 
@@ -35,6 +36,13 @@ public class StoreController {
     @GetMapping("/{storeId}")
     public Optional<Store> getStore(@PathVariable Long storeId) {
         return storeService.getStoreById(storeId);
+    }
+
+    // Method: stores.getStoresByOwnerId
+    @Operation(summary = "Get Stores by Owner ID", description = "Retrieve stores owned by a specific user")
+    @GetMapping("/owner/{ownerId}")
+    public List<Store> getStoresByOwnerId(@PathVariable String ownerId) {
+        return storeService.getStoresByOwnerId(ownerId);
     }
 
     // Method: stores.update
@@ -168,7 +176,7 @@ public class StoreController {
         return storeService.monthlySales(storeId);
     }
 
-    // Method: stores.reports.monthlySales
+    // Method: stores.reports.inventory
     @Operation(summary = "Get Inventory Status Report", description = "Retrieve the inventory status report for a store")
     @GetMapping("/{storeId}/reports/inventory")
     public List<Product> inventoryStatus(@PathVariable Long storeId) {

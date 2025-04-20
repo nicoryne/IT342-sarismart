@@ -1,14 +1,11 @@
-import type React from "react"
+import React from "react"
+import Verification from "@/components/inventory/verification"
+import DashboardClientWrapper from "./dashboard-client-wrapper"
 
-export const metadata = {
-  title: "Dashboard - SariSmart",
-  description: "SariSmart dashboard for managing your account and services.",
-}
-
-export default function DashboardLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
-  return children
+export default function DashboardLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <Verification>
+      <DashboardClientWrapper>{children}</DashboardClientWrapper>
+    </Verification>
+  )
 }

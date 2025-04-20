@@ -23,6 +23,16 @@ public class Store {
     @Column(nullable = false)
     private String location;
 
+    @Column(nullable = false)
+    private double latitude;
+
+    @Column(nullable = false)
+    private double longitude;
+
+    @ManyToOne
+    @JoinColumn(name = "owner_id", nullable = false)
+    private User owner;
+
     @OneToMany
     private List<User> workers = new ArrayList<>();
 
