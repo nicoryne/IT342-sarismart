@@ -17,6 +17,9 @@ interface StoreApiService {
     @GET("/api/v1/stores/{storeId}")
     suspend fun getStore(@Path("storeId") storeId: Long): Response<Store>
 
+    @GET("/api/v1/stores/owner/{ownerId}")
+    suspend fun getStoresByOwnerId(@Path("ownerId") ownerId: Long): Response<List<Store>>
+
     @PUT("/api/v1/stores/{storeId}")
     suspend fun updateStore(@Path("storeId") storeId: Long, @Body store: Store): Response<Store>
 

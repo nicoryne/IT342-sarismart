@@ -13,13 +13,13 @@ interface StoreTransactionsApiService {
     @POST("/api/v1/stores/{storeId}/transactions/sales")
     suspend fun createSale(@Path("storeId") storeId: Long, @Body sale: Sale): Response<Sale>
 
-    @GET("/api/v1/{storeId}/transactions/sales/{saleId}")
+    @GET("/api/v1/stores/{storeId}/transactions/sales/{saleId}")
     suspend fun getSale(@Path("storeId") storeId: Long, @Path("saleId") saleId: Long): Response<Sale>
 
-    @GET("/api/v1/{storeId}/transactions/sales")
+    @GET("/api/v1/stores/{storeId}/transactions/sales")
     suspend fun listSales(@Path("storeId") storeId: Long): Response<List<Sale>>
 
-    @DELETE("/api/v1/{storeId}/transactions/sales/{saleId}")
+    @DELETE("/api/v1/stores/{storeId}/transactions/sales/{saleId}")
     suspend fun refundSale(@Path("storeId") storeId: Long, @Path("saleId") saleId: Long): Response<Void>
 
 }

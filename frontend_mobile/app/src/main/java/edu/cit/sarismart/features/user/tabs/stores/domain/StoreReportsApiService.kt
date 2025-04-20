@@ -8,13 +8,13 @@ import retrofit2.http.Path
 
 interface StoreReportsApiService {
 
-    @GET("/api/v1/{storeId}/reports/daily")
+    @GET("/api/v1/stores/{storeId}/reports/daily")
     suspend fun dailySales(@Path("storeId") storeId: Long): Response<Report>
 
-    @GET("/api/v1/{storeId}/reports/monthly")
+    @GET("/api/v1/stores/{storeId}/reports/monthly")
     suspend fun monthlySales(@Path("storeId") storeId: Long): Response<Report>
 
-    @GET("/api/v1/{storeId}/reports/inventory")
+    @GET("/api/v1/stores/{storeId}/reports/inventory")
     suspend fun inventoryStatus(@Path("storeId") storeId: Long): Response<List<Product>>
-    
+
 }

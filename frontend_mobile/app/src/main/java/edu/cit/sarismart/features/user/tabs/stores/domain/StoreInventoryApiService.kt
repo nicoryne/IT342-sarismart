@@ -9,10 +9,10 @@ import retrofit2.http.Query
 
 interface StoreInventoryApiService {
 
-    @GET("/api/v1/{storeId}/inventory/alerts")
+    @GET("/api/v1/stores/{storeId}/inventory/alerts")
     suspend fun restockAlert(@Path("storeId") storeId: Long): Response<List<Product>>
 
-    @PUT("/api/v1/{storeId}/inventory/{productId}/reorder")
+    @PUT("/api/v1/stores/{storeId}/inventory/{productId}/reorder")
     suspend fun setReorderLevel(@Path("storeId") storeId: Long, @Path("productId") productId: Long, @Query("level") level: Int): Response<Void>
 
 }
