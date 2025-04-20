@@ -1,21 +1,20 @@
 "use client"
 
-import { useState } from "react"
-import { useStores } from "@/hooks/use-stores"
+import { useEffect, useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
+import { useStoresContext } from "@/hooks/use-stores-context"
 
 export default function DashboardPage() {
+  const { stores, filterProductsByStore } = useStoresContext()
+
   // STEP 1: Set up state for filtering and data display
   const [timeRange, setTimeRange] = useState("2w") // Time range for data filtering
   const [selectedStore, setSelectedStore] = useState("all") // Currently selected store
-
-  // STEP 2: Get store data and filtering functions from the custom hook
-  const { stores, filterProductsByStore } = useStores()
 
   // STEP 3: Get filtered data for the selected store
   // In a real implementation, this would fetch data from your backend API
@@ -74,7 +73,7 @@ export default function DashboardPage() {
                 strokeLinejoin="round"
                 className="h-4 w-4 text-muted-foreground"
               >
-                <path d="M16 16v1a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h2m5.66 0H14a2 2 0 0 1 2 2v3.34" />
+                <path d="M16 16v1a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h2m5.66 0H14a2 2 0 0 1-2 2v3.34" />
                 <path d="M3 15h10" />
                 <path d="M16 8l2-3 2 3" />
                 <path d="M18 5v12" />
