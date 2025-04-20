@@ -11,6 +11,9 @@ interface Store {
   location: string
   latitude?: number
   longitude?: number
+  totalProducts?: number
+  lowStock?: number
+  inventoryValue?: number
   // ...other fields if needed
 }
 
@@ -58,6 +61,9 @@ const fetchStores = async () => {
     location: store.location,
     latitude: store.latitude,
     longitude: store.longitude,
+    totalProducts: store.totalProducts,
+    lowStock: store.lowStock,
+    inventoryValue: store.inventoryValue,
     // ...add more mappings if needed
   }))
 }
@@ -65,6 +71,7 @@ const fetchStores = async () => {
 export function useStores() {
   // Create state to manage the stores data
   const [stores, setStores] = useState<Store[]>([])
+  const [selectedStore, setSelectedStore] = useState<string>("all") // Ensure selectedStore is a string
 
   React.useEffect(() => {
     fetchStores().then(setStores).catch(console.error)
@@ -152,27 +159,39 @@ export function useStores() {
     }
   }
 
-  // STEP 7: Function to filter products by store
+  // Function to filter products by store
   const filterProductsByStore = (storeId: string) => {
-    return {
-      totalProducts: 0,
-      lowStock: 0,
-      inventoryValue: 0, // was "$0", now 0 for type consistency
+    if (storeId === "all") {
+      // Aggregate data for all stores
+      return {
+        totalProducts: stores.reduce((sum, store) => sum + (store.totalProducts || 0), 0),
+        lowStock: stores.reduce((sum, store) => sum + (store.lowStock || 0), 0),
+        inventoryValue: stores.reduce((sum, store) => sum + (store.inventoryValue || 0), 0),
+      }
     }
+    // Find data for the specific store
+    const store = stores.find((s) => String(s.id) === storeId) // Ensure comparison is consistent
+    return store
+      ? {
+          totalProducts: store.totalProducts || 0,
+          lowStock: store.lowStock || 0,
+          inventoryValue: store.inventoryValue || 0,
+        }
+      : { totalProducts: 0, lowStock: 0, inventoryValue: 0 }
   }
 
-  // STEP 9: Function to filter transactions by store
+  // Function to filter transactions by store
   const filterTransactionsByStore = (storeId: string, allTransactions: any[]) => {
-    // STEP 10: In a real implementation, this would fetch actual transaction data filtered by store
+    // In a real implementation, this would fetch actual transaction data filtered by store
     // Example: const response = await fetch(`/api/stores/${storeId}/transactions`);
 
     // Return empty array as placeholder - would be replaced with actual data in production
     return []
   }
 
-  // STEP 11: Function to filter insights by store
+  // Function to filter insights by store
   const filterInsightsByStore = (storeId: string) => {
-    // STEP 12: In a real implementation, this would fetch actual insights data for the store
+    // In a real implementation, this would fetch actual insights data for the store
     // Example: const response = await fetch(`/api/stores/${storeId}/insights`);
 
     return {
@@ -183,9 +202,11 @@ export function useStores() {
     }
   }
 
-  // STEP 13: Return all the functions and data needed by components
+  // Return all the functions and data needed by components
   return {
     stores,
+    selectedStore,
+    setSelectedStore, // Expose setter for selectedStore
     addStore,
     filterProductsByStore,
     filterTransactionsByStore,

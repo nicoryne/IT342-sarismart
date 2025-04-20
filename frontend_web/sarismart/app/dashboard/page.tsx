@@ -10,16 +10,9 @@ import { Badge } from "@/components/ui/badge"
 import { useStoresContext } from "@/hooks/use-stores-context"
 
 export default function DashboardPage() {
-  const { stores, filterProductsByStore } = useStoresContext()
+  const { stores, selectedStore, filterProductsByStore } = useStoresContext() // Use selectedStore from context
 
-  // STEP 1: Set up state for filtering and data display
-  const [timeRange, setTimeRange] = useState("2w") // Time range for data filtering
-  const [selectedStore, setSelectedStore] = useState("all") // Currently selected store
-
-  // STEP 3: Get filtered data for the selected store
-  // In a real implementation, this would fetch data from your backend API
-  // Example: useEffect(() => { async function fetchData() { const response = await fetch(`/api/stores/${selectedStore}/overview`); const data = await response.json(); setStoreData(data); } fetchData(); }, [selectedStore]);
-  const storeData = filterProductsByStore(selectedStore)
+  const storeData = filterProductsByStore(selectedStore) // Fetch data based on selectedStore
 
   return (
     <main className="flex-1 overflow-auto p-4 md:p-6">
@@ -28,7 +21,7 @@ export default function DashboardPage() {
         <h2 className="mb-4 text-lg font-medium">
           {selectedStore === "all"
             ? "All Stores Inventory Overview"
-            : `${stores.find((s) => s.id === selectedStore)?.name} Inventory Overview`}
+            : `${stores.find((s) => String(s.id) === selectedStore)?.name || "Store"} Inventory Overview`}
         </h2>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {/* STEP 5: Total Products Card */}

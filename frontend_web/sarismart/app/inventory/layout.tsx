@@ -3,23 +3,26 @@ import type React from "react"
 import InventorySidebar from "@/components/inventory/sidebar"
 import InventoryHeader from "@/components/inventory/header"
 import Verification from "@/components/inventory/verification"
+import { StoresProvider } from "@/hooks/use-stores-context"
 
 export default function InventoryLayout({ children }: { children: React.ReactNode }) {
   return (
-    <Verification>
-      <div className="flex min-h-screen bg-gray-50">
-        {/* Sidebar */}
-        <InventorySidebar />
+    <StoresProvider>
+      <Verification>
+        <div className="flex min-h-screen bg-gray-50">
+          {/* Sidebar */}
+          <InventorySidebar />
 
-        {/* Main Content */}
-        <div className="flex flex-1 flex-col">
-          {/* Top Navigation */}
-          <InventoryHeader />
+          {/* Main Content */}
+          <div className="flex flex-1 flex-col">
+            {/* Top Navigation */}
+            <InventoryHeader />
 
-          {/* Page Content */}
-          <div className="flex-1 overflow-auto">{children}</div>
+            {/* Page Content */}
+            <div className="flex-1 overflow-auto">{children}</div>
+          </div>
         </div>
-      </div>
-    </Verification>
+      </Verification>
+    </StoresProvider>
   )
 }

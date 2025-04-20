@@ -13,10 +13,9 @@ import { Label } from "@/components/ui/label"
 import { useStoresContext } from "@/hooks/use-stores-context"
 
 export default function InventoryHeader() {
-  const { stores, addStore } = useStoresContext()
+  const { stores, selectedStore, setSelectedStore, addStore } = useStoresContext() // Use selectedStore and setter
 
-  // STEP 1: Set up state for store selection and the Add Store modal
-  const [selectedStore, setSelectedStore] = useState("all")
+  // STEP 1: Set up state for the Add Store modal
   const [isAddStoreOpen, setIsAddStoreOpen] = useState(false) // Controls the visibility of the Add Store modal
 
   // STEP 2: Create state for the new store form data
@@ -84,7 +83,7 @@ export default function InventoryHeader() {
               }
 
               // Otherwise, update the selected store
-              setSelectedStore(value)
+              setSelectedStore(value) // Update selectedStore in context
               // Show visual feedback with a toast notification
               const toast = document.createElement("div")
               toast.className = "fixed top-4 right-4 bg-[#008080] text-white px-4 py-2 rounded shadow-lg z-50"
