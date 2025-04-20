@@ -41,7 +41,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                     throw new RuntimeException("Missing role claim in token");
                 }
 
-                SimpleGrantedAuthority authority = new SimpleGrantedAuthority("ROLE_" + role);
+                SimpleGrantedAuthority authority = new SimpleGrantedAuthority(role);
                 UsernamePasswordAuthenticationToken authentication =
                         new UsernamePasswordAuthenticationToken(userId, null, Collections.singletonList(authority));
                 SecurityContextHolder.getContext().setAuthentication(authentication);
