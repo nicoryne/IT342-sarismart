@@ -112,6 +112,12 @@ dependencies {
     // Location Services
     implementation(libs.play.services.location)
 
+    // Navigation
+    implementation(libs.androidx.navigation.compose.v277)
+
+    // Accompanist
+    implementation(libs.accompanist.permissions)
+
     // Biometrics
     implementation(libs.androidx.biometric.ktx)
 

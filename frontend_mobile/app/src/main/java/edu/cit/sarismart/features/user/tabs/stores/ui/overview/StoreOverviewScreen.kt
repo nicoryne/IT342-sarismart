@@ -17,10 +17,12 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.State
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import edu.cit.sarismart.features.user.components.Header
 import edu.cit.sarismart.features.user.tabs.stores.ui.components.RegisterNewStoreButton
 import edu.cit.sarismart.features.user.tabs.stores.ui.components.StoreInfoBox
@@ -37,7 +39,12 @@ data class DummyStore (
 @Composable
 fun StoreOverviewScreen(
     onNavigateToNotifications: () -> Unit,
+    viewModel: StoreOverviewScreenViewModel = hiltViewModel(),
+    onSelectLocation: () -> Unit,
+    showBottomSheet: State<Boolean>,
+    onShowBottomSheetChanged: (Boolean) -> Unit
 ) {
+
     val dummyStores = listOf(
         DummyStore("Store A", "Location 1", true, StoreStatus.GOOD),
         DummyStore("Store B", "Location 2", false, StoreStatus.LOW_STOCK),
@@ -84,7 +91,7 @@ fun StoreOverviewScreen(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.Center
         ) {
-            RegisterNewStoreButton()
+            RegisterNewStoreButton(onRegisterStoreClick = { onShowBottomSheetChanged(true)} )
         }
 
         Spacer(modifier = Modifier.height(24.dp))
@@ -123,6 +130,14 @@ fun StoreOverviewScreen(
                 )
                 Spacer(modifier = Modifier.height(16.dp))
             }
+        }
+
+        if (showBottomSheet.value) {
+            StoreFormBottomSheet(
+                onDismissRequest = { onShowBottomSheetChanged(false) },
+                onSelectLocation = {
+                    onSelectLocation(); onShowBottomSheetChanged(true) }
+            )
         }
     }
 }
