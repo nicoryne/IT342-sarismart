@@ -45,6 +45,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import com.google.android.gms.location.FusedLocationProviderClient
@@ -56,6 +57,8 @@ import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.rememberCameraPositionState
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.util.Locale
 
@@ -63,8 +66,8 @@ import java.util.Locale
 @SuppressLint("MissingPermission")
 @Composable
 fun MapLocationSelectionScreen(
-    onLocationSelected: (String, Double, Double) -> Unit,
-    onCancel: () -> Unit
+    onLocationSelected: (name: String, latitude: Double, longitude: Double) -> Unit,
+    onNavigateToStore: () -> Unit,
 ) {
     val context = LocalContext.current
     val lifecycleOwner = androidx.lifecycle.compose.LocalLifecycleOwner.current
@@ -77,6 +80,7 @@ fun MapLocationSelectionScreen(
     var searchQuery by remember { mutableStateOf("") }
     var locationPermissionGranted by remember { mutableStateOf(false) }
     var showPermissionDialog by remember { mutableStateOf(false) }
+    var showConfirmationDialog by remember { mutableStateOf(false)}
 
     val cameraPositionState = rememberCameraPositionState()
 
@@ -173,7 +177,29 @@ fun MapLocationSelectionScreen(
             dismissButton = {
                 Button(onClick = {
                     showPermissionDialog = false
-                    onCancel()
+                    onNavigateToStore
+                }) {
+                    Text("Cancel")
+                }
+            }
+        )
+    }
+
+    if (showConfirmationDialog) {
+        AlertDialog(
+            onDismissRequest = { showConfirmationDialog = false },
+            title = { Text(text = "Confirmation") },
+            text = { Text("You are creating a store at ${selectedLocationName})")},
+            confirmButton = {
+                Button(onClick = {
+                    onLocationSelected(selectedLocationName, selectedLatLng.latitude, selectedLatLng.longitude)
+                }) {
+                    Text("Confirm")
+                }
+            },
+            dismissButton = {
+                Button(onClick = {
+                    showConfirmationDialog = false
                 }) {
                     Text("Cancel")
                 }
@@ -204,7 +230,7 @@ fun MapLocationSelectionScreen(
                     modifier = Modifier.weight(1f)
                 )
                 Spacer(modifier = Modifier.width(8.dp))
-                IconButton(onClick = onCancel) {
+                IconButton(onClick = onNavigateToStore) {
                     Icon(Icons.Filled.Cancel, contentDescription = "Cancel")
                 }
             }
@@ -226,13 +252,13 @@ fun MapLocationSelectionScreen(
 
                 )
                 Spacer(modifier = Modifier.width(8.dp))
-                Button(onClick = onCancel) {
+                Button(onClick = onNavigateToStore) {
                     Text("Cancel")
                 }
                 Spacer(modifier = Modifier.width(8.dp))
                 Button(
                     onClick = {
-                        onLocationSelected(selectedLocationName, selectedLatLng.latitude, selectedLatLng.longitude)
+                        showConfirmationDialog = true
                     },
                     enabled = selectedLocationName.isNotBlank()
                 ) {

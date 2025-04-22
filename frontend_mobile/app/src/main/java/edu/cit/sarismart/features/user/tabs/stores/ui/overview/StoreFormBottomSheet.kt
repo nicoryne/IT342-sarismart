@@ -23,6 +23,7 @@ import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -33,12 +34,13 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.navigation.compose.rememberNavController
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun StoreFormBottomSheet(
- viewModel: StoreFormBottomSheetViewModel = hiltViewModel<StoreFormBottomSheetViewModel>(),
+ viewModel: StoreOverviewScreenViewModel = hiltViewModel<StoreOverviewScreenViewModel>(),
  onDismissRequest: () -> Unit,
  onSelectLocation: () -> Unit,
  onSubmitLoading: () -> Unit,
@@ -73,7 +75,7 @@ fun StoreFormBottomSheet(
 
             OutlinedTextField(
                 value = storeName,
-                onValueChange = { viewModel.onStoreNameChanged(it) },
+                onValueChange = { viewModel.updateStoreName(it) },
                 label = { Text("Store Name *") },
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp),
@@ -101,7 +103,7 @@ fun StoreFormBottomSheet(
 
             OutlinedTextField(
                 value = storeLocation,
-                onValueChange = { viewModel.onStoreLocationChanged(it) },
+                onValueChange = { viewModel.updateStoreLocation(it) },
                 label = { Text("Store Location *") },
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp),

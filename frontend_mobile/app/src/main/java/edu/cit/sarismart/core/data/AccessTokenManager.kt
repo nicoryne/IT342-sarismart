@@ -30,6 +30,11 @@ class AccessTokenManager @Inject constructor(@ApplicationContext private val con
 
     override val getToken: Flow<String?>
         get() = context.dataStore.data.map { preferences ->
+            if(isExpired()) {
+                deleteToken()
+                return@map null
+            }
+
             preferences[ACCESS_TOKEN_KEY]
         }
 
@@ -59,7 +64,6 @@ class AccessTokenManager @Inject constructor(@ApplicationContext private val con
     suspend fun isExpired(): Boolean {
         val currentTimestampSeconds = TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis())
         val expiresAt = getExpiresAt.first()
-        Log.d("AccessTokenManager", "Current timestamp: $currentTimestampSeconds, Expires at: $expiresAt")
         return expiresAt == null || expiresAt.toLong() < currentTimestampSeconds
     }
 

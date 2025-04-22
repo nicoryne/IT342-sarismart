@@ -14,26 +14,19 @@ import edu.cit.sarismart.features.user.tabs.notifications.ui.NotificationScreen
 import edu.cit.sarismart.features.user.tabs.sasa.ui.chat.SasaChatScreen
 import edu.cit.sarismart.features.user.tabs.scan.ui.stores.PickStoreScreen
 import edu.cit.sarismart.features.user.tabs.stores.ui.overview.MapLocationSelectionScreen
-import edu.cit.sarismart.features.user.tabs.stores.ui.overview.StoreFormBottomSheetViewModel
 import edu.cit.sarismart.features.user.tabs.stores.ui.overview.StoreOverviewScreen
+import edu.cit.sarismart.features.user.tabs.stores.ui.overview.StoreOverviewScreenViewModel
 
 @Composable
 fun UserNavigationHost(
     navController: NavHostController,
     onNavigateToLogin: () -> Unit,
-    viewModel: UserNavigationHostViewModel = hiltViewModel()
 ) {
-
-    LaunchedEffect(key1 = true) {
-        viewModel.initStores()
-    }
-
     NavHost(
         navController = navController,
         startDestination = UserTabs.MAPS.route
     ) {
-
-
+        
         composable(UserTabs.MAPS.route) {
             UserMapScreen()
         }
@@ -44,23 +37,18 @@ fun UserNavigationHost(
             PickStoreScreen(onNavigateToNotifications = { navController.navigate("notifications") })
         }
         composable(UserTabs.STORE.route) {
-            val navBackStackEntry = remember(navController.currentBackStackEntry) {
-                navController.getBackStackEntry(UserTabs.STORE.route)
-            }
-            val showBottomSheet = navBackStackEntry.savedStateHandle.getStateFlow("showBottomSheet", false)
-                .collectAsState(initial = false)
-
             StoreOverviewScreen(
                 onNavigateToNotifications = { navController.navigate("notifications") },
-                onSelectLocation = { navController.navigate("map_location_selection") },
-                showBottomSheet = showBottomSheet,
-                onShowBottomSheetChanged = { newValue ->
-                    navBackStackEntry.savedStateHandle["showBottomSheet"] = newValue
-                }
+                onSelectLocation = { navController.navigate("map_location_selection") }
             )
         }
+
         composable(UserTabs.ACCOUNT.route) {
-            AccountScreen(onNavigateToLogin, onNavigateToNotifications = { navController.navigate("notifications") })
+            AccountScreen(
+                onNavigateToLogin,
+                onClearBackStack = { navController.clearBackStack(UserTabs.ACCOUNT.route) },
+                onNavigateToNotifications = { navController.navigate("notifications") },
+            )
         }
 
         composable("notifications") {
@@ -71,35 +59,19 @@ fun UserNavigationHost(
             val previousBackStackEntry = remember(navController.currentBackStackEntry) {
                 navController.previousBackStackEntry
             }
+
             val viewModel = previousBackStackEntry?.let {
-                hiltViewModel<StoreFormBottomSheetViewModel>(it)
-            }
-
-            val parentEntry = remember(navController.currentBackStackEntry) {
-                navController.getBackStackEntry(UserTabs.STORE.route)
-            }
-            val parentShowBottomSheet = remember {
-                parentEntry.savedStateHandle.getStateFlow("showBottomSheet", false)
-            }.collectAsState(initial = false)
-
-            val parentShowBottomSheetSetter = remember {
-                { value: Boolean ->
-                    parentEntry.savedStateHandle["showBottomSheet"] = value
-                }
+                hiltViewModel<StoreOverviewScreenViewModel>(it)
             }
 
             MapLocationSelectionScreen(
                 onLocationSelected = { name, latitude, longitude ->
-                    viewModel?.onStoreLocationChanged(name)
-                    viewModel?.onStoreLatitudeChanged(latitude)
-                    viewModel?.onStoreLongitudeChanged(longitude)
-                    parentShowBottomSheetSetter(true)
+                    viewModel?.updateStoreLocation(name)
+                    viewModel?.updateStoreLatitude(latitude)
+                    viewModel?.updateStoreLongitude(longitude)
                     navController.popBackStack()
                 },
-                onCancel = {
-                    parentShowBottomSheetSetter(true)
-                    navController.popBackStack()
-                }
+                onNavigateToStore = { navController.navigate("store") }
             )
         }
     }

@@ -47,11 +47,10 @@ data class DummyStore (
 fun StoreOverviewScreen(
     onNavigateToNotifications: () -> Unit,
     viewModel: StoreOverviewScreenViewModel = hiltViewModel(),
-    onSelectLocation: () -> Unit,
-    showBottomSheet: State<Boolean>,
-    onShowBottomSheetChanged: (Boolean) -> Unit
+    onSelectLocation: () -> Unit
 ) {
 
+    val showBottomSheet by viewModel.showBottomSheet.collectAsState()
     val isSubmitLoading by viewModel.isSubmitLoading.collectAsState()
     val isSubmitError by viewModel.isSubmitError.collectAsState()
     val isSubmitSuccess by viewModel.isSubmitSuccess.collectAsState()
@@ -66,10 +65,6 @@ fun StoreOverviewScreen(
         DummyStore("Store E", "Location 5", true, StoreStatus.LOW_STOCK),
         DummyStore("Store F", "Location 6", false, StoreStatus.OUT_OF_STOCK)
     )
-
-    LaunchedEffect(key1 = true) {
-        viewModel.initStores()
-    }
 
     Column(
         modifier = Modifier
@@ -108,7 +103,7 @@ fun StoreOverviewScreen(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.Center
         ) {
-            RegisterNewStoreButton(onRegisterStoreClick = { onShowBottomSheetChanged(true)} )
+            RegisterNewStoreButton(onRegisterStoreClick = { viewModel.onShowBottomSheetChanged(true)} )
         }
 
         Spacer(modifier = Modifier.height(24.dp))
@@ -149,11 +144,11 @@ fun StoreOverviewScreen(
             }
         }
 
-        if (showBottomSheet.value) {
+        if (showBottomSheet) {
             StoreFormBottomSheet(
-                onDismissRequest = { onShowBottomSheetChanged(false) },
+                onDismissRequest = { viewModel.onShowBottomSheetChanged(false) },
                 onSelectLocation = {
-                    onSelectLocation(); onShowBottomSheetChanged(true)
+                    onSelectLocation(); viewModel.onShowBottomSheetChanged(true)
                 },
                 onSubmitLoading = { viewModel.onSubmitLoading() },
                 onSubmitSuccess = { viewModel.onSubmitSuccess() },
@@ -189,7 +184,7 @@ fun StoreOverviewScreen(
                 },
                 confirmButton = {
                     if (!isSubmitLoading) {
-                        Button(onClick = { viewModel.onDismissSubmitDialog() }) {
+                        Button(onClick = { viewModel.onDismissSubmitDialog(); viewModel.onShowBottomSheetChanged(false) }) {
                             Text("Okay")
                         }
                     }
