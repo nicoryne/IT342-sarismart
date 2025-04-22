@@ -9,5 +9,7 @@ interface StoreRepository {
 
     suspend fun updateStores()
 
+    suspend fun getOwnedStores(): List<Store>
+
 
 }

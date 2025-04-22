@@ -20,6 +20,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -55,6 +56,7 @@ fun StoreOverviewScreen(
     val isSubmitError by viewModel.isSubmitError.collectAsState()
     val isSubmitSuccess by viewModel.isSubmitSuccess.collectAsState()
     val showSubmitDialog by viewModel.showSubmitDialog.collectAsState()
+    val stores by viewModel.stores.collectAsState()
 
     val dummyStores = listOf(
         DummyStore("Store A", "Location 1", true, StoreStatus.GOOD),
@@ -64,6 +66,10 @@ fun StoreOverviewScreen(
         DummyStore("Store E", "Location 5", true, StoreStatus.LOW_STOCK),
         DummyStore("Store F", "Location 6", false, StoreStatus.OUT_OF_STOCK)
     )
+
+    LaunchedEffect(key1 = true) {
+        viewModel.initStores()
+    }
 
     Column(
         modifier = Modifier
@@ -131,13 +137,13 @@ fun StoreOverviewScreen(
 
         // store overview items here
         LazyColumn () {
-            items(dummyStores) { store ->
+            items(stores) { store ->
                 StoreOverviewItem(
                     onStoreItemClick = { /* Handle item click */ },
                     storeName = store.storeName,
-                    storeLocation = store.storeLocation,
-                    isOwner = store.isOwner,
-                    status = store.storeStatus
+                    storeLocation = store.location,
+                    isOwner = true,
+                    status = StoreStatus.OUT_OF_STOCK
                 )
                 Spacer(modifier = Modifier.height(16.dp))
             }

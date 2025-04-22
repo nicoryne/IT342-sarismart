@@ -1,6 +1,7 @@
 package edu.cit.sarismart.features.user.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -19,12 +20,19 @@ import edu.cit.sarismart.features.user.tabs.stores.ui.overview.StoreOverviewScre
 @Composable
 fun UserNavigationHost(
     navController: NavHostController,
-    onNavigateToLogin: () -> Unit
+    onNavigateToLogin: () -> Unit,
+    viewModel: UserNavigationHostViewModel = hiltViewModel()
 ) {
+
+    LaunchedEffect(key1 = true) {
+        viewModel.initStores()
+    }
+
     NavHost(
         navController = navController,
         startDestination = UserTabs.MAPS.route
     ) {
+
 
         composable(UserTabs.MAPS.route) {
             UserMapScreen()

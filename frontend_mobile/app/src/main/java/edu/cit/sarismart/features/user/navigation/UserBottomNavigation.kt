@@ -19,7 +19,8 @@ import androidx.navigation.NavHostController
 fun UserBottomNavigation(
     selectedTab: UserTabs,
     onTabSelected: (UserTabs) -> Unit,
-    navController: NavHostController
+    navController: NavHostController,
+
 ) {
     Surface(
         tonalElevation = 8.dp,

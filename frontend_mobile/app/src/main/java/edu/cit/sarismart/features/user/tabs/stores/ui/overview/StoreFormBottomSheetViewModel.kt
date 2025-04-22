@@ -35,6 +35,9 @@ class StoreFormBottomSheetViewModel @Inject constructor(
     private val _storeLocationError = MutableStateFlow<String?>(null)
     val storeLocationError: StateFlow<String?> = _storeLocationError
 
+
+
+
     fun onStoreNameChanged(name: String) {
         _storeName.value = name
         _storeNameError.value = null

@@ -10,5 +10,4 @@ interface TokenManager {
 
     suspend fun deleteToken()
 
-    suspend fun isExpired(): Boolean
 }

@@ -4,13 +4,15 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import edu.cit.sarismart.features.user.tabs.stores.data.models.Store
+import edu.cit.sarismart.features.user.tabs.stores.data.repository.StoreRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class StoreOverviewScreenViewModel @Inject constructor() : ViewModel() {
+class StoreOverviewScreenViewModel @Inject constructor(private val storeRepository: StoreRepository) : ViewModel() {
 
     private val _isSubmitLoading = MutableStateFlow(false)
     val isSubmitLoading: StateFlow<Boolean> = _isSubmitLoading
@@ -23,6 +25,20 @@ class StoreOverviewScreenViewModel @Inject constructor() : ViewModel() {
 
     private val _showSubmitDialog = MutableStateFlow(false)
     val showSubmitDialog: StateFlow<Boolean> = _showSubmitDialog
+
+    private val _stores = MutableStateFlow<List<Store>>(emptyList())
+    val stores: StateFlow<List<Store>> = _stores
+
+    fun initStores() {
+        viewModelScope.launch {
+            try {
+                val stores = storeRepository.getOwnedStores()
+                _stores.value = stores
+            } catch (e: Exception) {
+                Log.e("StoreOverviewScreenViewModel", "Error updating stores: ${e.message}")
+            }
+        }
+    }
 
     fun onSubmitLoading() {
         _isSubmitLoading.value = true

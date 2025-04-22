@@ -7,6 +7,7 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.google.gson.Gson
+import com.google.gson.GsonBuilder
 import com.google.gson.reflect.TypeToken
 import dagger.hilt.android.qualifiers.ApplicationContext
 import edu.cit.sarismart.features.user.tabs.stores.data.models.Store
@@ -18,9 +19,7 @@ import javax.inject.Singleton
 
 @Singleton
 class UserStoresManager @Inject constructor(
-    @ApplicationContext private val context: Context,
-    private val gson: Gson
-) {
+    @ApplicationContext private val context: Context) {
     private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "user_stores_prefs")
 
     private val dataStore = context.dataStore
@@ -29,6 +28,9 @@ class UserStoresManager @Inject constructor(
 
     private val userWorkerStoresKey = stringPreferencesKey("user_worker_stores")
 
+    private val gsonBuilder: Gson = GsonBuilder().create()
+
+
     suspend fun clear() {
         dataStore.edit { preferences ->
             preferences.clear()
@@ -36,14 +38,14 @@ class UserStoresManager @Inject constructor(
     }
 
     suspend fun saveUserOwnerStores(stores: List<Store>) {
-        val storesJson = gson.toJson(stores)
+        val storesJson = gsonBuilder.toJson(stores)
         dataStore.edit { preferences ->
             preferences[userOwnerStoresKey] = storesJson
         }
     }
 
     suspend fun saveUserWorkerStores(stores: List<Store>) {
-        val storesJson = gson.toJson(stores)
+        val storesJson = gsonBuilder.toJson(stores)
         dataStore.edit { preferences ->
             preferences[userWorkerStoresKey] = storesJson
         }
@@ -79,7 +81,7 @@ class UserStoresManager @Inject constructor(
                 val storesJson = preferences[userOwnerStoresKey] ?: ""
                 if (storesJson.isNotEmpty()) {
                     val typeToken = object : TypeToken<List<Store>>() {}.type
-                    gson.fromJson(storesJson, typeToken) ?: emptyList()
+                    gsonBuilder.fromJson(storesJson, typeToken) ?: emptyList()
                 } else {
                     emptyList()
                 }
@@ -92,7 +94,7 @@ class UserStoresManager @Inject constructor(
                 val storesJson = preferences[userWorkerStoresKey] ?: ""
                 if (storesJson.isNotEmpty()) {
                     val typeToken = object : TypeToken<List<Store>>() {}.type
-                    gson.fromJson(storesJson, typeToken) ?: emptyList()
+                    gsonBuilder.fromJson(storesJson, typeToken) ?: emptyList()
                 } else {
                     emptyList()
                 }

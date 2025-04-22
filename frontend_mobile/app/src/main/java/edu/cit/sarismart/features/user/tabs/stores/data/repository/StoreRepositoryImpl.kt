@@ -81,7 +81,10 @@ class StoreRepositoryImpl @Inject constructor(
         } catch (e: Exception) {
             Log.e("StoreRepository", "An unexpected error occurred: ${e.localizedMessage ?: e.message ?: "Unknown error"}")
         }
+    }
 
+    override suspend fun getOwnedStores(): List<Store> {
+        return userStoresManager.getUserOwnerStores().first()
     }
 }
 

@@ -26,7 +26,8 @@ object StoreModule {
     ): StoreRepository {
         return StoreRepositoryImpl(
             backendRetrofit.create<StoreApiService>(StoreApiService::class.java),
-            userDetailsManager
+            userDetailsManager,
+            storesManager
         )
     }
 
