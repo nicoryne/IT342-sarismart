@@ -8,8 +8,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.Map;
 
 import me.sarismart.backend.DTO.AuthRequest;
 import me.sarismart.backend.Service.SupabaseAuthService;
@@ -44,5 +47,23 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<Object> signIn(@RequestBody AuthRequest authRequest) {
         return supabaseAuthService.signIn(authRequest.getEmail(), authRequest.getPassword());
+    }
+
+    @Operation(summary = "Get User Details", description = "Retrieve the current user details from Supabase")
+    @GetMapping("/user")
+    public ResponseEntity<Object> getUserDetails(@RequestHeader("Authorization") String authorizationHeader) {
+        try {
+            if (!authorizationHeader.startsWith("Bearer ")) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body(Map.of("error", "Invalid Authorization header format"));
+            }
+            String accessToken = authorizationHeader.substring(7);
+
+            return supabaseAuthService.getUserDetails(accessToken);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Failed to retrieve user details", "details", e.getMessage()));
+        }
     }
 }

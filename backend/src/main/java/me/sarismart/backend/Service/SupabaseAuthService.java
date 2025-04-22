@@ -121,4 +121,35 @@ public class SupabaseAuthService {
                     .body(Map.of("error", "Exception during sign in", "details", e.getMessage()));
         }
     }    
+
+    public ResponseEntity<Object> getUserDetails(String accessToken) {
+        String url = appConfig.getUrl() + "/auth/v1/user";
+    
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.set("Authorization", "Bearer " + accessToken);
+        headers.set("apikey", appConfig.getApiKey());
+    
+        HttpEntity<Void> entity = new HttpEntity<>(headers);
+    
+        try {
+            ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
+    
+            // Print status and body for debugging in Render
+            System.out.println("Supabase getUserDetails response status: " + response.getStatusCode());
+            System.out.println("Supabase getUserDetails response body: " + response.getBody());
+    
+            if (response.getStatusCode().is2xxSuccessful()) {
+                JSONObject json = new JSONObject(response.getBody());
+                return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(json.toMap());
+            } else {
+                return ResponseEntity.status(response.getStatusCode())
+                        .body(Map.of("error", "Failed to retrieve user details", "details", response.getBody()));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Exception during getUserDetails", "details", e.getMessage()));
+        }
+    }
 }
