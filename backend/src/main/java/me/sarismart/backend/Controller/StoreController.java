@@ -36,7 +36,7 @@ public class StoreController {
     // Method: stores.getNearby
     // Permit all users to get nearby stores
     @Operation(summary = "Get Nearby Stores", description = "Retrieve a list of nearby stores")
-    @GetMapping("/nearby/{latitude}/{longitude}/{distance}")
+    @GetMapping("/nearby/{latitude}/{longitude}/{radius}")
     public List<Store> getNearbyStores(@PathVariable double latitude, @PathVariable double longitude, @PathVariable double radius) {
         return storeService.getNearbyStores(latitude, longitude, radius);
     }
