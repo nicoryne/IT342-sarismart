@@ -8,6 +8,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import edu.cit.sarismart.features.auth.data.repository.AuthRepository
 import edu.cit.sarismart.core.util.BiometricUtil
+import edu.cit.sarismart.features.user.tabs.stores.data.repository.StoreRepository
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -19,6 +20,7 @@ import javax.inject.Inject
 @HiltViewModel
 class LoginViewModel @Inject constructor(
     private val authRepository: AuthRepository,
+    private val storeRepository: StoreRepository,
     @ApplicationContext private val context: Context
 ) : ViewModel() {
 
@@ -74,6 +76,7 @@ class LoginViewModel @Inject constructor(
             _isLoading.value = false
 
             if (res.success) {
+                storeRepository.updateStores()
                 _navigationEvent.emit(LoginNavigationEvent.NavigateToHome)
             } else {
                 _loginError.value = res.message
@@ -96,6 +99,7 @@ class LoginViewModel @Inject constructor(
             _isLoading.value = false
 
             if (res.success) {
+                storeRepository.updateStores()
                 _navigationEvent.emit(LoginNavigationEvent.NavigateToHome)
             }
         }

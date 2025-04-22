@@ -108,18 +108,6 @@ class StoreOverviewScreenViewModel @Inject constructor(
     }
 
 
-    fun onLocationChanged(location: String, longitude: Double, latitude: Double) {
-        savedStateHandle[KEY_STORE_LOCATION] = location
-        savedStateHandle[KEY_STORE_LONGITUDE] = longitude
-        savedStateHandle[KEY_STORE_LATITUDE] = latitude
-
-        viewModelScope.launch {
-            storeLocation.value
-            storeLongitude.value
-            storeLatitude.value
-        }
-    }
-
     fun clearValues() {
         updateStoreName("")
         updateStoreLocation("")
@@ -207,6 +195,12 @@ class StoreOverviewScreenViewModel @Inject constructor(
             onDismissRequest()
             clearValues()
         }
+    }
+
+    suspend fun getStores() {
+        val stores = storeRepository.getOwnedStores()
+        Log.i("StoreOverviewScreenViewModel", "Stores: $stores")
+        _stores.value = stores
     }
 
 

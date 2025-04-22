@@ -69,10 +69,12 @@ class StoreRepositoryImpl @Inject constructor(
 
         try {
             val response = storeApiService.getStoresByOwnerId(ownerId)
+            Log.i("StoreRepository", "Response: $response")
 
             if(response.isSuccessful) {
                 response.body()?.let {
                     userStoresManager.saveUserOwnerStores(it)
+                    Log.i("StoreRepository", "Stores updated successfully ${it}")
                 }
             } else {
                 Log.e("StoreRepository", "API Error: ${response.code()} - ${response.message()}")

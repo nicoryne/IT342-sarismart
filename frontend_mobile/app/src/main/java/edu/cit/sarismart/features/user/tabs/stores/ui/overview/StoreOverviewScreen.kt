@@ -66,6 +66,10 @@ fun StoreOverviewScreen(
         DummyStore("Store F", "Location 6", false, StoreStatus.OUT_OF_STOCK)
     )
 
+    LaunchedEffect(key1 = true) {
+        viewModel.getStores()
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()

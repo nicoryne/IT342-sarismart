@@ -13,6 +13,7 @@ import edu.cit.sarismart.features.auth.data.models.AuthResponse
 import edu.cit.sarismart.features.auth.data.models.ClientResponse
 import edu.cit.sarismart.features.auth.domain.AuthApiService
 import edu.cit.sarismart.features.user.tabs.account.data.models.User
+import edu.cit.sarismart.features.user.tabs.stores.data.repository.StoreRepositoryImpl
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
