@@ -73,6 +73,10 @@ public class StoreService {
                 return storeRepository.findAll();
         }
 
+        public List<Store> getNearbyStores(double latitude, double longitude, double radius) {
+                return storeRepository.findNearbyStores(latitude, longitude, radius);
+        }
+
         public Optional<Store> getStoreById(Long id) {
                 return storeRepository.findById(id);
         }
