@@ -33,13 +33,17 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(
-                    "/api/v1/auth/**",
+                    "/api/v1/auth/test",
+                    "/api/v1/auth/register",
+                    "/api/v1/auth/login",
+                    "/api/v1/auth/refresh",
                     "/v3/api-docs/**",
                     "/swagger-ui/**",
-                    "/swagger-ui.html",
-                    "/api/v1/stores/**"
+                    "/swagger-ui.html"
                     ).permitAll()
                 .requestMatchers(
+                    "/api/v1/auth/user",
+                    "/api/v1/stores/**",
                     "/api/v1/products/**"
                     ).hasAuthority("authenticated")
                 .anyRequest().authenticated()

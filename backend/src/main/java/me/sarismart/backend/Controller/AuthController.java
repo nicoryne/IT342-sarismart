@@ -49,6 +49,24 @@ public class AuthController {
         return supabaseAuthService.signIn(authRequest.getEmail(), authRequest.getPassword());
     }
 
+    @Operation(summary = "Refresh Session", description = "Refresh the current session using a refresh token")
+    @PostMapping("/refresh")
+    public ResponseEntity<Object> refreshSession(@RequestBody Map<String, String> requestBody) {
+        try {
+            String refreshToken = requestBody.get("refresh_token");
+            if (refreshToken == null || refreshToken.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body(Map.of("error", "Missing refresh_token in request body"));
+            }
+
+            return supabaseAuthService.refreshSession(refreshToken);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Failed to refresh session", "details", e.getMessage()));
+        }
+    }
+
     @Operation(summary = "Get User Details", description = "Retrieve the current user details from Supabase")
     @GetMapping("/user")
     public ResponseEntity<Object> getUserDetails(@RequestHeader("Authorization") String authorizationHeader) {
