@@ -40,14 +40,17 @@ import kotlinx.coroutines.launch
 fun StoreFormBottomSheet(
  viewModel: StoreFormBottomSheetViewModel = hiltViewModel<StoreFormBottomSheetViewModel>(),
  onDismissRequest: () -> Unit,
- onSelectLocation: () -> Unit
+ onSelectLocation: () -> Unit,
+ onSubmitLoading: () -> Unit,
+ onSubmitSuccess: () -> Unit,
+ onSubmitError: (it: String) -> Unit
 ) {
     val sheetState = rememberModalBottomSheetState()
 
     val storeName by viewModel.storeName.collectAsState()
     val storeLocation by viewModel.storeLocation.collectAsState()
-    val storeLongitude by viewModel.storeLongitude.collectAsState()
-    val storeLatitude by viewModel.storeLatitude.collectAsState()
+    val storeNameError by viewModel.storeNameError.collectAsState()
+    val storeLocationError by viewModel.storeLocationError.collectAsState()
 
     ModalBottomSheet(
         onDismissRequest = onDismissRequest,
@@ -71,7 +74,7 @@ fun StoreFormBottomSheet(
             OutlinedTextField(
                 value = storeName,
                 onValueChange = { viewModel.onStoreNameChanged(it) },
-                label = { Text("Store Name") },
+                label = { Text("Store Name *") },
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp),
                 colors = OutlinedTextFieldDefaults.colors(
@@ -82,7 +85,16 @@ fun StoreFormBottomSheet(
                     keyboardType = KeyboardType.Text,
                     imeAction = ImeAction.Next
                 ),
-                singleLine = true
+                singleLine = true,
+                isError = storeNameError != null,
+                supportingText = {
+                    storeNameError?.let {
+                        Text(
+                            text = it,
+                            color = MaterialTheme.colorScheme.error
+                        )
+                    }
+                }
             )
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -90,7 +102,7 @@ fun StoreFormBottomSheet(
             OutlinedTextField(
                 value = storeLocation,
                 onValueChange = { viewModel.onStoreLocationChanged(it) },
-                label = { Text("Store Location") },
+                label = { Text("Store Location *") },
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp),
                 keyboardOptions = KeyboardOptions(
@@ -109,7 +121,16 @@ fun StoreFormBottomSheet(
                             tint = MaterialTheme.colorScheme.primary)
                     }
                 },
-                singleLine = true
+                singleLine = true,
+                isError = storeLocationError != null,
+                supportingText = {
+                    storeLocationError?.let {
+                        Text(
+                            text = it,
+                            color = MaterialTheme.colorScheme.error
+                        )
+                    }
+                }
             )
 
             Spacer(modifier = Modifier.height(32.dp))
@@ -117,9 +138,13 @@ fun StoreFormBottomSheet(
             Button(
                 onClick = {
                     viewModel.viewModelScope.launch {
-                        viewModel.onSubmit()
+                        viewModel.onSubmit(
+                            onSubmitting = onSubmitLoading,
+                            onSubmitSuccess = onSubmitSuccess,
+                            onSubmitError = { onSubmitError(it) },
+                            onDismissRequest = { onDismissRequest }
+                        )
                     }
-                    onDismissRequest()
                 },
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp),

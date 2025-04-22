@@ -12,14 +12,20 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -45,6 +51,13 @@ fun StoreOverviewScreen(
     onShowBottomSheetChanged: (Boolean) -> Unit
 ) {
 
+    val isSubmitLoading by viewModel.isSubmitLoading.collectAsState()
+    val isSubmitError by viewModel.isSubmitError.collectAsState()
+    val isSubmitSuccess by viewModel.isSubmitSuccess.collectAsState()
+    val showSubmitDialog by viewModel.showSubmitDialog.collectAsState()
+
+
+
     val dummyStores = listOf(
         DummyStore("Store A", "Location 1", true, StoreStatus.GOOD),
         DummyStore("Store B", "Location 2", false, StoreStatus.LOW_STOCK),
@@ -68,7 +81,7 @@ fun StoreOverviewScreen(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // Registered Stores
+            // registered stores
             StoreInfoBox(
                 modifier = Modifier.weight(1f),
                 title = "You currently have",
@@ -76,7 +89,7 @@ fun StoreOverviewScreen(
                 subtitle = "stores registered"
             )
 
-            // Restocking Due in X Days
+            // restocking due in x days
             StoreInfoBox(
                 modifier = Modifier.weight(1f),
                 title = "Restocking due in",
@@ -136,11 +149,53 @@ fun StoreOverviewScreen(
             StoreFormBottomSheet(
                 onDismissRequest = { onShowBottomSheetChanged(false) },
                 onSelectLocation = {
-                    onSelectLocation(); onShowBottomSheetChanged(true) }
+                    onSelectLocation(); onShowBottomSheetChanged(true)
+                },
+                onSubmitLoading = { viewModel.onSubmitLoading() },
+                onSubmitSuccess = { viewModel.onSubmitSuccess() },
+                onSubmitError = { viewModel.onSubmitError(it) }
+            )
+        }
+
+        if (showSubmitDialog) {
+            AlertDialog(
+                onDismissRequest = { viewModel.onDismissSubmitDialog() },
+                title = {
+                    Text(
+                        text = if (isSubmitLoading) "Creating Store"
+                        else if (isSubmitSuccess != null) "Success"
+                        else if (isSubmitError != null) "Error"
+                        else ""
+                    )
+                },
+                text = {
+                    Column(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        if (isSubmitLoading) {
+                            CircularProgressIndicator()
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text("Creating your new store...")
+                        } else {
+                            isSubmitSuccess?.let { Text(it, color = MaterialTheme.colorScheme.primary) }
+                            isSubmitError?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+                        }
+                    }
+                },
+                confirmButton = {
+                    if (!isSubmitLoading) {
+                        Button(onClick = { viewModel.onDismissSubmitDialog() }) {
+                            Text("Okay")
+                        }
+                    }
+                },
+                dismissButton = null
             )
         }
     }
 }
+
 
 
 

@@ -4,28 +4,60 @@ import android.util.Log
 import edu.cit.sarismart.core.data.UserDetailsManager
 import edu.cit.sarismart.features.user.tabs.account.data.repository.AccountRepository
 import edu.cit.sarismart.features.user.tabs.account.domain.AccountService
+import edu.cit.sarismart.features.user.tabs.stores.data.exceptions.CreateStoreException
 import edu.cit.sarismart.features.user.tabs.stores.data.models.Store
 import edu.cit.sarismart.features.user.tabs.stores.data.models.StoreRequest
 import edu.cit.sarismart.features.user.tabs.stores.domain.StoreApiService
 import kotlinx.coroutines.flow.first
+import retrofit2.Response
 import javax.inject.Inject
 
-class StoreRepositoryImpl @Inject constructor(private val storeApiService: StoreApiService, private val userDetailsManager: UserDetailsManager): StoreRepository {
+class StoreRepositoryImpl @Inject constructor(
+    private val storeApiService: StoreApiService,
+    private val userDetailsManager: UserDetailsManager
+) : StoreRepository {
 
     override suspend fun createStore(
         storeName: String,
         storeLocation: String,
         storeLatitude: Double,
         storeLongitude: Double
-    ) {
-        val ownerId = userDetailsManager.getUserId.first().toString()
-        val newStore = StoreRequest(storeName = storeName, location = storeLocation, latitude = storeLatitude, longitude = storeLongitude, ownerId = ownerId)
+    ): Result<Store> {
+        return try {
+            val ownerId = userDetailsManager.getUserId.first()
 
-        Log.i("StoreRepository", "Creating store: $newStore")
-        Log.i("StoreRepository", "Owner ID: $ownerId")
-        val store = storeApiService.createStore(newStore)
-        Log.i("StoreRepository", "Store created: ${store.body()}")
+            if (ownerId == null) {
+                Log.e("StoreRepository", "Owner ID is null")
+                return Result.failure(CreateStoreException.MissingOwnerId)
+            }
+
+            if (storeName.isBlank() || storeLocation.isBlank() || storeLongitude.isNaN() || storeLatitude.isNaN()) {
+                Log.e("StoreRepository", "Invalid store data")
+                return Result.failure(CreateStoreException.InvalidInput("Store name, location, latitude, and longitude must be valid."))
+            }
+
+            val newStore = StoreRequest(
+                storeName = storeName,
+                location = storeLocation,
+                latitude = storeLatitude,
+                longitude = storeLongitude,
+                ownerId = ownerId.toString()
+            )
+
+            val response = storeApiService.createStore(newStore)
+
+            if (response.isSuccessful) {
+                response.body()?.let {
+                    Result.success(it)
+                } ?: Result.failure(CreateStoreException.EmptyResponseBody)
+            } else {
+                Log.e("StoreRepository", "API Error: ${response.code()} - ${response.message()}")
+                Result.failure(CreateStoreException.ApiException(response.code(), response.message()))
+            }
+        } catch (e: Exception) {
+            Log.e("StoreRepository", "An unexpected error occurred: ${e.localizedMessage ?: e.message ?: "Unknown error"}")
+            Result.failure(CreateStoreException.UnknownError(e))
+        }
     }
-
-
 }
+

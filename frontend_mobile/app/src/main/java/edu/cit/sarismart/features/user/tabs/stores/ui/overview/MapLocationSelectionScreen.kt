@@ -134,7 +134,6 @@ fun MapLocationSelectionScreen(
         }
     }
 
-    // Handle search query
     val onSearch = {
         if (searchQuery.isNotBlank()) {
             scope.launch {
