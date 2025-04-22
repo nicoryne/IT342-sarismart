@@ -5,6 +5,7 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import edu.cit.sarismart.core.data.UserDetailsManager
+import edu.cit.sarismart.core.data.UserStoresManager
 import edu.cit.sarismart.core.network.BackendRetrofitClient
 import edu.cit.sarismart.features.user.tabs.stores.data.repository.StoreRepository
 import edu.cit.sarismart.features.user.tabs.stores.data.repository.StoreRepositoryImpl
@@ -20,7 +21,9 @@ object StoreModule {
     @Singleton
     fun provideStoreRepository(
         @BackendRetrofitClient backendRetrofit: Retrofit,
-        userDetailsManager: UserDetailsManager): StoreRepository {
+        userDetailsManager: UserDetailsManager,
+        storesManager: UserStoresManager
+    ): StoreRepository {
         return StoreRepositoryImpl(
             backendRetrofit.create<StoreApiService>(StoreApiService::class.java),
             userDetailsManager

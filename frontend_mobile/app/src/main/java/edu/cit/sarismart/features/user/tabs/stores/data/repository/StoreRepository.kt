@@ -7,5 +7,7 @@ interface StoreRepository {
 
     suspend fun createStore(storeName: String, storeLocation: String, storeLatitude: Double, storeLongitude: Double): Result<Store>
 
+    suspend fun updateStores()
+
 
 }

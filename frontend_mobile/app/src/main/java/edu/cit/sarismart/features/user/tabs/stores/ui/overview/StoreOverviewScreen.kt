@@ -56,8 +56,6 @@ fun StoreOverviewScreen(
     val isSubmitSuccess by viewModel.isSubmitSuccess.collectAsState()
     val showSubmitDialog by viewModel.showSubmitDialog.collectAsState()
 
-
-
     val dummyStores = listOf(
         DummyStore("Store A", "Location 1", true, StoreStatus.GOOD),
         DummyStore("Store B", "Location 2", false, StoreStatus.LOW_STOCK),

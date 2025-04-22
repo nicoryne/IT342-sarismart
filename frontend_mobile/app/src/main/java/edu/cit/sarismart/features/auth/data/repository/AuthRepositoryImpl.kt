@@ -6,6 +6,7 @@ import edu.cit.sarismart.core.data.PreferencesManager
 import edu.cit.sarismart.core.data.AccessTokenManager
 import edu.cit.sarismart.core.data.RefreshTokenManager
 import edu.cit.sarismart.core.data.UserDetailsManager
+import edu.cit.sarismart.core.data.UserStoresManager
 import edu.cit.sarismart.features.auth.data.models.AuthRequest
 import edu.cit.sarismart.features.auth.data.models.AuthResponse
 import edu.cit.sarismart.features.auth.data.models.ClientResponse
@@ -18,7 +19,13 @@ import retrofit2.Response
 import javax.inject.Inject
 
 
-class AuthRepositoryImpl @Inject constructor(private val authApiService: AuthApiService, private val accessTokenManager: AccessTokenManager, private val refreshTokenManager: RefreshTokenManager, private val preferencesManager: PreferencesManager, private val userDetailsManager: UserDetailsManager) : AuthRepository {
+class AuthRepositoryImpl @Inject constructor(
+    private val authApiService: AuthApiService,
+    private val accessTokenManager: AccessTokenManager,
+    private val refreshTokenManager: RefreshTokenManager,
+    private val preferencesManager: PreferencesManager,
+    private val userDetailsManager: UserDetailsManager,
+   ) : AuthRepository {
 
     override suspend fun login(email: String, password: String): ClientResponse {
         val authRequest = AuthRequest(email, password)
@@ -47,6 +54,7 @@ class AuthRepositoryImpl @Inject constructor(private val authApiService: AuthApi
                         Log.i("AuthRepositoryImpl", "Saving User: $user")
                         userDetailsManager.saveUserDetails(user)
                         Log.i("AuthRepositoryImpl", "User Details: $user")
+
                     }
 
                     ClientResponse(true, "Login Successful.")

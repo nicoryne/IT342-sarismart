@@ -27,7 +27,8 @@ object AuthModule {
         accessTokenManager: AccessTokenManager,
         preferencesManager: PreferencesManager,
         refreshTokenManager: RefreshTokenManager,
-        userDetailsManager: UserDetailsManager): AuthRepository {
+        userDetailsManager: UserDetailsManager,
+        ): AuthRepository {
         return AuthRepositoryImpl(
             backendRetrofit.create<AuthApiService>(AuthApiService::class.java),
             accessTokenManager,
