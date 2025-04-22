@@ -45,6 +45,13 @@ public class StoreController {
         return storeService.getStoresByOwnerId(ownerId);
     }
 
+    // Method: stores.getStoresByWorkerId
+    @Operation(summary = "Get Stores by Worker ID", description = "Retrieve stores where a specific user is a worker")
+    @GetMapping("/worker/{workerId}")
+    public List<Store> getStoresByWorkerId(@PathVariable String workerId) {
+        return storeService.getStoresByWorkerId(workerId);
+    }
+
     // Method: stores.update
     @Operation(summary = "Update Store", description = "Update an existing store")
     @PutMapping("/{storeId}")

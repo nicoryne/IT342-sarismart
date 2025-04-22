@@ -39,6 +39,10 @@ public class StoreService {
                 return storeRepository.findByOwner_SupabaseUid(ownerId);
         }
 
+        public List<Store> getStoresByWorkerId(String workerId) {
+                return storeRepository.findByWorkers_SupabaseUid(workerId);
+        }
+
         public Store createStore(StoreRequest store) {
                 User owner = userRepository.findBySupabaseUid(store.getOwnerId())
                         .orElseThrow(() -> new RuntimeException("Owner not found"));

@@ -8,4 +8,5 @@ import java.util.List;
 @Repository
 public interface StoreRepository extends JpaRepository<Store, Long> {
     List<Store> findByOwner_SupabaseUid(String supabaseUid);
+    List<Store> findByWorkers_SupabaseUid(String supabaseUid);
 }

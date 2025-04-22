@@ -33,13 +33,19 @@ public class Store {
     @JoinColumn(name = "owner_id", nullable = false)
     private User owner;
 
-    @OneToMany
+    @ManyToMany
+    @JoinTable(
+        name = "store_workers",
+        joinColumns = @JoinColumn(name = "store_id"),
+        inverseJoinColumns = @JoinColumn(name = "worker_id")
+    )
     private List<User> workers = new ArrayList<>();
 
     @JsonIgnore
     @OneToMany(mappedBy = "store", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Product> products = new ArrayList<>();
 
+    @JsonIgnore
     @OneToMany(mappedBy = "store", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Sale> sales = new ArrayList<>();
 }
