@@ -4,7 +4,7 @@ import type React from "react"
 
 import { useState } from "react"
 import Image from "next/image"
-import { ChevronDown, Menu, Plus, Store, X } from "lucide-react"
+import { ChevronDown, Menu, Plus, Store, X, Pencil, Trash2 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -13,7 +13,7 @@ import { Label } from "@/components/ui/label"
 import { useStoresContext } from "@/hooks/use-stores-context"
 
 export default function InventoryHeader() {
-  const { stores, selectedStore, setSelectedStore, addStore } = useStoresContext() // Use selectedStore and setter
+  const { stores, selectedStore, setSelectedStore, addStore, updateStore, deleteStore } = useStoresContext() // Use selectedStore and setter
 
   // STEP 1: Set up state for the Add Store modal
   const [isAddStoreOpen, setIsAddStoreOpen] = useState(false) // Controls the visibility of the Add Store modal
@@ -26,6 +26,50 @@ export default function InventoryHeader() {
     name: "",
     location: "",
   })
+
+  const [isUpdateStoreOpen, setIsUpdateStoreOpen] = useState(false) // Controls the visibility of the Update Store modal
+  const [storeToUpdate, setStoreToUpdate] = useState<{ id: string | number; name: string; location: string } | null>(
+    null,
+  )
+
+  const [isDeleteStoreOpen, setIsDeleteStoreOpen] = useState(false) // Controls the visibility of the Delete Store modal
+  const [storeToDelete, setStoreToDelete] = useState<{ id: string | number; name: string } | null>(null)
+
+  // Handle opening the update modal
+  const handleOpenUpdateModal = (store: { id: string | number; name: string; location: string }) => {
+    setStoreToUpdate(store)
+    setIsUpdateStoreOpen(true)
+  }
+
+  // Handle updating a store
+  const handleUpdateStore = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (storeToUpdate) {
+      updateStore(storeToUpdate.id, { name: storeToUpdate.name, location: storeToUpdate.location })
+      setIsUpdateStoreOpen(false)
+    }
+  }
+
+  // Handle opening the delete modal
+  const handleOpenDeleteModal = (store: { id: string | number; name: string }) => {
+    setStoreToDelete(store)
+    setIsDeleteStoreOpen(true)
+  }
+
+  // Handle confirming the deletion
+  const handleConfirmDelete = () => {
+    if (storeToDelete) {
+      deleteStore(storeToDelete.id)
+      setIsDeleteStoreOpen(false)
+    }
+  }
+
+  // Handle deleting a store
+  const handleDeleteStore = (storeId: string | number) => {
+    if (confirm("Are you sure you want to delete this store?")) {
+      deleteStore(storeId)
+    }
+  }
 
   // STEP 4: Handle input changes in the form fields
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -88,9 +132,7 @@ export default function InventoryHeader() {
               const toast = document.createElement("div")
               toast.className = "fixed top-4 right-4 bg-[#008080] text-white px-4 py-2 rounded shadow-lg z-50"
               toast.textContent = `Switched to ${
-                value === "all"
-                  ? "All Stores"
-                  : stores.find((s) => String(s.id) === value)?.name
+                value === "all" ? "All Stores" : stores.find((s) => String(s.id) === value)?.name
               }`
               document.body.appendChild(toast)
               setTimeout(() => {
@@ -107,9 +149,23 @@ export default function InventoryHeader() {
               <SelectItem value="all">All Stores</SelectItem>
               {/* STEP 12: Map through the stores to create dropdown options */}
               {stores.map((store) => (
-                <SelectItem key={store.id} value={String(store.id)}>
-                  {store.name}
-                </SelectItem>
+                <div key={store.id} className="flex items-center justify-between">
+                  <SelectItem value={String(store.id)}>{store.name}</SelectItem>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => handleOpenUpdateModal(store)}
+                      className="text-blue-500 p-1 hover:bg-blue-50 rounded"
+                    >
+                      <Pencil className="h-4 w-4" />
+                    </button>
+                    <button
+                      onClick={() => handleOpenDeleteModal(store)}
+                      className="text-red-500 p-1 hover:bg-red-50 rounded"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </div>
+                </div>
               ))}
               {/* STEP 13: Add the "Add Store" option at the bottom of the dropdown */}
               <SelectItem value="add-store" className="text-[#008080] font-medium">
@@ -200,6 +256,96 @@ export default function InventoryHeader() {
                 </Button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Update Store Modal */}
+      {isUpdateStoreOpen && storeToUpdate && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="relative w-full max-w-[400px] rounded-lg bg-white p-5 shadow-lg">
+            <button
+              className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none"
+              onClick={() => setIsUpdateStoreOpen(false)}
+            >
+              <X className="h-4 w-4" />
+              <span className="sr-only">Close</span>
+            </button>
+
+            <div className="mb-4">
+              <h2 className="text-lg font-semibold leading-none tracking-tight">Update Store</h2>
+              <p className="text-sm text-muted-foreground">Modify the store details below.</p>
+            </div>
+
+            <form onSubmit={handleUpdateStore}>
+              <div className="grid gap-4 py-2">
+                <div className="space-y-1">
+                  <Label htmlFor="update-name">Store Name</Label>
+                  <Input
+                    id="update-name"
+                    name="name"
+                    placeholder="Enter store name"
+                    value={storeToUpdate.name}
+                    onChange={(e) => setStoreToUpdate((prev) => prev && { ...prev, name: e.target.value })}
+                    required
+                  />
+                </div>
+                <div className="space-y-1">
+                  <Label htmlFor="update-location">Store Location</Label>
+                  <Input
+                    id="update-location"
+                    name="location"
+                    placeholder="Enter store location"
+                    value={storeToUpdate.location}
+                    onChange={(e) => setStoreToUpdate((prev) => prev && { ...prev, location: e.target.value })}
+                    required
+                  />
+                </div>
+              </div>
+              <div className="mt-4 flex justify-end gap-2">
+                <Button type="button" variant="outline" onClick={() => setIsUpdateStoreOpen(false)}>
+                  Cancel
+                </Button>
+                <Button type="submit" className="bg-[#008080] hover:bg-[#005F6B]">
+                  Update Store
+                </Button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Store Modal */}
+      {isDeleteStoreOpen && storeToDelete && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="relative w-full max-w-[400px] rounded-lg bg-white p-5 shadow-lg">
+            <button
+              className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none"
+              onClick={() => setIsDeleteStoreOpen(false)}
+            >
+              <X className="h-4 w-4" />
+              <span className="sr-only">Close</span>
+            </button>
+
+            <div className="mb-4">
+              <h2 className="text-lg font-semibold leading-none tracking-tight">Delete Store</h2>
+              <p className="text-sm text-muted-foreground">
+                Are you sure you want to delete the store <strong>{storeToDelete.name}</strong>? This action cannot be undone.
+              </p>
+            </div>
+
+            <div className="mt-4 flex justify-end gap-2">
+              <Button type="button" variant="outline" onClick={() => setIsDeleteStoreOpen(false)}>
+                Cancel
+              </Button>
+              <Button
+                type="button"
+                className="bg-red-600 hover:bg-red-700"
+                onClick={handleConfirmDelete}
+              >
+                Delete
+              </Button>
+            </div>
           </div>
         </div>
       )}

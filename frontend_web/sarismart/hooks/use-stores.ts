@@ -159,6 +159,70 @@ export function useStores() {
     }
   }
 
+  // Function to delete a store
+  const deleteStore = async (storeId: string | number) => {
+    const token = localStorage.getItem("token")
+    if (!token) {
+      console.error("No token found")
+      return
+    }
+
+    try {
+      const response = await fetch(`https://sarismart-backend.onrender.com/api/v1/stores/${storeId}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+
+      if (!response.ok) {
+        throw new Error("Failed to delete store")
+      }
+
+      setStores((prev) => prev.filter((store) => store.id !== storeId))
+    } catch (error) {
+      console.error(error)
+    }
+  }
+
+  // Function to update a store
+  const updateStore = async (storeId: string | number, updatedData: { name: string; location: string }) => {
+    const token = localStorage.getItem("token")
+    if (!token) {
+      console.error("No token found")
+      return
+    }
+
+    try {
+      const response = await fetch(`https://sarismart-backend.onrender.com/api/v1/stores/${storeId}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          storeName: updatedData.name,
+          location: updatedData.location,
+        }),
+      })
+
+      if (!response.ok) {
+        throw new Error("Failed to update store")
+      }
+
+      const updatedStore = await response.json()
+      setStores((prev) =>
+        prev.map((store) =>
+          store.id === storeId
+            ? { ...store, name: updatedStore.storeName, location: updatedStore.location }
+            : store
+        )
+      )
+    } catch (error) {
+      console.error(error)
+    }
+  }
+
   // Function to filter products by store
   const filterProductsByStore = (storeId: string) => {
     if (storeId === "all") {
@@ -208,6 +272,8 @@ export function useStores() {
     selectedStore,
     setSelectedStore, // Expose setter for selectedStore
     addStore,
+    deleteStore, // Expose deleteStore
+    updateStore, // Expose updateStore
     filterProductsByStore,
     filterTransactionsByStore,
     filterInsightsByStore,
