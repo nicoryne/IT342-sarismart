@@ -2,6 +2,8 @@ package me.sarismart.backend.Entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
@@ -18,4 +20,7 @@ public class User {
     private String fullName;
 
     private String phone;
+
+    @ManyToMany(mappedBy = "workers")
+    private List<Store> stores = new ArrayList<>();
 }

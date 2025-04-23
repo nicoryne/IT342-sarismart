@@ -22,6 +22,8 @@ public class Product {
 
     private String category;
     
+    private String description;
+
     @Column(nullable = false)
     private double price;
 
@@ -29,8 +31,6 @@ public class Product {
 
     private int sold;
     
-    private String description;
-
     private int reorderLevel;
 
     @ManyToOne
