@@ -93,5 +93,61 @@ class StoreRepositoryImpl @Inject constructor(
     override suspend fun getStoreById(id: Long): Store {
         return userStoresManager.getUserOwnerStores().first().find { it.id == id } ?: throw Exception("Store not found")
     }
-}
 
+    override suspend fun deleteStore(storeId: Long): Boolean {
+        try {
+            val response = storeApiService.deleteStore(storeId)
+
+            if(response.isSuccessful) {
+                return true
+            } else {
+                Log.e("StoreRepository", "API Error: ${response.code()} - ${response.message()}")
+            }
+
+        } catch (e: Exception) {
+            Log.e("StoreRepository", "An unexpected error occurred: ${e.localizedMessage ?: e.message ?: "Unknown error"}")
+        }
+
+        return false
+    }
+
+    override suspend fun editStore(
+        store: Store,
+        storeName: String,
+        storeLocation: String,
+        storeLatitude: Double,
+        storeLongitude: Double
+    ) {
+
+        try {
+            val updateRequest = Store(
+                storeName = storeName,
+                location = storeLocation,
+                latitude = storeLatitude,
+                longitude = storeLongitude,
+                id = store.id,
+                owner = store.owner,
+                workers = store.workers,
+                sales = store.sales ?: emptyList(),
+            )
+
+            val response = storeApiService.updateStore(store.id, updateRequest)
+
+            if (response.isSuccessful) {
+                response.body()?.let { updatedStore ->
+                    val currentStores = userStoresManager.getUserOwnerStores().first()
+                    val updatedStores = currentStores.map {
+                        if (it.id == updatedStore.id) updatedStore else it
+                    }
+                    userStoresManager.saveUserOwnerStores(updatedStores)
+                }
+            } else {
+                Log.e("StoreRepository", "API Error: ${response.code()} - ${response.message()}")
+                throw Exception("Failed to update store: ${response.message()}")
+            }
+        } catch (e: Exception) {
+            Log.e("StoreRepository", "An unexpected error occurred: ${e.localizedMessage ?: e.message ?: "Unknown error"}")
+            throw e
+        }
+    }
+}

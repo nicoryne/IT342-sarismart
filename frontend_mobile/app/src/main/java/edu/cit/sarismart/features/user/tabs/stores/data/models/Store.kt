@@ -6,9 +6,9 @@ data class Store (
     val id: Long,
     val storeName: String,
     val location: String,
-    val latitude: Number,
-    val longitude: Number,
+    val latitude: Double,
+    val longitude: Double,
     val owner: User,
     val workers: List<User>,
-    val sales: List<Sale>
+    val sales: List<Sale>?
 )

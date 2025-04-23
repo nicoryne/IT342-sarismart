@@ -35,24 +35,44 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.compose.rememberNavController
+import edu.cit.sarismart.features.user.tabs.stores.data.models.Store
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun StoreFormBottomSheet(
- viewModel: StoreOverviewScreenViewModel = hiltViewModel<StoreOverviewScreenViewModel>(),
- onDismissRequest: () -> Unit,
- onSelectLocation: () -> Unit,
- onSubmitLoading: () -> Unit,
- onSubmitSuccess: () -> Unit,
- onSubmitError: (it: String) -> Unit
+    viewModel: StoreOverviewScreenViewModel = hiltViewModel<StoreOverviewScreenViewModel>(),
+    onDismissRequest: () -> Unit,
+    onSelectLocation: () -> Unit,
+    onSubmitLoading: () -> Unit,
+    onSubmitSuccess: () -> Unit,
+    onSubmitError: (it: String) -> Unit,
+    store: Store? = null,
+    customStoreName: String? = null,
+    customStoreLocation: String? = null,
+    customStoreNameError: String? = null,
+    customStoreLocationError: String? = null,
+    onStoreNameChange: ((String) -> Unit)? = null,
+    onStoreLocationChange: ((String) -> Unit)? = null,
+    onCustomSubmit: (() -> Unit)? = null
 ) {
     val sheetState = rememberModalBottomSheetState()
 
-    val storeName by viewModel.storeName.collectAsState()
-    val storeLocation by viewModel.storeLocation.collectAsState()
-    val storeNameError by viewModel.storeNameError.collectAsState()
-    val storeLocationError by viewModel.storeLocationError.collectAsState()
+    val storeName = customStoreName ?: viewModel.storeName.collectAsState().value
+    val storeLocation = customStoreLocation ?: viewModel.storeLocation.collectAsState().value
+    val storeNameError = customStoreNameError ?: viewModel.storeNameError.collectAsState().value
+    val storeLocationError = customStoreLocationError ?: viewModel.storeLocationError.collectAsState().value
+
+    val isEditMode = store != null
+
+    LaunchedEffect(store) {
+        if (store != null && onStoreNameChange == null) {
+            viewModel.updateStoreName(store.storeName)
+            viewModel.updateStoreLocation(store.location)
+            viewModel.updateStoreLongitude(store.longitude)
+            viewModel.updateStoreLatitude(store.latitude)
+        }
+    }
 
     ModalBottomSheet(
         onDismissRequest = onDismissRequest,
@@ -65,7 +85,7 @@ fun StoreFormBottomSheet(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = "Register your store with SariSmart!",
+                text = if (isEditMode) "Edit your store details" else "Register your store with SariSmart!",
                 style = MaterialTheme.typography.bodyMedium,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.primary,
@@ -75,7 +95,13 @@ fun StoreFormBottomSheet(
 
             OutlinedTextField(
                 value = storeName,
-                onValueChange = { viewModel.updateStoreName(it) },
+                onValueChange = {
+                    if (onStoreNameChange != null) {
+                        onStoreNameChange(it)
+                    } else {
+                        viewModel.updateStoreName(it)
+                    }
+                },
                 label = { Text("Store Name *") },
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp),
@@ -103,7 +129,13 @@ fun StoreFormBottomSheet(
 
             OutlinedTextField(
                 value = storeLocation,
-                onValueChange = { viewModel.updateStoreLocation(it) },
+                onValueChange = {
+                    if (onStoreLocationChange != null) {
+                        onStoreLocationChange(it)
+                    } else {
+                        viewModel.updateStoreLocation(it)
+                    }
+                },
                 label = { Text("Store Location *") },
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp),
@@ -114,7 +146,7 @@ fun StoreFormBottomSheet(
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedBorderColor = MaterialTheme.colorScheme.primary,
                     unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f),
-                    ),
+                ),
                 trailingIcon = {
                     IconButton(onClick = onSelectLocation) {
                         Icon(
@@ -139,13 +171,17 @@ fun StoreFormBottomSheet(
 
             Button(
                 onClick = {
-                    viewModel.viewModelScope.launch {
-                        viewModel.onSubmit(
-                            onSubmitting = onSubmitLoading,
-                            onSubmitSuccess = onSubmitSuccess,
-                            onSubmitError = { onSubmitError(it) },
-                            onDismissRequest = { onDismissRequest }
-                        )
+                    if (onCustomSubmit != null) {
+                        onCustomSubmit()
+                    } else {
+                        viewModel.viewModelScope.launch {
+                            viewModel.onSubmit(
+                                onSubmitting = onSubmitLoading,
+                                onSubmitSuccess = onSubmitSuccess,
+                                onSubmitError = { onSubmitError(it) },
+                                onDismissRequest = { onDismissRequest }
+                            )
+                        }
                     }
                 },
                 modifier = Modifier.fillMaxWidth(),
@@ -153,7 +189,7 @@ fun StoreFormBottomSheet(
                 border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary)
             ) {
                 Text(
-                    "Submit",
+                    if (isEditMode) "Save Changes" else "Submit",
                     fontWeight = FontWeight.Medium,
                     fontSize = MaterialTheme.typography.bodyMedium.fontSize
                 )
@@ -163,7 +199,12 @@ fun StoreFormBottomSheet(
 
             OutlinedButton(
                 onClick = {
-                    viewModel.onCancel(); onDismissRequest()
+                    if (onStoreNameChange != null) {
+                        // We're in edit mode with custom handlers
+                        onDismissRequest()
+                    } else {
+                        viewModel.onCancel(); onDismissRequest()
+                    }
                 },
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp),

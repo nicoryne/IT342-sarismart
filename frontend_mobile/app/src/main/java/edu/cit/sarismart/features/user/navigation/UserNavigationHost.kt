@@ -22,6 +22,7 @@ import edu.cit.sarismart.features.user.tabs.stores.ui.overview.MapLocationSelect
 import edu.cit.sarismart.features.user.tabs.stores.ui.overview.StoreOverviewScreen
 import edu.cit.sarismart.features.user.tabs.stores.ui.overview.StoreOverviewScreenViewModel
 import edu.cit.sarismart.features.user.tabs.stores.ui.profile.StoreProfileScreen
+import edu.cit.sarismart.features.user.tabs.stores.ui.profile.StoreProfileScreenViewModel
 
 @Composable
 fun UserNavigationHost(
@@ -32,7 +33,7 @@ fun UserNavigationHost(
         navController = navController,
         startDestination = UserTabs.MAPS.route
     ) {
-        
+
         composable(UserTabs.MAPS.route) {
             UserMapScreen()
         }
@@ -50,7 +51,7 @@ fun UserNavigationHost(
                 onNavigateToNotifications = { navController.navigate("notifications") },
                 onSelectLocation = { navController.navigate("map_location_selection") },
                 onNavigateToProfile = {
-                    storeId -> navController.navigate("store_profile/$storeId");
+                        storeId -> navController.navigate("store_profile/$storeId");
                     Log.d("UserNavigationHost", "Navigating to store profile with ID: $storeId")
                 }
             )
@@ -61,7 +62,7 @@ fun UserNavigationHost(
             StoreProfileScreen(
                 storeId = storeId,
                 onBack = { navController.popBackStack() },
-                onNotificationClick = { navController.navigate("notifications") }
+                onSelectLocation = { navController.navigate("map_location_selection_profile") }
             )
         }
 
@@ -93,6 +94,26 @@ fun UserNavigationHost(
                     navController.popBackStack()
                 },
                 onNavigateToStore = { navController.navigate("store") }
+            )
+        }
+
+        composable("map_location_selection_profile") {
+            val previousBackStackEntry = remember(navController.currentBackStackEntry) {
+                navController.previousBackStackEntry
+            }
+
+            val viewModel = previousBackStackEntry?.let {
+                hiltViewModel<StoreProfileScreenViewModel>(it)
+            }
+
+            MapLocationSelectionScreen(
+                onLocationSelected = { name, latitude, longitude ->
+                    viewModel?.updateStoreLocation(name)
+                    viewModel?.updateStoreLatitude(latitude)
+                    viewModel?.updateStoreLongitude(longitude)
+                    navController.popBackStack()
+                },
+                onNavigateToStore = { navController.popBackStack() }
             )
         }
 

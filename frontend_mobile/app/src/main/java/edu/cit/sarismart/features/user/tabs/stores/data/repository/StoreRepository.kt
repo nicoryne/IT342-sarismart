@@ -13,4 +13,8 @@ interface StoreRepository {
 
     suspend fun getStoreById(id: Long): Store
 
+    suspend fun deleteStore(storeId: Long): Boolean
+
+    suspend fun editStore(store: Store, storeName: String, storeLocation: String, storeLatitude: Double, storeLongitude: Double)
+
 }
