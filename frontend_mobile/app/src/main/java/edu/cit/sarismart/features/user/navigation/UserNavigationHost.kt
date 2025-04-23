@@ -1,5 +1,7 @@
 package edu.cit.sarismart.features.user.navigation
 
+import android.util.Log
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -12,10 +14,14 @@ import edu.cit.sarismart.features.user.tabs.account.ui.AccountScreen
 import edu.cit.sarismart.features.user.tabs.maps.ui.map.UserMapScreen
 import edu.cit.sarismart.features.user.tabs.notifications.ui.NotificationScreen
 import edu.cit.sarismart.features.user.tabs.sasa.ui.chat.SasaChatScreen
+import edu.cit.sarismart.features.user.tabs.scan.ui.carts.CartDetailsScreen
+import edu.cit.sarismart.features.user.tabs.scan.ui.carts.PickCartScreen
 import edu.cit.sarismart.features.user.tabs.scan.ui.stores.PickStoreScreen
+import edu.cit.sarismart.features.user.tabs.scan.ui.stores.StoreMenuScreen
 import edu.cit.sarismart.features.user.tabs.stores.ui.overview.MapLocationSelectionScreen
 import edu.cit.sarismart.features.user.tabs.stores.ui.overview.StoreOverviewScreen
 import edu.cit.sarismart.features.user.tabs.stores.ui.overview.StoreOverviewScreenViewModel
+import edu.cit.sarismart.features.user.tabs.stores.ui.profile.StoreProfileScreen
 
 @Composable
 fun UserNavigationHost(
@@ -34,19 +40,34 @@ fun UserNavigationHost(
             SasaChatScreen(onNavigateToNotifications = { navController.navigate("notifications") })
         }
         composable(UserTabs.SCAN.route) {
-            PickStoreScreen(onNavigateToNotifications = { navController.navigate("notifications") })
+            PickStoreScreen(
+                onNavigateToNotifications = { navController.navigate("notifications") },
+                navController = navController
+            )
         }
         composable(UserTabs.STORE.route) {
             StoreOverviewScreen(
                 onNavigateToNotifications = { navController.navigate("notifications") },
-                onSelectLocation = { navController.navigate("map_location_selection") }
+                onSelectLocation = { navController.navigate("map_location_selection") },
+                onNavigateToProfile = {
+                    storeId -> navController.navigate("store_profile/$storeId");
+                    Log.d("UserNavigationHost", "Navigating to store profile with ID: $storeId")
+                }
+            )
+        }
+        composable("store_profile/{storeId}") { backStackEntry ->
+            val storeId = backStackEntry.arguments?.getString("storeId")?.toLongOrNull()
+            Log.d("UserNavigationHost", "Store ID: $storeId")
+            StoreProfileScreen(
+                storeId = storeId,
+                onBack = { navController.popBackStack() },
+                onNotificationClick = { navController.navigate("notifications") }
             )
         }
 
         composable(UserTabs.ACCOUNT.route) {
             AccountScreen(
-                onNavigateToLogin,
-                onClearBackStack = { navController.clearBackStack(UserTabs.ACCOUNT.route) },
+                onNavigateToLogin = { onNavigateToLogin() },
                 onNavigateToNotifications = { navController.navigate("notifications") },
             )
         }
@@ -72,6 +93,47 @@ fun UserNavigationHost(
                     navController.popBackStack()
                 },
                 onNavigateToStore = { navController.navigate("store") }
+            )
+        }
+
+        composable("pick_store") {
+            PickStoreScreen(
+                onNavigateToNotifications = { navController.navigate("notifications") },
+                navController = navController
+            )
+        }
+
+        composable("store_menu/{storeId}") { backStackEntry ->
+            val storeId = backStackEntry.arguments?.getString("storeId")?.toLongOrNull()
+            StoreMenuScreen(
+                onNavigateToNotifications = { navController.navigate("notifications") },
+                storeId = storeId,
+                navController = navController
+            )
+        }
+        composable("pick_cart/{storeId}") { backStackEntry ->
+            val storeId = backStackEntry.arguments?.getString("storeId")?.toLongOrNull()
+            if (storeId != null) {
+                PickCartScreen(
+                    onNavigateToNotifications = { navController.navigate("notifications") },
+                    onCartSelected = { cart ->
+                        navController.navigate("cart_details/${cart.id}")
+                    },
+                    storeId = storeId,
+                    navController = navController
+                )
+            } else {
+                Text("Error: Invalid Store ID")
+            }
+        }
+
+        composable("cart_details/{storeId}/{cartId}") { backStackEntry ->
+            val cartId = backStackEntry.arguments?.getString("cartId")?.toLongOrNull()
+            val storeId = backStackEntry.arguments?.getString("storeId")?.toLongOrNull()
+            CartDetailsScreen(
+                onNavigateToNotifications = { navController.navigate("notifications") },
+                cartId = cartId,
+                storeId = storeId
             )
         }
     }

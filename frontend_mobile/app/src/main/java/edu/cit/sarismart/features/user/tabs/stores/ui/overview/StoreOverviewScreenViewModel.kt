@@ -187,6 +187,7 @@ class StoreOverviewScreenViewModel @Inject constructor(
                 storeLatitude = storeLatitude.value,
                 storeLongitude = storeLongitude.value
             ).onSuccess {
+                getStores()
                 onSubmitSuccess()
             }.onFailure {
                 onSubmitError("Server denied your request.")
@@ -199,7 +200,6 @@ class StoreOverviewScreenViewModel @Inject constructor(
 
     suspend fun getStores() {
         val stores = storeRepository.getOwnedStores()
-        Log.i("StoreOverviewScreenViewModel", "Stores: $stores")
         _stores.value = stores
     }
 

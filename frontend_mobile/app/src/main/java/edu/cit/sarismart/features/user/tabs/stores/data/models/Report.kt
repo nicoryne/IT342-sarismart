@@ -4,5 +4,5 @@ data class Report (
     val reportType: String,
     val period: String,
     val totalSales: Double,
-    val totalTransactions: Integer
+    val totalTransactions: Int
 )

@@ -5,8 +5,8 @@ data class Product (
     val name: String,
     val category: String,
     val price: Double,
-    val stock: Integer,
+    val stock: Int,
     val description: String,
-    val reorderLevel: Integer,
+    val reorderLevel: Int,
     val store: Store,
 )

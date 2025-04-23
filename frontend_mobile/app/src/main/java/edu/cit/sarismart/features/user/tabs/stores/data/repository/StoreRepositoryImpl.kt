@@ -47,6 +47,7 @@ class StoreRepositoryImpl @Inject constructor(
 
             if (response.isSuccessful) {
                 response.body()?.let {
+                    userStoresManager.addToUserOwnerStores(it)
                     Result.success(it)
                 } ?: Result.failure(CreateStoreException.EmptyResponseBody)
             } else {
@@ -87,6 +88,10 @@ class StoreRepositoryImpl @Inject constructor(
 
     override suspend fun getOwnedStores(): List<Store> {
         return userStoresManager.getUserOwnerStores().first()
+    }
+
+    override suspend fun getStoreById(id: Long): Store {
+        return userStoresManager.getUserOwnerStores().first().find { it.id == id } ?: throw Exception("Store not found")
     }
 }
 

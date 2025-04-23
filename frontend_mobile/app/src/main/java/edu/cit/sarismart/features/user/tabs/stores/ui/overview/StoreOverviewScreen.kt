@@ -1,5 +1,6 @@
 package edu.cit.sarismart.features.user.tabs.stores.ui.overview
 
+import android.util.Log
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -47,7 +48,8 @@ data class DummyStore (
 fun StoreOverviewScreen(
     onNavigateToNotifications: () -> Unit,
     viewModel: StoreOverviewScreenViewModel = hiltViewModel(),
-    onSelectLocation: () -> Unit
+    onSelectLocation: () -> Unit,
+    onNavigateToProfile: (storeId: Long) -> Unit
 ) {
 
     val showBottomSheet by viewModel.showBottomSheet.collectAsState()
@@ -87,8 +89,8 @@ fun StoreOverviewScreen(
             // registered stores
             StoreInfoBox(
                 modifier = Modifier.weight(1f),
-                title = "You currently have",
-                number = "2",
+                title = "You have",
+                number = stores.size.toString(),
                 subtitle = "stores registered"
             )
 
@@ -136,9 +138,10 @@ fun StoreOverviewScreen(
 
         // store overview items here
         LazyColumn () {
-            items(stores) { store ->
+            items(stores, key = { store -> store.id }) { store ->
                 StoreOverviewItem(
-                    onStoreItemClick = { /* Handle item click */ },
+                    onStoreItemClick = { onNavigateToProfile(store.id);
+                                       Log.d("StoreOverviewScreen", "Navigating to store profile with ID: ${store.id}")},
                     storeName = store.storeName,
                     storeLocation = store.location,
                     isOwner = true,

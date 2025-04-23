@@ -3,6 +3,8 @@ package edu.cit.sarismart.features.user.tabs.stores.ui.components
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -27,28 +29,30 @@ fun StoreInfoBox(
 ) {
     Card(
         modifier = modifier
-            .height(IntrinsicSize.Min),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primary)
+            .height(160.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondary)
     ) {
         Column(
             modifier = Modifier
                 .padding(16.dp)
-                .fillMaxWidth(),
+                .fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
             Text(
                 text = title,
                 color = MaterialTheme.colorScheme.onPrimary,
-                textAlign = TextAlign.Center
+                textAlign = TextAlign.Center,
             )
+            Spacer(Modifier.height(8.dp))
             Text(
                 text = number,
-                color = MaterialTheme.colorScheme.onPrimary,
+                color = MaterialTheme.colorScheme.tertiaryContainer,
                 fontSize = 30.sp,
                 fontWeight = FontWeight.Bold,
                 textAlign = TextAlign.Center
             )
+            Spacer(Modifier.height(8.dp))
             Text(
                 text = subtitle,
                 color = MaterialTheme.colorScheme.onPrimary,

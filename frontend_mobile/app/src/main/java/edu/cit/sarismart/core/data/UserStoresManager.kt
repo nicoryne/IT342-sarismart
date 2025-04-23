@@ -101,5 +101,21 @@ class UserStoresManager @Inject constructor(
             }
     }
 
+    fun getStoreById(id: Long): Flow<Store?> {
+        return dataStore.data
+            .map{ preferences ->
+                val ownerStoresJson = preferences[userOwnerStoresKey] ?: ""
+                val workerStoresJson = preferences[userWorkerStoresKey] ?: ""
+
+                val typeToken = object : TypeToken<List<Store>>() {}.type
+
+                val ownerStores = gsonBuilder.fromJson<List<Store>>(ownerStoresJson, typeToken) ?: emptyList()
+                val workerStores = gsonBuilder.fromJson<List<Store>>(workerStoresJson, typeToken) ?: emptyList()
+
+                val allStores = ownerStores + workerStores
+                allStores.find { it.id == id }
+            }
+    }
+
 
 }

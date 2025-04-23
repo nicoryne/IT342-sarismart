@@ -44,7 +44,6 @@ class AccountViewModel @Inject constructor(
 
             if (res.success) {
                 _navigationEvent.emit(AccountNavigationEvent.NavigateToLogin)
-                _navigationEvent.emit(AccountNavigationEvent.ClearBackStack)
             }
 
         }
@@ -61,5 +60,4 @@ class AccountViewModel @Inject constructor(
 
 sealed class AccountNavigationEvent {
     object NavigateToLogin : AccountNavigationEvent()
-    object ClearBackStack : AccountNavigationEvent()
 }

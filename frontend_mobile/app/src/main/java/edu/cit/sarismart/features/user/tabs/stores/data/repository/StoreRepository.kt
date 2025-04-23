@@ -11,5 +11,6 @@ interface StoreRepository {
 
     suspend fun getOwnedStores(): List<Store>
 
+    suspend fun getStoreById(id: Long): Store
 
 }

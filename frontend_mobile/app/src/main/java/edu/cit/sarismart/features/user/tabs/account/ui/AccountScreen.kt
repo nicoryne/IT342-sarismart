@@ -27,7 +27,6 @@ import edu.cit.sarismart.features.user.tabs.account.ui.components.UserDetailBox
 @Composable
 fun AccountScreen (
     onNavigateToLogin: () -> Unit,
-    onClearBackStack: () -> Unit,
     onNavigateToNotifications: () -> Unit,
     viewModel: AccountViewModel = hiltViewModel<AccountViewModel>()
 ) {
@@ -50,7 +49,6 @@ fun AccountScreen (
         viewModel.navigationEvent.collect { event ->
             when (event) {
                 AccountNavigationEvent.NavigateToLogin -> onNavigateToLogin()
-                AccountNavigationEvent.ClearBackStack -> onClearBackStack()
             }
         }
     }
