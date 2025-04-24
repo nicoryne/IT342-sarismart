@@ -188,12 +188,21 @@ fun StoreMenuScreen(
                                     }
                                     "inventory" -> {
                                         // Navigate to inventory
+                                        storeId?.let { id ->
+                                            navController.navigate("store/$id/inventory")
+                                        }
                                     }
                                     "sales" -> {
                                         // Navigate to sales
+                                        storeId?.let { id ->
+                                            navController.navigate("store/$id/sales")
+                                        }
                                     }
                                     "settings" -> {
                                         // Navigate to settings
+                                        storeId?.let { id ->
+                                            navController.navigate("store/$id/settings")
+                                        }
                                     }
                                 }
                             }
