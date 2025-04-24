@@ -8,6 +8,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -102,11 +103,16 @@ fun CoreNavigationController(viewModel: CoreNavigationViewModel = hiltViewModel(
 
         // User
         composable("user") {
-            UserNavigationController (
-                onNavigateToLogin = { navController.navigate("login") }
+            UserNavigationController(
+                onNavigateToLogin = {
+                    navController.navigate("login") {
+                        popUpTo(0) {
+                            inclusive = true
+                        }
+                        launchSingleTop = true
+                    }
+                }
             )
-
-
         }
 
     }

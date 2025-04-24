@@ -9,4 +9,6 @@ object Constants {
     val GEMINI_API_URL = "https://generativelanguage.googleapis.com/"
 
     val GEMINI_MODEL = "gemini-2.0-flash"
+
+    val UPC_API_URL = "https://api.upcitemdb.com/"
 }

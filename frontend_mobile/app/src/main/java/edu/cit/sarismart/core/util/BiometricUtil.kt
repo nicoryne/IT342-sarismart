@@ -10,9 +10,7 @@ import kotlin.coroutines.resume
 
 class BiometricUtil {
     companion object {
-        /**
-         * checks if the device supports biometric authentication and if biometrics are enrolled
-         */
+
         fun canAuthenticate(context: Context): Boolean {
             val biometricManager = BiometricManager.from(context)
             return when (biometricManager.canAuthenticate(BiometricManager.Authenticators.BIOMETRIC_STRONG)) {
@@ -21,9 +19,7 @@ class BiometricUtil {
             }
         }
 
-        /**
-         * shows the biometric prompt and returns the result via callback
-         */
+
         fun showBiometricPrompt(
             activity: FragmentActivity,
             title: String = "Biometric Authentication",
@@ -62,9 +58,7 @@ class BiometricUtil {
             BiometricPrompt(activity, executor, callback).authenticate(promptInfo)
         }
 
-        /**
-         * shows the biometric prompt and returns the result via suspending function
-         */
+
         suspend fun showBiometricPromptSuspend(
             activity: FragmentActivity,
             title: String = "Biometric Authentication",

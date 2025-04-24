@@ -1,6 +1,7 @@
 package edu.cit.sarismart.features.auth.data.repository
 
 import edu.cit.sarismart.features.auth.data.models.ClientResponse
+import edu.cit.sarismart.features.user.tabs.account.data.models.User
 
 interface AuthRepository {
 
@@ -14,7 +15,7 @@ interface AuthRepository {
 
     suspend fun logout(): ClientResponse
 
-    fun isBiometricEnabled(): Boolean
+    suspend fun saveUser(user: User, accessToken: String, refreshToken: String, expiresAt: Long)
 
-    fun setBiometricEnabled(enabled: Boolean)
+    fun isBiometricEnabled(): Boolean
 }
