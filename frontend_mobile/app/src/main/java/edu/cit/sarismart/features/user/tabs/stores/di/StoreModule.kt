@@ -7,6 +7,7 @@ import dagger.hilt.components.SingletonComponent
 import edu.cit.sarismart.core.data.UserDetailsManager
 import edu.cit.sarismart.core.data.UserStoresManager
 import edu.cit.sarismart.core.network.BackendRetrofitClient
+import edu.cit.sarismart.features.user.tabs.scan.data.repository.BarcodeRepository
 import edu.cit.sarismart.features.user.tabs.stores.data.repository.ProductRepository
 import edu.cit.sarismart.features.user.tabs.stores.data.repository.ProductRepositoryImpl
 import edu.cit.sarismart.features.user.tabs.stores.data.repository.StoreRepository
@@ -19,7 +20,6 @@ import edu.cit.sarismart.features.user.tabs.stores.domain.StoreTransactionsApiSe
 import edu.cit.sarismart.features.user.tabs.stores.domain.StoreWorkerApiService
 import retrofit2.Retrofit
 import javax.inject.Singleton
-
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -67,29 +67,29 @@ object StoreModule {
         storeProductApiService: StoreProductApiService,
         storeTransactionsApiService: StoreTransactionsApiService,
         storeInventoryApiService: StoreInventoryApiService,
-        storeRepository: StoreRepository
+        storeRepository: StoreRepository,
+        barcodeRepository: BarcodeRepository
     ): ProductRepository {
         return ProductRepositoryImpl(
             storeProductApiService,
             storeTransactionsApiService,
             storeInventoryApiService,
-            storeRepository
+            storeRepository,
+            barcodeRepository
         )
     }
 
     @Provides
     @Singleton
     fun provideStoreRepository(
-        @BackendRetrofitClient backendRetrofit: Retrofit,
+        storeApiService: StoreApiService,
         userDetailsManager: UserDetailsManager,
-        storesManager: UserStoresManager
+        userStoresManager: UserStoresManager
     ): StoreRepository {
         return StoreRepositoryImpl(
-            backendRetrofit.create<StoreApiService>(StoreApiService::class.java),
+            storeApiService,
             userDetailsManager,
-            storesManager
+            userStoresManager
         )
     }
-
-
 }

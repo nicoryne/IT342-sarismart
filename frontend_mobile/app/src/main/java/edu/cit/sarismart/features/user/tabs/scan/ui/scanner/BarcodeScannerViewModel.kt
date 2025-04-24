@@ -32,6 +32,9 @@ class BarcodeScannerViewModel @Inject constructor(
     private val _errorMessage = MutableStateFlow("")
     val errorMessage: StateFlow<String> = _errorMessage
 
+    private val _productCreated = MutableStateFlow(false)
+    val productCreated: StateFlow<Boolean> = _productCreated
+
     private var storeId: Long = -1
     private var cartId: Long = -1
 
@@ -51,6 +54,7 @@ class BarcodeScannerViewModel @Inject constructor(
         _isScanning.value = true
         _lastScannedBarcode.value = barcode
         _isLoading.value = true
+        _productCreated.value = false
 
         Log.d("BarcodeScannerViewModel", "Processing barcode: $barcode")
 
@@ -59,13 +63,19 @@ class BarcodeScannerViewModel @Inject constructor(
                 val product = productRepository.getProductByBarcode(barcode, storeId)
 
                 if (product != null) {
-                    Log.d("BarcodeScannerViewModel", "Product found: ${product.name}")
+                    if (product.id > 0) {
+                        Log.d("BarcodeScannerViewModel", "Product found: ${product.name}")
+                    } else {
+                        Log.d("BarcodeScannerViewModel", "Product created: ${product.name}")
+                        _productCreated.value = true
+                    }
+
                     // Add product to cart
                     cartRepository.addItemToCart(cartId, storeId, product.id)
                     _isProductFound.value = true
                 } else {
                     Log.e("BarcodeScannerViewModel", "Product not found for barcode: $barcode")
-                    _errorMessage.value = "Product not found for barcode: $barcode"
+                    _errorMessage.value = "Product not found for barcode: $barcode. No product information available."
                 }
             } catch (e: Exception) {
                 Log.e("BarcodeScannerViewModel", "Error processing barcode", e)
@@ -83,5 +93,9 @@ class BarcodeScannerViewModel @Inject constructor(
 
     fun resetProductFound() {
         _isProductFound.value = false
+    }
+
+    fun resetProductCreated() {
+        _productCreated.value = false
     }
 }

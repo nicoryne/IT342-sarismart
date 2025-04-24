@@ -8,5 +8,7 @@ data class Product (
     val stock: Int,
     val description: String,
     val reorderLevel: Int,
+    val sold: Int,
     val store: Store,
+    val barcode: String
 )

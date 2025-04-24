@@ -9,3 +9,7 @@ annotation class BackendRetrofitClient()
 @Qualifier
 @Retention(AnnotationRetention.BINARY)
 annotation class GeminiRetrofitClient()
+
+@Qualifier
+@Retention(AnnotationRetention.BINARY)
+annotation class UpcRetrofitClient()

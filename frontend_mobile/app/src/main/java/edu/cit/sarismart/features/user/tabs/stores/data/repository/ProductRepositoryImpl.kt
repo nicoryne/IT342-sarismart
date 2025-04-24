@@ -1,6 +1,8 @@
 package edu.cit.sarismart.features.user.tabs.stores.data.repository
 
+import android.util.Log
 import edu.cit.sarismart.features.user.tabs.scan.data.models.CartItem
+import edu.cit.sarismart.features.user.tabs.scan.data.repository.BarcodeRepository
 import edu.cit.sarismart.features.user.tabs.stores.data.models.Product
 import edu.cit.sarismart.features.user.tabs.stores.data.models.Sale
 import edu.cit.sarismart.features.user.tabs.stores.domain.StoreInventoryApiService
@@ -17,7 +19,8 @@ class ProductRepositoryImpl @Inject constructor(
     private val storeProductApiService: StoreProductApiService,
     private val storeTransactionsApiService: StoreTransactionsApiService,
     private val storeInventoryApiService: StoreInventoryApiService,
-    private val storeRepository: StoreRepository
+    private val storeRepository: StoreRepository,
+    private val barcodeRepository: BarcodeRepository
 ) : ProductRepository {
 
     override suspend fun getProductsForStore(storeId: Long): List<Product> = withContext(Dispatchers.IO) {
@@ -28,7 +31,7 @@ class ProductRepositoryImpl @Inject constructor(
             }
             return@withContext emptyList()
         } catch (e: Exception) {
-            // Log error
+            Log.e("ProductRepository", "Error getting products for store", e)
             return@withContext emptyList()
         }
     }
@@ -40,27 +43,49 @@ class ProductRepositoryImpl @Inject constructor(
             val products = getProductsForStore(storeId)
             return@withContext products.find { it.id == productId }
         } catch (e: Exception) {
-            // Log error
+            Log.e("ProductRepository", "Error getting product by ID", e)
             return@withContext null
         }
     }
 
     override suspend fun getProductByBarcode(barcode: String, storeId: Long): Product? = withContext(Dispatchers.IO) {
         try {
-            // In a real app, you would have a dedicated endpoint for barcode lookup
-            // For now, we'll simulate it by returning a random product
+            // First, try to find the product in the store's inventory
             val products = getProductsForStore(storeId)
-            if (products.isNotEmpty()) {
-                // In a real app, you would search for the product with matching barcode
-                // For demo purposes, we'll just return a random product
-                return@withContext products.random()
+            val existingProduct = products.find { it.barcode == barcode }
+
+            if (existingProduct != null) {
+                return@withContext existingProduct
             }
+
+            // If not found, look up the barcode and create a new product
+            Log.d("ProductRepository", "Product not found locally, looking up barcode: $barcode")
+            val store = storeRepository.getStoreById(storeId)
+            val newProduct = barcodeRepository.createProductFromBarcode(barcode, storeId, store)
+
+            if (newProduct != null) {
+                // Create the product in the store
+                Log.d("ProductRepository", "Creating new product from barcode: ${newProduct.name}")
+                val response = storeProductApiService.createProduct(storeId, newProduct)
+
+                if (response.isSuccessful) {
+                    Log.d("ProductRepository", "Product created successfully")
+                    return@withContext response.body()
+                } else {
+                    Log.e("ProductRepository", "Failed to create product: ${response.code()}")
+                }
+            } else {
+                Log.e("ProductRepository", "Could not find product information for barcode: $barcode")
+            }
+
             return@withContext null
         } catch (e: Exception) {
-            // Log error
+            Log.e("ProductRepository", "Error processing barcode", e)
             return@withContext null
         }
     }
+
+    // Rest of the implementation remains the same
 
     override suspend fun updateProductStock(productId: Long, storeId: Long, newStock: Int): Boolean = withContext(Dispatchers.IO) {
         try {
@@ -71,7 +96,7 @@ class ProductRepositoryImpl @Inject constructor(
             val response = storeProductApiService.adjustStock(storeId, productId, adjustment)
             return@withContext response.isSuccessful
         } catch (e: Exception) {
-            // Log error
+            Log.e("ProductRepository", "Error updating product stock", e)
             return@withContext false
         }
     }
@@ -93,7 +118,7 @@ class ProductRepositoryImpl @Inject constructor(
             }
             return@withContext null
         } catch (e: Exception) {
-            // Log error
+            Log.e("ProductRepository", "Error creating sale", e)
             return@withContext null
         }
     }
@@ -106,7 +131,7 @@ class ProductRepositoryImpl @Inject constructor(
             }
             return@withContext emptyList()
         } catch (e: Exception) {
-            // Log error
+            Log.e("ProductRepository", "Error getting sales for store", e)
             return@withContext emptyList()
         }
     }
@@ -119,7 +144,7 @@ class ProductRepositoryImpl @Inject constructor(
             }
             return@withContext emptyList()
         } catch (e: Exception) {
-            // Log error
+            Log.e("ProductRepository", "Error getting low stock alerts", e)
             return@withContext emptyList()
         }
     }
@@ -129,7 +154,7 @@ class ProductRepositoryImpl @Inject constructor(
             val response = storeInventoryApiService.setReorderLevel(storeId, productId, level)
             return@withContext response.isSuccessful
         } catch (e: Exception) {
-            // Log error
+            Log.e("ProductRepository", "Error setting reorder level", e)
             return@withContext false
         }
     }

@@ -8,6 +8,7 @@ import dagger.hilt.components.SingletonComponent
 import edu.cit.sarismart.core.data.AccessTokenManager
 import edu.cit.sarismart.core.network.BackendRetrofitClient
 import edu.cit.sarismart.core.network.GeminiRetrofitClient
+import edu.cit.sarismart.core.network.UpcRetrofitClient
 import edu.cit.sarismart.core.util.Constants
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking

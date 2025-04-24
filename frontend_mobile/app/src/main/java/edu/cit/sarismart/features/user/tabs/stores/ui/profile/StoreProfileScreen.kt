@@ -323,7 +323,9 @@ fun StoreContent(store: Store) {
             stock = 10,
             description = "High-performance laptop with SSD.",
             reorderLevel = 3,
-            store = store
+            store = store,
+            sold = 3,
+            barcode = "123 123"
         ),
         Product(
             id = 2,
@@ -333,7 +335,9 @@ fun StoreContent(store: Store) {
             stock = 50,
             description = "Ergonomic wireless mouse.",
             reorderLevel = 10,
-            store = store
+            store = store,
+            sold = 3,
+            barcode = "123 123"
         ),
         Product(
             id = 3,
@@ -343,7 +347,9 @@ fun StoreContent(store: Store) {
             stock = 5,
             description = "Comfortable office chair.",
             reorderLevel = 2,
-            store = store
+            store = store,
+            sold = 3,
+            barcode = "123 123"
         ),
     )
     Column(

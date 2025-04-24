@@ -73,6 +73,8 @@ fun BarcodeScannerScreen(
     val isProductFound by viewModel.isProductFound.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
     val errorMessage by viewModel.errorMessage.collectAsState()
+    val productCreated by viewModel.productCreated.collectAsState()
+
 
     var hasCameraPermission by remember {
         mutableStateOf(
@@ -214,6 +216,19 @@ fun BarcodeScannerScreen(
                     .padding(16.dp),
                 contentAlignment = Alignment.Center
             ) {
+                if (productCreated) {
+                    AlertDialog(
+                        onDismissRequest = { viewModel.resetProductCreated() },
+                        title = { Text("New Product Added") },
+                        text = { Text("A new product has been added to your store from the barcode database and added to your cart.") },
+                        confirmButton = {
+                            Button(onClick = { viewModel.resetProductCreated() }) {
+                                Text("OK")
+                            }
+                        }
+                    )
+                }
+
                 Box(
                     modifier = Modifier
                         .size(250.dp)

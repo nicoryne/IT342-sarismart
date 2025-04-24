@@ -78,6 +78,7 @@ dependencies {
     val composeBom = platform("androidx.compose:compose-bom:2025.02.00")
     implementation(composeBom)
     androidTestImplementation(composeBom)
+    implementation(libs.androidx.foundation)
 
     // Material 3
     implementation(libs.androidx.material3)
@@ -93,6 +94,9 @@ dependencies {
 
     // Google Font
     implementation(libs.androidx.ui.text.google.fonts)
+
+    // Animation
+    implementation(libs.androidx.animation)
 
     // Lottie
     implementation(libs.lottie.compose)

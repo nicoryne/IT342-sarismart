@@ -6,8 +6,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.navArgument
 import edu.cit.sarismart.features.user.tabs.account.ui.AccountScreen
 import edu.cit.sarismart.features.user.tabs.maps.ui.map.UserMapScreen
 import edu.cit.sarismart.features.user.tabs.notifications.ui.NotificationScreen
@@ -126,33 +128,15 @@ fun UserNavigationHost(
 
         composable("store_menu/{storeId}") { backStackEntry ->
             val storeId = backStackEntry.arguments?.getString("storeId")?.toLongOrNull()
+
             StoreMenuScreen(
                 onNavigateToNotifications = { navController.navigate("notifications") },
-                storeId = storeId,
                 navController = navController,
                 onNavigateToScanner = { storeId, cartId ->
                     navController.navigate("barcode_scanner/$storeId/$cartId")
-                }
+                },
+                storeId = storeId
             )
-        }
-
-        composable("pick_cart/{storeId}") { backStackEntry ->
-            val storeId = backStackEntry.arguments?.getString("storeId")?.toLongOrNull()
-            if (storeId != null) {
-                PickCartScreen(
-                    onNavigateToNotifications = { navController.navigate("notifications") },
-                    onCartSelected = { cart ->
-                        navController.navigate("cart_details/$storeId/${cart.id}")
-                    },
-                    storeId = storeId,
-                    navController = navController,
-                    onNavigateToScanner = { storeId, cartId ->
-                        navController.navigate("barcode_scanner/$storeId/$cartId")
-                    }
-                )
-            } else {
-                Text("Error: Invalid Store ID")
-            }
         }
 
         composable("cart_details/{storeId}/{cartId}") { backStackEntry ->
@@ -204,6 +188,23 @@ fun UserNavigationHost(
                 },
                 storeId = storeId,
                 cartId = cartId
+            )
+        }
+
+        composable(
+            route = "store/{storeId}/scan",
+            arguments = listOf(navArgument("storeId") { type = NavType.LongType })
+        ) { backStackEntry ->
+            val storeId = backStackEntry.arguments?.getLong("storeId") ?: -1L
+
+            // Log the storeId to verify it's being passed correctly
+            Log.d("Navigation", "Navigating to PickCartScreen with storeId: $storeId")
+
+            PickCartScreen(
+                onNavigateBack = { navController.popBackStack() },
+                onNavigateToScanner = { storeId, cartId ->
+                    navController.navigate("barcode_scanner/$storeId/$cartId")
+                }
             )
         }
     }
