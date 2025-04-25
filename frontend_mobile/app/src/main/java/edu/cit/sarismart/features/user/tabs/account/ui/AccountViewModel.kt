@@ -37,7 +37,7 @@ class AccountViewModel @Inject constructor(
     fun onLogoutClicked() {
         viewModelScope.launch {
             _isLoading.value = true
-            delay(1000) // simulate network delay
+            delay(1000)
 
             val res = authRepository.logout()
             _isLoading.value = false

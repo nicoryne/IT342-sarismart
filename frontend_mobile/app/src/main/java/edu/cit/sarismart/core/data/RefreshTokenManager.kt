@@ -42,7 +42,4 @@ class RefreshTokenManager @Inject constructor(@ApplicationContext private val co
         }
     }
 
-    override suspend fun isExpired(): Boolean {
-        TODO("Not yet implemented")
-    }
 }

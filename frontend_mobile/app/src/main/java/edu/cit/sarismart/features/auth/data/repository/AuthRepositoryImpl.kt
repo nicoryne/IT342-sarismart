@@ -2,23 +2,34 @@ package edu.cit.sarismart.features.auth.data.repository
 
 import android.util.Log
 import androidx.compose.runtime.collectAsState
+import androidx.navigation.compose.rememberNavController
 import edu.cit.sarismart.core.data.PreferencesManager
 import edu.cit.sarismart.core.data.AccessTokenManager
 import edu.cit.sarismart.core.data.RefreshTokenManager
 import edu.cit.sarismart.core.data.UserDetailsManager
+import edu.cit.sarismart.core.data.UserStoresManager
 import edu.cit.sarismart.features.auth.data.models.AuthRequest
 import edu.cit.sarismart.features.auth.data.models.AuthResponse
 import edu.cit.sarismart.features.auth.data.models.ClientResponse
 import edu.cit.sarismart.features.auth.domain.AuthApiService
+import edu.cit.sarismart.features.user.tabs.account.data.models.User
+import edu.cit.sarismart.features.user.tabs.stores.data.repository.StoreRepositoryImpl
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import retrofit2.Response
+import java.io.IOException
 import javax.inject.Inject
 
 
-class AuthRepositoryImpl @Inject constructor(private val authApiService: AuthApiService, private val accessTokenManager: AccessTokenManager, private val refreshTokenManager: RefreshTokenManager, private val preferencesManager: PreferencesManager, private val userDetailsManager: UserDetailsManager) : AuthRepository {
+class AuthRepositoryImpl @Inject constructor(
+    private val authApiService: AuthApiService,
+    private val accessTokenManager: AccessTokenManager,
+    private val refreshTokenManager: RefreshTokenManager,
+    private val preferencesManager: PreferencesManager,
+    private val userDetailsManager: UserDetailsManager,
+   ) : AuthRepository {
 
     override suspend fun login(email: String, password: String): ClientResponse {
         val authRequest = AuthRequest(email, password)
@@ -33,22 +44,10 @@ class AuthRepositoryImpl @Inject constructor(private val authApiService: AuthApi
                     val body = response.body()
                     val accessToken = body?.accessToken
                     val refreshToken = body?.refreshToken
+                    val expiresAt = body?.expiresAt
                     val user = body?.user
 
-                    if (accessToken != null) {
-                        accessTokenManager.saveToken(accessToken)
-                    }
-
-                    if (refreshToken != null) {
-                        refreshTokenManager.saveToken(refreshToken)
-                    }
-
-                    if (user != null) {
-                        Log.i("AuthRepositoryImpl", "Saving User: $user")
-                        userDetailsManager.saveUserDetails(user)
-                        Log.i("AuthRepositoryImpl", "User Details: $user")
-                    }
-
+                    saveUser(user!!, accessToken!!, refreshToken!!, expiresAt!!)
                     ClientResponse(true, "Login Successful.")
                 } else if (response.code() == 403) {
                     ClientResponse(false, "Please try again. Invalid login credentials.")
@@ -62,9 +61,38 @@ class AuthRepositoryImpl @Inject constructor(private val authApiService: AuthApi
         }
     }
 
-
     override suspend fun loginWithBiometric(): ClientResponse {
-        return ClientResponse(true, "Test Success.")
+        if(!accessTokenManager.isExpired()) {
+            return ClientResponse(true, "Login Successful.")
+        }
+
+        return withContext(Dispatchers.IO) {
+            try {
+                val refreshToken = refreshTokenManager.getToken.first().toString()
+                val response = authApiService.refresh(mapOf("refresh_token" to refreshToken))
+
+                if (response.isSuccessful) {
+                    logout()
+                    val body = response.body()
+                    val accessToken = body?.accessToken
+                    val refreshToken = body?.refreshToken
+                    val expiresAt = body?.expiresAt
+                    val user = body?.user
+
+                    saveUser(user!!, accessToken!!, refreshToken!!, expiresAt!!)
+                    ClientResponse(true, "Login Successful.")
+                } else if (response.code() == 403) {
+                    ClientResponse(false, "Please try again. Invalid login credentials.")
+                } else {
+                    ClientResponse(false, "Please try again. Account might not exist.")
+                }
+            } catch (e: Exception) {
+                Log.e("AuthRepositoryImpl", "Error: ${e.message}")
+                ClientResponse(false, "Please try again. Server might be down.")
+            }
+        }
+
+
     }
 
     override suspend fun register(
@@ -122,5 +150,12 @@ class AuthRepositoryImpl @Inject constructor(private val authApiService: AuthApi
     override fun isBiometricEnabled(): Boolean {
         val token = runBlocking { refreshTokenManager.getToken.first() }
         return !token.isNullOrEmpty()
+    }
+
+    override suspend fun saveUser(user: User, accessToken: String, refreshToken: String, expiresAt: Long) {
+        accessTokenManager.saveToken(accessToken)
+        accessTokenManager.setExpiresAt(expiresAt)
+        refreshTokenManager.saveToken(refreshToken)
+        userDetailsManager.saveUserDetails(user)
     }
 }

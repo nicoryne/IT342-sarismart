@@ -30,25 +30,6 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-<<<<<<< HEAD
-                .cors(Customizer.withDefaults())
-                .csrf(csrf -> csrf.disable())
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(
-                                "/api/v1/auth/**",
-                                "/v3/api-docs/**",
-                                "/swagger-ui/**",
-                                "/swagger-ui.html",
-                                "/api/v1/stores/**")
-                        .permitAll()
-                        .requestMatchers(
-                                "/api/v1/products/**")
-                        .hasAuthority("authenticated")
-                        .anyRequest().authenticated())
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
-                .httpBasic(Customizer.withDefaults());
-=======
             .cors(Customizer.withDefaults())
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
@@ -74,6 +55,7 @@ public class SecurityConfig {
 
                 // Store-related endpoints
                 .requestMatchers(HttpMethod.GET, "/api/v1/stores").permitAll() // Get all stores
+                .requestMatchers(HttpMethod.GET, "/api/v1/stores/nearby/{latitude}/{longitude}/{radius}").permitAll() // Get nearby stores
                 .requestMatchers(HttpMethod.GET, "/api/v1/stores/{storeId}").permitAll() // Get store by ID
                 .requestMatchers(HttpMethod.POST, "/api/v1/stores").hasAuthority("authenticated") // Create a store
                 .requestMatchers(HttpMethod.PUT, "/api/v1/stores/{storeId}").hasAuthority("authenticated") // Update a store
@@ -117,7 +99,6 @@ public class SecurityConfig {
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
             .httpBasic(Customizer.withDefaults());
->>>>>>> 1d2c47e1e9759a17087f89245d58a7dbce995d2b
 
         return http.build();
     }

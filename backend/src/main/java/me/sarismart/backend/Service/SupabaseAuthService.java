@@ -121,8 +121,6 @@ public class SupabaseAuthService {
                     .body(Map.of("error", "Exception during sign in", "details", e.getMessage()));
         }
     }
-<<<<<<< HEAD
-=======
     
     public ResponseEntity<Object> refreshSession(String refreshToken) {
         String url = appConfig.getUrl() + "/auth/v1/token?grant_type=refresh_token";
@@ -187,5 +185,4 @@ public class SupabaseAuthService {
                     .body(Map.of("error", "Exception during getUserDetails", "details", e.getMessage()));
         }
     }
->>>>>>> 1d2c47e1e9759a17087f89245d58a7dbce995d2b
 }
