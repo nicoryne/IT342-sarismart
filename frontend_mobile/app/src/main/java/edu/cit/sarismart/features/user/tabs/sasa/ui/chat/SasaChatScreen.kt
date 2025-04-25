@@ -131,9 +131,9 @@ fun SasaChatScreen(
                         .padding(16.dp),
                     placeholder = { Text("Chat with Sasa...") },
                     colors = TextFieldDefaults.colors(
-                        focusedContainerColor = Color.White,
-                        unfocusedContainerColor = Color.White,
-                        disabledContainerColor = Color.White,
+                        focusedContainerColor = MaterialTheme.colorScheme.background,
+                        unfocusedContainerColor = MaterialTheme.colorScheme.background,
+                        disabledContainerColor = MaterialTheme.colorScheme.background,
                         unfocusedIndicatorColor = MaterialTheme.colorScheme.secondary,
                         unfocusedTextColor = MaterialTheme.colorScheme.secondary,
                         unfocusedPlaceholderColor =  Color(0xFF8B8A8A)

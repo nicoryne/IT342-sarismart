@@ -11,6 +11,8 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Separator } from "@/components/ui/separator"
+import { useRouter } from "next/navigation"
+
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false)
@@ -19,6 +21,8 @@ export default function LoginPage() {
     password: "",
     rememberMe: false,
   })
+  const router = useRouter()
+
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
@@ -30,10 +34,10 @@ export default function LoginPage() {
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+    e.preventDefault()
   
     try {
-      const response = await fetch("http://localhost:8080/api/v1/auth/login", {
+      const response = await fetch("https://sarismart-backend.onrender.com/api/v1/auth/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -42,23 +46,22 @@ export default function LoginPage() {
           email: formData.email,
           password: formData.password,
         }),
-      });
+      })
   
       if (response.ok) {
-        const data = await response.json(); // or .text() depending on your backend's response
-        console.log("✅ Login successful:", data);
+        const data = await response.json()
+        console.log("✅ Login successful:", data)
   
-        localStorage.setItem("token", data.access_token);
+        localStorage.setItem("token", data.access_token)
+        router.push("/dashboard")
       } else {
-        const errorText = await response.text();
-        console.error("❌ Login failed:", errorText);
-        alert("Login failed: " + errorText);
+        const errorText = await response.text()
+        console.error("❌ Login failed:", errorText)
       }
     } catch (err) {
-      console.error("💥 Error:", err);
-      alert("Something went wrong!");
+      console.error("💥 Error:", err)
     }
-  };  
+  }  
   
 
   const togglePasswordVisibility = () => {
@@ -140,14 +143,6 @@ export default function LoginPage() {
             </div>
 
             <div className="mt-6 grid grid-cols-2 gap-3">
-              <Button variant="outline" className="w-full">
-                <Github className="mr-2 h-4 w-4" />
-                GitHub
-              </Button>
-              <Button variant="outline" className="w-full">
-                <Facebook className="mr-2 h-4 w-4" />
-                Facebook
-              </Button>
               <Button variant="outline" className="col-span-2 w-full">
                 <Mail className="mr-2 h-4 w-4" />
                 Email

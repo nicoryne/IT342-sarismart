@@ -13,6 +13,7 @@ secrets {
 
 }
 
+
 android {
     namespace = "edu.cit.sarismart"
     compileSdk = 35
@@ -25,8 +26,6 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-
-        manifestPlaceholders["MAPS_API_KEY"] = project.findProperty("maps.api.key") ?: ""
     }
 
     buildTypes {
@@ -79,6 +78,7 @@ dependencies {
     val composeBom = platform("androidx.compose:compose-bom:2025.02.00")
     implementation(composeBom)
     androidTestImplementation(composeBom)
+    implementation(libs.androidx.foundation)
 
     // Material 3
     implementation(libs.androidx.material3)
@@ -95,6 +95,9 @@ dependencies {
     // Google Font
     implementation(libs.androidx.ui.text.google.fonts)
 
+    // Animation
+    implementation(libs.androidx.animation)
+
     // Lottie
     implementation(libs.lottie.compose)
 
@@ -103,6 +106,8 @@ dependencies {
 
     // Data Store
     implementation(libs.androidx.datastore.preferences)
+    implementation(libs.androidx.datastore)
+
 
     // Google Maps
     implementation(libs.maps.compose)
@@ -110,6 +115,12 @@ dependencies {
 
     // Location Services
     implementation(libs.play.services.location)
+
+    // Navigation
+    implementation(libs.androidx.navigation.compose.v277)
+
+    // Accompanist
+    implementation(libs.accompanist.permissions)
 
     // Biometrics
     implementation(libs.androidx.biometric.ktx)
@@ -122,11 +133,23 @@ dependencies {
     implementation(platform(libs.okhttp.bom))
     implementation(libs.okhttp)
     implementation(libs.logging.interceptor)
+
+    // Camera
+    implementation(libs.androidx.camera.camera2)
+    implementation(libs.androidx.camera.lifecycle)
+    implementation(libs.androidx.camera.view)
+
+    // Barcode Scanning
+    implementation(libs.barcode.scanning)
+
 }
+
 
 kapt {
     correctErrorTypes = true
 }
+
+
 
 
 

@@ -49,12 +49,12 @@ fun ChatMessageItem(message: Message) {
                     .clip(RoundedCornerShape(8.dp)),
                 shadowElevation = 12.dp,
                 tonalElevation = 10.dp,
-                color = if (message.isUserMessage) MaterialTheme.colorScheme.primary else Color.White
+                color = if (message.isUserMessage) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.background
             ) {
                 Text(
                     text = message.text,
                     style = MaterialTheme.typography.bodyMedium,
-                    color = if (message.isUserMessage) Color.White else MaterialTheme.colorScheme.primary,
+                    color = if (message.isUserMessage) MaterialTheme.colorScheme.background else MaterialTheme.colorScheme.primary,
                     modifier = Modifier
                         .padding(horizontal = 16.dp, vertical = 8.dp)
                 )

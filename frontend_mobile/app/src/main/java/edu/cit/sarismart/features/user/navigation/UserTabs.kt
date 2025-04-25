@@ -13,3 +13,4 @@ enum class UserTabs(
     STORE("store", "My Store", R.drawable.ic_tab_store),
     ACCOUNT("account", "Account", R.drawable.ic_tab_profile)
 }
+

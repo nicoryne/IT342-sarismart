@@ -79,7 +79,7 @@ fun LoginScreen(
                         BiometricUtil.showBiometricPrompt(
                             activity = it,
                             title = "Login to SariSmart",
-                            subtitle = "Use your fingerprint or face to log in",
+                            subtitle = "Use your fingerprint to log in",
                             onSuccess = { viewModel.onBiometricAuthSuccess() },
                             onError = { _, _ -> /* handle error */ },
                             onFailed = { /* handle failure */ }
@@ -87,6 +87,12 @@ fun LoginScreen(
                     }
                 }
             }
+        }
+    }
+
+    LaunchedEffect(isBiometricAvailable) {
+        if(isBiometricAvailable) {
+            viewModel.onBiometricLoginClicked()
         }
     }
 
@@ -285,7 +291,7 @@ fun LoginScreen(
                     modifier = Modifier.weight(1f),
                     shape = RoundedCornerShape(12.dp),
                     colors = ButtonDefaults.elevatedButtonColors(
-                        containerColor = Color.White
+                        containerColor = MaterialTheme.colorScheme.background
                     )
                 ) {
                     Icon(
@@ -304,7 +310,7 @@ fun LoginScreen(
                     modifier = Modifier.weight(1f),
                     shape = RoundedCornerShape(12.dp),
                     colors = ButtonDefaults.elevatedButtonColors(
-                        containerColor = Color.White
+                        containerColor = MaterialTheme.colorScheme.background
                     )
                 ) {
                     Icon(

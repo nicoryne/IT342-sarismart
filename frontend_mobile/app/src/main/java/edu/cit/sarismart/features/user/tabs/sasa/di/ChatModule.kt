@@ -4,12 +4,11 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import edu.cit.sarismart.features.auth.domain.AuthApiService
+import edu.cit.sarismart.core.network.GeminiRetrofitClient
 import edu.cit.sarismart.features.user.tabs.sasa.data.repository.ChatRepository
 import edu.cit.sarismart.features.user.tabs.sasa.data.repository.ChatRepositoryImpl
-import edu.cit.sarismart.features.user.tabs.sasa.domain.ChatService
+import edu.cit.sarismart.features.user.tabs.sasa.domain.ChatApiService
 import retrofit2.Retrofit
-import javax.inject.Named
 import javax.inject.Singleton
 
 @Module
@@ -18,9 +17,9 @@ object ChatModule {
 
     @Provides
     @Singleton
-    fun provideChatRepository(@Named("GeminiRetrofit") geminiRetrofit: Retrofit): ChatRepository {
+    fun provideChatRepository(@GeminiRetrofitClient geminiRetrofitClient: Retrofit): ChatRepository {
         return ChatRepositoryImpl(
-            geminiRetrofit.create<ChatService>(ChatService::class.java)
+            geminiRetrofitClient.create<ChatApiService>(ChatApiService::class.java)
         )
     }
 }

@@ -17,6 +17,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 
@@ -31,9 +32,9 @@ fun UserDetailBox(label: String, value: String, isEditable: Boolean, onEditClick
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(8.dp)),
-            shadowElevation = 4.dp,
-            tonalElevation = 2.dp,
-            color = MaterialTheme.colorScheme.surface,
+            shadowElevation = 8.dp,
+            tonalElevation = 8.dp,
+            color = MaterialTheme.colorScheme.background,
         ) {
             Box(
                 modifier = Modifier
@@ -43,12 +44,14 @@ fun UserDetailBox(label: String, value: String, isEditable: Boolean, onEditClick
                 Column(modifier = Modifier.align(Alignment.CenterStart)) {
                     Text(
                         text = label,
-                        style = MaterialTheme.typography.bodyMedium,
-                        fontWeight = FontWeight.Bold
+                        style = MaterialTheme.typography.bodySmall,
+                        fontWeight = FontWeight.SemiBold,
+                        color = Color(0xFF8B8A8A)
                     )
                     Text(
                         text = value,
-                        style = MaterialTheme.typography.bodyMedium
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.Bold,
                     )
                 }
 
@@ -57,7 +60,6 @@ fun UserDetailBox(label: String, value: String, isEditable: Boolean, onEditClick
                         onClick = onEditClick,
                         modifier = Modifier
                             .align(Alignment.CenterEnd)
-                            .padding(8.dp)
                     ) {
                         Icon(
                             Icons.Filled.Edit,
