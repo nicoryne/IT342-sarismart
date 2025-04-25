@@ -55,6 +55,7 @@ public class SecurityConfig {
 
                 // Store-related endpoints
                 .requestMatchers(HttpMethod.GET, "/api/v1/stores").permitAll() // Get all stores
+                .requestMatchers(HttpMethod.GET, "/api/v1/stores/nearby/{latitude}/{longitude}/{radius}").permitAll() // Get nearby stores
                 .requestMatchers(HttpMethod.GET, "/api/v1/stores/{storeId}").permitAll() // Get store by ID
                 .requestMatchers(HttpMethod.POST, "/api/v1/stores").hasAuthority("authenticated") // Create a store
                 .requestMatchers(HttpMethod.PUT, "/api/v1/stores/{storeId}").hasAuthority("authenticated") // Update a store

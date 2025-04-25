@@ -33,6 +33,14 @@ public class StoreController {
         return storeService.createStore(store);
     }
 
+    // Method: stores.getNearby
+    // Permit all users to get nearby stores
+    @Operation(summary = "Get Nearby Stores", description = "Retrieve a list of nearby stores")
+    @GetMapping("/nearby/{latitude}/{longitude}/{radius}")
+    public List<Store> getNearbyStores(@PathVariable double latitude, @PathVariable double longitude, @PathVariable double radius) {
+        return storeService.getNearbyStores(latitude, longitude, radius);
+    }
+
     // Method: stores.get
     // Permit all users to get a store by ID
     @Operation(summary = "Get Store by ID", description = "Retrieve a store by its ID")
