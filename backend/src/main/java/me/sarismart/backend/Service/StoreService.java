@@ -5,7 +5,6 @@ import me.sarismart.backend.Repository.SaleRepository;
 import me.sarismart.backend.Repository.StoreRepository;
 import me.sarismart.backend.Repository.UserRepository;
 import me.sarismart.backend.Repository.StockAdjustmentRepository;
-import me.sarismart.backend.Security.JwtUtil;
 import me.sarismart.backend.DTO.StoreRequest;
 import me.sarismart.backend.Entity.Product;
 import me.sarismart.backend.Entity.Report;
@@ -34,9 +33,6 @@ public class StoreService {
 
         @Autowired
         private StockAdjustmentRepository stockAdjustmentRepository;
-
-        @Autowired
-        private JwtUtil jwtUtil;
         
         @Autowired
         private AuthorizationService authorizationService;
@@ -44,19 +40,15 @@ public class StoreService {
         private String getCurrentUserId() {
                 Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
                 if (authentication == null || !authentication.isAuthenticated()) {
-                        throw new RuntimeException("User is not authenticated");
+                    throw new RuntimeException("User is not authenticated");
                 }
-                
-                Object credentials = authentication.getCredentials();
-                if (!(credentials instanceof String token)) {
-                        throw new RuntimeException("Invalid authentication token");
+            
+                Object principal = authentication.getPrincipal();
+                if (principal instanceof String userId) {
+                    return userId;
                 }
-                
-                try {
-                        return jwtUtil.getUserIdFromToken(token);
-                } catch (Exception e) {
-                        throw new RuntimeException("Failed to extract user ID from token", e);
-                }
+            
+                throw new RuntimeException("Failed to retrieve user ID from authentication principal");
         }
 
         private void authorizeOwner(Store store) {
