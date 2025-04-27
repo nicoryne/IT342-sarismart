@@ -4,7 +4,7 @@ import type React from "react"
 
 import { useState } from "react"
 import Link from "next/link"
-import { Eye, EyeOff, Facebook, Github, Mail } from "lucide-react"
+import { Eye, EyeOff, Mail, Loader2 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -12,6 +12,8 @@ import { Label } from "@/components/ui/label"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Separator } from "@/components/ui/separator"
 import { useRouter } from "next/navigation"
+import { TermsModal } from "@/components/terms-modal"
+import { PrivacyModal } from "@/components/privacy-modal"
 
 export default function RegisterPage() {
   const [showPassword, setShowPassword] = useState(false)
@@ -26,6 +28,26 @@ export default function RegisterPage() {
     agreeTerms: false,
   })
   const [passwordError, setPasswordError] = useState("")
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState("")
+  const [showTermsModal, setShowTermsModal] = useState(false)
+  const [showPrivacyModal, setShowPrivacyModal] = useState(false)
+
+  // Function to show toast notifications
+  const showToast = (message: string, type: "success" | "error") => {
+    const toast = document.createElement("div")
+    toast.className = `fixed top-4 right-4 px-4 py-2 rounded shadow-lg z-50 transition-opacity duration-300 ${
+      type === "success" ? "bg-green-600 text-white" : "bg-red-600 text-white"
+    }`
+    toast.textContent = message
+    document.body.appendChild(toast)
+
+    // Fade out and remove
+    setTimeout(() => {
+      toast.style.opacity = "0"
+      setTimeout(() => document.body.removeChild(toast), 500)
+    }, 3000)
+  }
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
@@ -42,7 +64,16 @@ export default function RegisterPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-  
+    setIsLoading(true)
+    setError("")
+
+    // Validate passwords match
+    if (formData.password !== formData.confirmPassword) {
+      setError("Passwords do not match")
+      setIsLoading(false)
+      return
+    }
+
     try {
       const response = await fetch("https://sarismart-backend.onrender.com/api/v1/auth/register", {
         method: "POST",
@@ -56,21 +87,34 @@ export default function RegisterPage() {
           phone: formData.phone,
         }),
       })
-  
-      if (!response.ok) {
-        throw new Error("Sign up failed")
+
+      if (response.ok) {
+        const data = await response.json()
+        console.log("Sign Up successful:", data)
+
+        localStorage.setItem("token", data.access_token)
+
+        // Show success toast
+        showToast("Registration successful! Redirecting...", "success")
+
+        // Redirect after a short delay to show the success message
+        setTimeout(() => {
+          router.push("/dashboard")
+        }, 1000)
+      } else {
+        const errorData = await response.json()
+        console.error("Sign Up error:", errorData)
+        setError(errorData.message || "Registration failed")
+        showToast("Registration failed: " + (errorData.message || "Please try again"), "error")
       }
-  
-      const data = await response.json()
-      console.log("Sign Up successful:", data)
-  
-      localStorage.setItem("token", data.access_token)
-      router.push("/dashboard") 
     } catch (error) {
       console.error("Sign Up error:", error)
+      setError("An unexpected error occurred. Please try again.")
+      showToast("Connection error. Please check your internet and try again.", "error")
+    } finally {
+      setIsLoading(false)
     }
   }
-  
 
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword)
@@ -183,23 +227,39 @@ export default function RegisterPage() {
               </div>
               {passwordError && <p className="text-sm text-red-500">{passwordError}</p>}
             </div>
+            {error && <div className="rounded-md bg-red-50 p-3 text-sm text-red-600">{error}</div>}
 
             <div className="flex items-center space-x-2">
               <Checkbox id="terms" required checked={formData.agreeTerms} onCheckedChange={handleCheckboxChange} />
               <Label htmlFor="terms" className="text-sm font-normal">
                 I agree to the{" "}
-                <Link href="/terms" className="text-[#008080] hover:underline">
+                <button
+                  type="button"
+                  onClick={() => setShowTermsModal(true)}
+                  className="text-[#008080] font-medium hover:underline focus:outline-none"
+                >
                   Terms of Service
-                </Link>{" "}
+                </button>{" "}
                 and{" "}
-                <Link href="/privacy" className="text-[#008080] hover:underline">
+                <button
+                  type="button"
+                  onClick={() => setShowPrivacyModal(true)}
+                  className="text-[#008080] font-medium hover:underline focus:outline-none"
+                >
                   Privacy Policy
-                </Link>
+                </button>
               </Label>
             </div>
 
-            <Button type="submit" className="w-full bg-[#008080] text-white hover:bg-[#005F6B]">
-              Create Account
+            <Button type="submit" className="w-full bg-[#008080] text-white hover:bg-[#005F6B]" disabled={isLoading}>
+              {isLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Creating Account...
+                </>
+              ) : (
+                "Create Account"
+              )}
             </Button>
           </form>
 
@@ -229,6 +289,12 @@ export default function RegisterPage() {
           </Link>
         </div>
       </div>
+
+      {/* Terms of Service Modal */}
+      <TermsModal defaultOpen={showTermsModal} onOpenChange={setShowTermsModal} />
+
+      {/* Privacy Policy Modal */}
+      <PrivacyModal defaultOpen={showPrivacyModal} onOpenChange={setShowPrivacyModal} />
     </div>
   )
 }

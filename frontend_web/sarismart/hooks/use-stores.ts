@@ -25,20 +25,23 @@ const fetchStores = async () => {
 
   if (token) {
     try {
-      const base64Url = token.split('.')[1];
-      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-      const jsonPayload = decodeURIComponent(window.atob(base64).split('').map(function(c) {
-          return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-      }).join(''));
-  
-      const payload = JSON.parse(jsonPayload);
-      ownerId = payload.sub;
+      const base64Url = token.split(".")[1]
+      const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/")
+      const jsonPayload = decodeURIComponent(
+        window
+          .atob(base64)
+          .split("")
+          .map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
+          .join(""),
+      )
 
+      const payload = JSON.parse(jsonPayload)
+      ownerId = payload.sub
     } catch (error) {
-      console.error("Error decoding or parsing the token:", error);
+      console.error("Error decoding or parsing the token:", error)
     }
   } else {
-    console.log("No token found in local storage.");
+    console.log("No token found in local storage.")
   }
 
   if (!ownerId) throw new Error("No ownerId found in token")
@@ -81,11 +84,15 @@ export function useStores() {
   function getUserFromToken(token: string | null) {
     if (!token) return null
     try {
-      const base64Url = token.split('.')[1]
-      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/')
-      const jsonPayload = decodeURIComponent(window.atob(base64).split('').map(function(c) {
-        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)
-      }).join(''))
+      const base64Url = token.split(".")[1]
+      const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/")
+      const jsonPayload = decodeURIComponent(
+        window
+          .atob(base64)
+          .split("")
+          .map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
+          .join(""),
+      )
       return JSON.parse(jsonPayload)
     } catch {
       return null
@@ -104,9 +111,7 @@ export function useStores() {
 
     // Get device location
     const getPosition = (): Promise<GeolocationPosition> =>
-      new Promise((resolve, reject) =>
-        navigator.geolocation.getCurrentPosition(resolve, reject)
-      )
+      new Promise((resolve, reject) => navigator.geolocation.getCurrentPosition(resolve, reject))
 
     let latitude = 0
     let longitude = 0
@@ -125,7 +130,7 @@ export function useStores() {
       location: newStore.location,
       latitude,
       longitude,
-      ownerId: user.sub
+      ownerId: user.sub,
     }
 
     try {
@@ -135,7 +140,7 @@ export function useStores() {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(body)
+        body: JSON.stringify(body),
       })
 
       if (!response.ok) {
@@ -144,7 +149,7 @@ export function useStores() {
 
       const createdStore = await response.json()
       // Map backend response to frontend Store interface
-      setStores(prev => [
+      setStores((prev) => [
         ...prev,
         {
           id: createdStore.id,
@@ -152,7 +157,7 @@ export function useStores() {
           location: createdStore.location,
           latitude: createdStore.latitude,
           longitude: createdStore.longitude,
-        }
+        },
       ])
     } catch (error) {
       console.error(error)
@@ -213,10 +218,8 @@ export function useStores() {
       const updatedStore = await response.json()
       setStores((prev) =>
         prev.map((store) =>
-          store.id === storeId
-            ? { ...store, name: updatedStore.storeName, location: updatedStore.location }
-            : store
-        )
+          store.id === storeId ? { ...store, name: updatedStore.storeName, location: updatedStore.location } : store,
+        ),
       )
     } catch (error) {
       console.error(error)
