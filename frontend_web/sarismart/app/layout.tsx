@@ -8,6 +8,7 @@ const inter = Inter({ subsets: ["latin"] })
 export const metadata = {
   title: "SariSmart - Smart Technology Solutions",
   description: "Empowering businesses with intelligent solutions that drive growth, efficiency, and innovation.",
+    generator: 'v0.dev'
 }
 
 export default function RootLayout({

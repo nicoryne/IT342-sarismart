@@ -1,4 +1,4 @@
-import React from "react"
+import type React from "react"
 import Verification from "@/components/inventory/verification"
 import DashboardClientWrapper from "./dashboard-client-wrapper"
 

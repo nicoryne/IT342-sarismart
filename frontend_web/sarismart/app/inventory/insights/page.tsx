@@ -1,257 +1,463 @@
 "use client"
 
-import { useState } from "react"
-import { Calendar, Filter, LineChart, PieChart, BarChart3, RefreshCw } from "lucide-react"
+import { useState, useEffect } from "react"
+import { LineChart, PieChart, BarChart3, Loader2 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { useStores } from "@/hooks/use-stores"
+import { useStoresContext } from "@/hooks/use-stores-context"
+import { StoreSelector } from "@/components/store-selector"
+import { showToast } from "@/components/ui/toast-notification"
 
 export default function InsightsPage() {
-  // STEP 1: Set up state for filtering and data display
-  const [timeRange, setTimeRange] = useState("30d") // Time range for data filtering
-  const [refreshing, setRefreshing] = useState(false) // Loading state for refresh action
-  const [selectedStore, setSelectedStore] = useState("all") // Currently selected store
+  const [timeRange, setTimeRange] = useState("30d")
+  const { selectedStore, filterInsightsByStore, stores } = useStoresContext()
+  const [storeInsights, setStoreInsights] = useState({
+    revenueGrowth: "0%",
+    turnover: "0x",
+    topCategory: "None",
+  })
+  const [isLoading, setIsLoading] = useState(false)
+  const [salesData, setSalesData] = useState([])
+  const [inventoryData, setInventoryData] = useState([])
 
-  // STEP 2: Get store insights data from the custom hook
-  const { filterInsightsByStore } = useStores()
+  // Define the type for stock history entries
+  type StockHistoryEntry = {
+    description: string;
+    // Add other properties if needed
+  };
 
-  // STEP 3: Get insights for the selected store
-  // In a real implementation, this would fetch data from your backend API
-  // Example: useEffect(() => { async function fetchData() { const response = await fetch(`/api/stores/${selectedStore}/insights`); const data = await response.json(); setStoreInsights(data); } fetchData(); }, [selectedStore]);
-  const storeInsights = filterInsightsByStore(selectedStore)
+  // Define the type for restock alert entries
+  type RestockAlertEntry = {
+    message: string;
+    // Add other properties if needed
+  };
 
-  // STEP 4: Handle refresh button click to fetch fresh data
-  const handleRefresh = () => {
-    setRefreshing(true)
-    // STEP 5: In a real implementation, this would fetch fresh data from the API
-    // Example: async function fetchInsights() {
-    //   try {
-    //     const response = await fetch(`/api/stores/${selectedStore}/insights`, { cache: 'no-store' });
-    //     const data = await response.json();
-    //     setStoreInsights(data);
-    //   } catch (error) {
-    //     console.error('Error refreshing insights:', error);
-    //   } finally {
-    //     setRefreshing(false);
-    //   }
-    // }
-    // fetchInsights();
+  // Update the state type
+  const [stockHistory, setStockHistory] = useState<StockHistoryEntry[]>([])
+  const [restockAlerts, setRestockAlerts] = useState<RestockAlertEntry[]>([])
 
-    // Simulate API call with timeout
-    setTimeout(() => setRefreshing(false), 1500)
+  // Fetch insights when selectedStore or timeRange changes
+  useEffect(() => {
+    const fetchInsights = async () => {
+      setIsLoading(true)
+      try {
+        // Check if filterInsightsByStore exists before calling it
+        if (typeof filterInsightsByStore !== "function") {
+          console.error("filterInsightsByStore is not a function")
+          setStoreInsights({ revenueGrowth: "0%", turnover: "0x", topCategory: "None" })
+          return
+        }
+
+        const insights = await filterInsightsByStore(selectedStore)
+        setStoreInsights(insights)
+
+        // Fetch sales data
+        await fetchSalesData()
+
+        // Fetch inventory data
+        await fetchInventoryData()
+
+        // Fetch stock adjustment history
+        await fetchStockHistory()
+
+        // Fetch restock alerts
+        await fetchRestockAlerts()
+      } catch (error) {
+        console.error("Error fetching insights:", error)
+        showToast("Failed to fetch insights data", "error")
+        setStoreInsights({ revenueGrowth: "0%", turnover: "0x", topCategory: "None" })
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    fetchInsights()
+  }, [selectedStore, timeRange, filterInsightsByStore, stores])
+
+  // Fetch sales data from the API
+  const fetchSalesData = async () => {
+    try {
+      const token = localStorage.getItem("token")
+      if (!token) {
+        showToast("Authentication token not found", "error")
+        return
+      }
+
+      if (selectedStore === "all") {
+        // For "all" stores, we could aggregate data from all user's stores
+        // This is a simplified implementation - just setting empty data
+        setSalesData([])
+        return
+      }
+
+      // Verify the selected store belongs to the user's stores
+      const storeExists = stores.some((store) => String(store.id) === selectedStore)
+      if (!storeExists) {
+        console.warn(`Store ${selectedStore} does not belong to the current user`)
+        setSalesData([])
+        return
+      }
+
+      // Determine which report to fetch based on timeRange
+      const reportType = timeRange === "7d" ? "daily" : "monthly"
+
+      const response = await fetch(
+        `https://sarismart-backend.onrender.com/api/v1/stores/${selectedStore}/reports/${reportType}`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      )
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch sales data: ${response.status}`)
+      }
+
+      const data = await response.json()
+      setSalesData(data)
+    } catch (error) {
+      console.error("Error fetching sales data:", error)
+      setSalesData([])
+    }
+  }
+
+  // Fetch inventory data from the API
+  const fetchInventoryData = async () => {
+    try {
+      const token = localStorage.getItem("token")
+      if (!token) {
+        showToast("Authentication token not found", "error")
+        return
+      }
+
+      if (selectedStore === "all") {
+        // For "all" stores, we could aggregate data from all user's stores
+        // This is a simplified implementation - just setting empty data
+        setInventoryData([])
+        return
+      }
+
+      // Verify the selected store belongs to the user's stores
+      const storeExists = stores.some((store) => String(store.id) === selectedStore)
+      if (!storeExists) {
+        console.warn(`Store ${selectedStore} does not belong to the current user`)
+        setInventoryData([])
+        return
+      }
+
+      const response = await fetch(
+        `https://sarismart-backend.onrender.com/api/v1/stores/${selectedStore}/reports/inventory`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      )
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch inventory data: ${response.status}`)
+      }
+
+      const data = await response.json()
+      setInventoryData(data)
+    } catch (error) {
+      console.error("Error fetching inventory data:", error)
+      setInventoryData([])
+    }
+  }
+
+  // Fetch stock adjustment history
+  const fetchStockHistory = async () => {
+    try {
+      const token = localStorage.getItem("token")
+      if (!token) {
+        showToast("Authentication token not found", "error")
+        return
+      }
+
+      if (selectedStore === "all") {
+        // Aggregate stock history for all stores
+        const allStockHistory = await Promise.all(
+          stores.map(async (store) => {
+            const response = await fetch(
+              `https://sarismart-backend.onrender.com/api/v1/stores/${store.id}/stock/history`,
+              {
+                method: "GET",
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                },
+              },
+            )
+            if (!response.ok) {
+              console.warn(`Failed to fetch stock history for store ${store.id}: ${response.status}`)
+              return []
+            }
+            return response.json()
+          })
+        )
+        // Flatten the aggregated data and map it to the desired format
+        const aggregatedData = allStockHistory.flat().map((entry) => ({
+          description: `${entry.productName || entry.name || "Unknown Product"} stock has been updated to ${
+            entry.newStock || "N/A"
+          } on ${new Date(entry.timestamp).toLocaleString()}`,
+        }))
+        setStockHistory(aggregatedData)
+        return
+      }
+
+      const storeExists = stores.some((store) => String(store.id) === selectedStore)
+      if (!storeExists) {
+        console.warn(`Store ${selectedStore} does not belong to the current user`)
+        setStockHistory([])
+        return
+      }
+
+      const response = await fetch(
+        `https://sarismart-backend.onrender.com/api/v1/stores/${selectedStore}/stock/history`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      )
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch stock history: ${response.status}`)
+      }
+
+      const data = await response.json()
+
+      // Map data to the desired message format
+      if (Array.isArray(data) && data.length > 0) {
+        setStockHistory(data.map((entry) => ({
+          description: `${entry.productName || entry.name || "Unknown Product"} stock has been updated to ${
+            entry.newStock || "N/A"
+          } on ${new Date(entry.timestamp).toLocaleString()}`,
+        })))
+      } else {
+        setStockHistory([])
+      }
+    } catch (error) {
+      console.error("Error fetching stock history:", error)
+      setStockHistory([])
+    }
+  }
+
+  // Fetch restock alerts
+  const fetchRestockAlerts = async () => {
+    try {
+      const token = localStorage.getItem("token")
+      if (!token) {
+        showToast("Authentication token not found", "error")
+        return
+      }
+
+      if (selectedStore === "all") {
+        setRestockAlerts([])
+        return
+      }
+
+      const storeExists = stores.some((store) => String(store.id) === selectedStore)
+      if (!storeExists) {
+        console.warn(`Store ${selectedStore} does not belong to the current user`)
+        setRestockAlerts([])
+        return
+      }
+
+      const response = await fetch(
+        `https://sarismart-backend.onrender.com/api/v1/stores/${selectedStore}/inventory/alerts`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      )
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch restock alerts: ${response.status}`)
+      }
+
+      const data = await response.json()
+      setRestockAlerts(data)
+    } catch (error) {
+      console.error("Error fetching restock alerts:", error)
+      setRestockAlerts([])
+    }
+  }
+
+  // Load sample data for demonstration
+  const loadSampleData = () => {
+    showToast("Sample data loaded for demonstration", "info")
+    // This would be replaced with real data in production
   }
 
   return (
-    <main className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-8">
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+    <main className="flex-1 p-4 md:p-6">
+      {/* Page Header */}
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Insights</h1>
-          <p className="text-muted-foreground">Analyze your business performance and make data-driven decisions.</p>
+          <h1 className="text-2xl font-bold">Insights</h1>
+          <p className="text-muted-foreground">Analyze your business performance</p>
         </div>
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-          {/* STEP 6: Refresh button to fetch fresh data */}
-          <Button variant="outline" size="sm" onClick={handleRefresh} disabled={refreshing}>
-            {refreshing ? <RefreshCw className="mr-2 h-4 w-4 animate-spin" /> : <RefreshCw className="mr-2 h-4 w-4" />}
-            Refresh
-          </Button>
-          {/* STEP 7: Time range selector for filtering data */}
-          <Select value={timeRange} onValueChange={setTimeRange}>
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Select a timeframe" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="7d">Last 7 days</SelectItem>
-              <SelectItem value="30d">Last 30 days</SelectItem>
-              <SelectItem value="90d">Last 90 days</SelectItem>
-              <SelectItem value="12m">Last 12 months</SelectItem>
-              <SelectItem value="custom">Custom range</SelectItem>
-            </SelectContent>
-          </Select>
+        <div className="flex flex-wrap gap-2">
+          <StoreSelector />
         </div>
       </div>
 
-      {/* STEP 8: Insights tabs for different views */}
+      {/* Main Content */}
       <Tabs defaultValue="overview" className="space-y-4">
         <TabsList>
           <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="sales">Sales</TabsTrigger>
           <TabsTrigger value="inventory">Inventory</TabsTrigger>
         </TabsList>
 
-        {/* STEP 9: Overview Tab - Shows key metrics */}
-        <TabsContent value="overview" className="space-y-4">
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {/* STEP 10: Revenue Trends Card */}
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-base">Revenue Trends</CardTitle>
-                <CardDescription>Monthly revenue performance</CardDescription>
-              </CardHeader>
-              <CardContent>
-                {/* STEP 11: In a real implementation, this would be a chart component using data from your backend */}
-                {/* Example: const [revenueData, setRevenueData] = useState([]); useEffect(() => { async function fetchRevenueData() { const response = await fetch(`/api/stores/${selectedStore}/insights/revenue?timeRange=${timeRange}`); const data = await response.json(); setRevenueData(data); } fetchRevenueData(); }, [selectedStore, timeRange]); */}
-                <div className="h-[200px] w-full bg-[#f8f9fa] rounded-md flex items-center justify-center">
-                  <LineChart className="h-16 w-16 text-muted-foreground/60" />
-                </div>
-              </CardContent>
-              <CardFooter className="flex justify-between text-xs text-muted-foreground">
-                <div>
-                  YoY Growth: <span className="text-[#008080] font-medium">{storeInsights.revenueGrowth}</span>
-                </div>
-              </CardFooter>
-            </Card>
-
-            {/* STEP 12: Inventory Turnover Card */}
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-base">Inventory Turnover</CardTitle>
-                <CardDescription>Stock movement efficiency</CardDescription>
-              </CardHeader>
-              <CardContent>
-                {/* STEP 13: In a real implementation, this would be a chart component using data from your backend */}
-                {/* Example: const [turnoverData, setTurnoverData] = useState([]); useEffect(() => { async function fetchTurnoverData() { const response = await fetch(`/api/stores/${selectedStore}/insights/turnover?timeRange=${timeRange}`); const data = await response.json(); setTurnoverData(data); } fetchTurnoverData(); }, [selectedStore, timeRange]); */}
-                <div className="h-[200px] w-full bg-[#f8f9fa] rounded-md flex items-center justify-center">
-                  <BarChart3 className="h-16 w-16 text-muted-foreground/60" />
-                </div>
-              </CardContent>
-              <CardFooter className="flex justify-between text-xs text-muted-foreground">
-                <div>
-                  Average Turnover: <span className="text-[#008080] font-medium">{storeInsights.turnover}</span>
-                </div>
-              </CardFooter>
-            </Card>
-
-            {/* STEP 14: Category Distribution Card */}
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-base">Category Distribution</CardTitle>
-                <CardDescription>Sales by product category</CardDescription>
-              </CardHeader>
-              <CardContent>
-                {/* STEP 15: In a real implementation, this would be a chart component using data from your backend */}
-                {/* Example: const [categoryData, setCategoryData] = useState([]); useEffect(() => { async function fetchCategoryData() { const response = await fetch(`/api/stores/${selectedStore}/insights/categories?timeRange=${timeRange}`); const data = await response.json(); setCategoryData(data); } fetchCategoryData(); }, [selectedStore, timeRange]); */}
-                <div className="h-[200px] w-full bg-[#f8f9fa] rounded-md flex items-center justify-center">
-                  <PieChart className="h-16 w-16 text-muted-foreground/60" />
-                </div>
-              </CardContent>
-              <CardFooter className="flex justify-between text-xs text-muted-foreground">
-                <div>
-                  Top Category: <span className="text-[#008080] font-medium">{storeInsights.topCategory}</span>
-                </div>
-              </CardFooter>
-            </Card>
+        {isLoading ? (
+          <div className="flex justify-center py-12">
+            <Loader2 className="h-8 w-8 animate-spin text-[#008080]" />
           </div>
+        ) : (
+          <>
+            <TabsContent value="overview" className="space-y-4">
+              {/* KPI Cards */}
+              <div className="grid gap-4 md:grid-cols-3">
+                <MetricCard
+                  title="Revenue Growth"
+                  value={storeInsights.revenueGrowth}
+                  change=""
+                  icon={<LineChart className="h-8 w-8 text-muted-foreground/60" />}
+                />
+                <MetricCard
+                  title="Inventory Turnover"
+                  value={storeInsights.turnover}
+                  change=""
+                  icon={<BarChart3 className="h-8 w-8 text-muted-foreground/60" />}
+                />
+                <MetricCard
+                  title="Top Category"
+                  value={storeInsights.topCategory}
+                  change=""
+                  icon={<PieChart className="h-8 w-8 text-muted-foreground/60" />}
+                />
+              </div>
 
-          {/* STEP 16: KPI Card - Shows key performance indicators */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Key Performance Indicators</CardTitle>
-              <CardDescription>Track your most important business metrics</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                {/* STEP 17: In a real implementation, these would be fetched from an API */}
-                {/* Example: const [kpis, setKpis] = useState([]); useEffect(() => { async function fetchKpis() { const response = await fetch(`/api/stores/${selectedStore}/insights/kpis?timeRange=${timeRange}`); const data = await response.json(); setKpis(data); } fetchKpis(); }, [selectedStore, timeRange]); */}
-                {[
-                  { title: "Average Order Value", value: "$0.00", change: "+0%", period: "vs. last period" },
-                  { title: "Inventory Turnover", value: "0x", change: "+0x", period: "vs. last period" },
-                  { title: "Stock to Sales Ratio", value: "0", change: "+0", period: "vs. last period" },
-                  { title: "Out of Stock Rate", value: "0%", change: "+0%", period: "vs. last period" },
-                  { title: "Inventory Accuracy", value: "0%", change: "+0%", period: "vs. last period" },
-                  { title: "Shrinkage Rate", value: "0%", change: "+0%", period: "vs. last period" },
-                  {
-                    title: "Days Inventory Outstanding",
-                    value: "0 days",
-                    change: "+0 days",
-                    period: "vs. last period",
-                  },
-                  { title: "Perfect Order Rate", value: "0%", change: "+0%", period: "vs. last period" },
-                ].map((kpi, index) => (
-                  <div key={index} className="rounded-lg border p-3">
-                    <div className="text-sm font-medium text-muted-foreground">{kpi.title}</div>
-                    <div className="mt-1 flex items-baseline">
-                      <div className="text-2xl font-semibold">{kpi.value}</div>
-                      <div
-                        className={`ml-2 text-xs font-medium ${
-                          kpi.change.startsWith("+") ? "text-[#40E0D0]" : "text-red-500"
-                        }`}
-                      >
-                        {kpi.change}
+              {/* KPI Grid */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Key Performance Indicators</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+                    {[
+                      { title: "Average Order Value", value: "₱0.00" },
+                      { title: "Inventory Turnover", value: storeInsights.turnover },
+                      { title: "Out of Stock Rate", value: "0%" },
+                      { title: "Inventory Accuracy", value: "100%" },
+                    ].map((kpi, index) => (
+                      <div key={index} className="rounded-lg border p-3">
+                        <div className="text-sm font-medium text-muted-foreground">{kpi.title}</div>
+                        <div className="mt-1 text-2xl font-semibold">{kpi.value}</div>
                       </div>
-                    </div>
-                    <div className="mt-1 text-xs text-muted-foreground">{kpi.period}</div>
+                    ))}
                   </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
+                </CardContent>
+              </Card>
+            </TabsContent>
 
-        {/* STEP 18: Sales Analytics Tab */}
-        <TabsContent value="sales" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <div>
-                  <CardTitle>Sales Analytics</CardTitle>
-                  <CardDescription>Detailed sales performance metrics</CardDescription>
-                </div>
-                <div className="flex items-center gap-2">
-                  {/* STEP 19: Date range picker for sales data */}
-                  <Button variant="outline" size="sm">
-                    <Calendar className="mr-2 h-4 w-4" />
-                    Date Range
-                  </Button>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent className="h-[500px] flex items-center justify-center">
-              {/* STEP 20: In a real implementation, this would be a chart component using data from your backend */}
-              {/* Example: const [salesData, setSalesData] = useState([]); useEffect(() => { async function fetchSalesData() { const response = await fetch(`/api/stores/${selectedStore}/analytics/sales?timeRange=${timeRange}`); const data = await response.json(); setSalesData(data); } fetchSalesData(); }, [selectedStore, timeRange]); */}
-              <div className="text-center space-y-2">
-                <LineChart className="h-16 w-16 mx-auto text-muted-foreground/60" />
-                <p className="text-muted-foreground">
-                  No sales data available. Sales analytics will appear here when data is available.
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        {/* STEP 21: Inventory Analytics Tab */}
-        <TabsContent value="inventory" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <div>
+            <TabsContent value="inventory" className="space-y-4">
+              <Card>
+                <CardHeader>
                   <CardTitle>Inventory Analytics</CardTitle>
-                  <CardDescription>Track inventory performance and trends</CardDescription>
-                </div>
-                <div className="flex items-center gap-2">
-                  {/* STEP 22: Category filter for inventory data */}
-                  <Button variant="outline" size="sm">
-                    <Filter className="mr-2 h-4 w-4" />
-                    Categories
-                  </Button>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent className="h-[500px] flex items-center justify-center">
-              {/* STEP 23: In a real implementation, this would be a chart component using data from your backend */}
-              {/* Example: const [inventoryData, setInventoryData] = useState([]); useEffect(() => { async function fetchInventoryData() { const response = await fetch(`/api/stores/${selectedStore}/analytics/inventory?timeRange=${timeRange}`); const data = await response.json(); setInventoryData(data); } fetchInventoryData(); }, [selectedStore, timeRange]); */}
-              <div className="text-center space-y-2">
-                <BarChart3 className="h-16 w-16 mx-auto text-muted-foreground/60" />
-                <p className="text-muted-foreground">
-                  No inventory data available. Inventory analytics will appear here when data is available.
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
+                </CardHeader>
+                <CardContent className="h-[300px] flex items-center justify-center">
+                  {inventoryData.length > 0 ? (
+                    <div>
+                      {/* This would be replaced with a real chart in production */}
+                      <p>Inventory data visualization would appear here</p>
+                    </div>
+                  ) : (
+                    <div className="text-center">
+                      <BarChart3 className="h-16 w-16 mx-auto text-muted-foreground/60" />
+                      <p className="text-muted-foreground mt-4">No inventory data available yet</p>
+                      <Button className="mt-4" variant="outline" onClick={loadSampleData}>
+                        Load Sample Data
+                      </Button>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Stock Adjustment History</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {stockHistory.length > 0 ? (
+                    <ul className="list-disc pl-5">
+                      {stockHistory.map((entry, index) => (
+                        <li key={index}>{entry.description}</li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p className="text-muted-foreground">No stock adjustment history available</p>
+                  )}
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Restock Alerts</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {restockAlerts.length > 0 ? (
+                    <ul>
+                      {restockAlerts.map((alert, index) => (
+                        <li key={index}>{alert.message}</li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p className="text-muted-foreground">No restock alerts available</p>
+                  )}
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </>
+        )}
       </Tabs>
     </main>
+  )
+}
+
+// Simple reusable metric card component
+type MetricCardProps = {
+  title: string;
+  value: string;
+  change?: string;
+  icon: React.ReactNode;
+};
+
+function MetricCard({ title, value, change, icon }: MetricCardProps) {
+  return (
+    <Card>
+      <CardHeader className="flex flex-row items-center justify-between pb-2">
+        <CardTitle className="text-sm font-medium">{title}</CardTitle>
+        {icon}
+      </CardHeader>
+      <CardContent>
+        <div className="text-2xl font-bold">{value}</div>
+        {change && (
+          <p className="text-xs text-muted-foreground">
+            <span className="text-green-500">{change}</span> from last month
+          </p>
+        )}
+      </CardContent>
+    </Card>
   )
 }

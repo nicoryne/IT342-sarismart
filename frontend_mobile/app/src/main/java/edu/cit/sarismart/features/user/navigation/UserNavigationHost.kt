@@ -17,7 +17,10 @@ import edu.cit.sarismart.features.user.tabs.sasa.ui.chat.SasaChatScreen
 import edu.cit.sarismart.features.user.tabs.scan.ui.carts.CartDetailsScreen
 import edu.cit.sarismart.features.user.tabs.scan.ui.carts.PickCartScreen
 import edu.cit.sarismart.features.user.tabs.scan.ui.carts.CartOverviewScreen
+import edu.cit.sarismart.features.user.tabs.scan.ui.inventory.InventoryScreen
+import edu.cit.sarismart.features.user.tabs.scan.ui.sales.SalesScreen
 import edu.cit.sarismart.features.user.tabs.scan.ui.scanner.BarcodeScannerScreen
+import edu.cit.sarismart.features.user.tabs.scan.ui.settings.StoreSettingsScreen
 import edu.cit.sarismart.features.user.tabs.scan.ui.stores.PickStoreScreen
 import edu.cit.sarismart.features.user.tabs.scan.ui.stores.StoreMenuScreen
 import edu.cit.sarismart.features.user.tabs.stores.ui.overview.MapLocationSelectionScreen
@@ -205,6 +208,51 @@ fun UserNavigationHost(
                 onNavigateToScanner = { storeId, cartId ->
                     navController.navigate("barcode_scanner/$storeId/$cartId")
                 }
+            )
+        }
+
+        composable(
+            route = "store/{storeId}/inventory",
+            arguments = listOf(navArgument("storeId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val storeId = backStackEntry.arguments?.getString("storeId")?.toLongOrNull() ?: -1L
+
+            // Log the storeId to verify it's being passed correctly
+            Log.d("Navigation", "Navigating to InventoryScreen with storeId: $storeId")
+
+            InventoryScreen(
+                onNavigateBack = { navController.popBackStack() },
+                storeId = storeId
+            )
+        }
+
+        composable(
+            route = "store/{storeId}/sales",
+            arguments = listOf(navArgument("storeId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val storeId = backStackEntry.arguments?.getString("storeId")?.toLongOrNull() ?: -1L
+
+            // Log the storeId to verify it's being passed correctly
+            Log.d("Navigation", "Navigating to SalesScreen with storeId: $storeId")
+
+            SalesScreen(
+                onNavigateBack = { navController.popBackStack() },
+                storeId = storeId
+            )
+        }
+
+        composable(
+            route = "store/{storeId}/settings",
+            arguments = listOf(navArgument("storeId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val storeId = backStackEntry.arguments?.getString("storeId")?.toLongOrNull() ?: -1L
+
+            // Log the storeId to verify it's being passed correctly
+            Log.d("Navigation", "Navigating to StoreSettingsScreen with storeId: $storeId")
+
+            StoreSettingsScreen(
+                onNavigateBack = { navController.popBackStack() },
+                storeId = storeId
             )
         }
     }

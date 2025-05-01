@@ -1,16 +1,13 @@
 "use client"
-import React, { createContext, useContext } from "react"
+import type React from "react"
+import { createContext, useContext } from "react"
 import { useStores } from "./use-stores"
 
 const StoresContext = createContext<ReturnType<typeof useStores> | undefined>(undefined)
 
 export function StoresProvider({ children }: { children: React.ReactNode }) {
   const stores = useStores()
-  return (
-    <StoresContext.Provider value={stores}>
-      {children}
-    </StoresContext.Provider>
-  )
+  return <StoresContext.Provider value={stores}>{children}</StoresContext.Provider>
 }
 
 export function useStoresContext() {

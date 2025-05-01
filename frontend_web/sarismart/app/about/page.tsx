@@ -72,7 +72,7 @@ export default function AboutPage() {
             <div className="flex items-center justify-center">
               <div className="relative h-[300px] w-full max-w-[500px] overflow-hidden rounded-2xl shadow-lg sm:h-[350px] md:h-[400px]">
                 <Image
-                  src="/placeholder.svg?height=800&width=800"
+                  src="/neighbor.png?height=800&width=800"
                   alt="SariSmart Office"
                   fill
                   className="object-cover"
@@ -104,7 +104,7 @@ export default function AboutPage() {
               <h3 className="text-xl font-bold text-[#008080]">Our Mission</h3>
               <p className="mt-2 text-gray-600">
                 To empower businesses with intelligent solutions that drive growth, efficiency, and innovation in
-                today's digital landscape.
+                todays digital landscape.
               </p>
             </div>
 
@@ -113,7 +113,7 @@ export default function AboutPage() {
               <h3 className="text-xl font-bold text-[#008080]">Our Vision</h3>
               <p className="mt-2 text-gray-600">
                 To be the global leader in smart business solutions, recognized for our innovation, reliability, and
-                positive impact on our clients' success.
+                positive impact on our clients success.
               </p>
             </div>
 
@@ -158,7 +158,7 @@ export default function AboutPage() {
             {/* Team Member 1 */}
             <div className="flex flex-col items-center text-center">
               <div className="relative h-40 w-40 overflow-hidden rounded-full">
-                <Image src="/placeholder.svg?height=160&width=160" alt="Team Member" fill className="object-cover" />
+                <Image src="/porter.jpg?height=160&width=160" alt="Team Member" fill className="object-cover" />
               </div>
               <h3 className="mt-4 text-lg font-bold">Nicolo Porter</h3>
               <p className="text-[#008080]">Mobile Developer</p>
@@ -171,7 +171,7 @@ export default function AboutPage() {
             {/* Team Member 2 */}
             <div className="flex flex-col items-center text-center">
               <div className="relative h-40 w-40 overflow-hidden rounded-full">
-                <Image src="/placeholder.svg?height=160&width=160" alt="Team Member" fill className="object-cover" />
+                <Image src="/mikel.jpg?height=160&width=160" alt="Team Member" fill className="object-cover" />
               </div>
               <h3 className="mt-4 text-lg font-bold">Michael Leones</h3>
               <p className="text-[#008080]">Web Developer</p>
@@ -184,13 +184,13 @@ export default function AboutPage() {
             {/* Team Member 3 */}
             <div className="flex flex-col items-center text-center">
               <div className="relative h-40 w-40 overflow-hidden rounded-full">
-                <Image src="/placeholder.svg?height=160&width=160" alt="Team Member" fill className="object-cover" />
+                <Image src="/kenny.jpg?height=160&width=160" alt="Team Member" fill className="object-cover" />
               </div>
               <h3 className="mt-4 text-lg font-bold">John Kenny Quijote</h3>
               <p className="text-[#008080]">Backend Developer</p>
               <p className="mt-2 text-sm text-gray-600">
-                John Kenny ensures our clients get the most value from our solutions, with a focus on long-term partnerships
-                and success.
+                John Kenny ensures our clients get the most value from our solutions, with a focus on long-term
+                partnerships and success.
               </p>
             </div>
           </div>
