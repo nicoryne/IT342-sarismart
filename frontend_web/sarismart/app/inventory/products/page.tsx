@@ -229,8 +229,39 @@ export default function ProductsPage() {
     filterProductsByTab(products, value)
   }
 
+  // Add barcode validation function after the other validation functions
+  const validateBarcode = (barcode: string) => {
+    if (!barcode) return true // Barcode is optional
+
+    // Common barcode formats:
+    // EAN-13: 13 digits
+    // UPC-A: 12 digits
+    // Code-39: Variable length, alphanumeric
+    // Code-128: Variable length, full ASCII
+
+    // For simplicity, we'll validate that it's either:
+    // 1. A numeric barcode of common lengths (8, 12, 13, 14 digits)
+    // 2. An alphanumeric code with reasonable length (up to 30 chars)
+
+    const numericBarcodeRegex = /^\d{8}$|^\d{12,14}$/
+    const alphanumericBarcodeRegex = /^[A-Z0-9-]{1,30}$/i
+
+    return numericBarcodeRegex.test(barcode) || alphanumericBarcodeRegex.test(barcode)
+  }
+
+  // Add barcode error state
+  const [barcodeError, setBarcodeError] = useState<string | null>(null)
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target
+
+    if (name === "barcode") {
+      setBarcodeError(null)
+      if (value && !validateBarcode(value)) {
+        setBarcodeError("Please enter a valid barcode format")
+      }
+    }
+
     setNewProduct((prev) => ({
       ...prev,
       [name]: value,
@@ -305,6 +336,10 @@ export default function ProductsPage() {
     }
     if (!newProduct.reorder_level || isNaN(Number(newProduct.reorder_level)) || Number(newProduct.reorder_level) < 0) {
       setFormError("Reorder level must be a non-negative number")
+      return false
+    }
+    if (newProduct.barcode && !validateBarcode(newProduct.barcode)) {
+      setFormError("Please enter a valid barcode format")
       return false
     }
     return true
@@ -475,6 +510,26 @@ export default function ProductsPage() {
     }
   }
 
+  const [editBarcodeError, setEditBarcodeError] = useState<string | null>(null)
+
+  // Update the handleEditInputChange function to validate barcode
+  const handleEditInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const { name, value } = e.target
+
+    if (name === "barcode") {
+      setEditBarcodeError(null)
+      if (value && !validateBarcode(value)) {
+        setEditBarcodeError("Please enter a valid barcode format")
+      }
+    }
+
+    setProductToEdit((prev: Product) => ({
+      ...prev,
+      [name]: value,
+    }))
+    setFormError(null)
+  }
+
   // Add this function to validate the edit form
   const validateEditForm = () => {
     if (!productToEdit.name.trim()) {
@@ -497,20 +552,14 @@ export default function ProductsPage() {
       setFormError("Reorder level must be a non-negative number")
       return false
     }
+    if (productToEdit.barcode && !validateBarcode(productToEdit.barcode)) {
+      setFormError("Please enter a valid barcode format")
+      return false
+    }
     return true
   }
 
-  // Add this function to handle input changes in the edit form
-  const handleEditInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
-  ) => {
-    const { name, value } = e.target
-    setProductToEdit((prev: Product) => ({
-      ...prev,
-      [name]: value,
-    }))
-    setFormError(null)
-  }
+  
 
   const handleDeleteProduct = (product: any) => {
     if (selectedStore === "all" && !isUserProduct(product)) {
@@ -1174,14 +1223,19 @@ export default function ProductsPage() {
                   />
                 </div>
                 <div className="space-y-1">
-                  <Label htmlFor="barcode">Barcode (Optional)</Label>
+                  <Label htmlFor="barcode">Barcode</Label>
                   <Input
                     id="barcode"
                     name="barcode"
                     placeholder="Enter product barcode"
                     value={newProduct.barcode}
                     onChange={handleInputChange}
+                    required
                   />
+                  {barcodeError && <p className="text-xs text-red-500">{barcodeError}</p>}
+                  <p className="text-xs text-gray-500">
+                    Common formats: EAN-13 (13 digits), UPC-A (12 digits), or alphanumeric code
+                  </p>
                 </div>
                 <div className="space-y-1">
                   <Label htmlFor="category">Category</Label>
@@ -1381,6 +1435,10 @@ export default function ProductsPage() {
                     value={productToEdit.barcode || ""}
                     onChange={handleEditInputChange}
                   />
+                  {editBarcodeError && <p className="text-xs text-red-500">{editBarcodeError}</p>}
+                  <p className="text-xs text-gray-500">
+                    Common formats: EAN-13 (13 digits), UPC-A (12 digits), or alphanumeric code
+                  </p>
                 </div>
                 <div className="space-y-1">
                   <Label htmlFor="edit-category">Category</Label>

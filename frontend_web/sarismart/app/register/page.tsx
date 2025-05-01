@@ -33,6 +33,17 @@ export default function RegisterPage() {
   const [showTermsModal, setShowTermsModal] = useState(false)
   const [showPrivacyModal, setShowPrivacyModal] = useState(false)
 
+  // Add these new state variables after the existing state declarations
+  const [passwordRequirements, setPasswordRequirements] = useState({
+    length: false,
+    lowercase: false,
+    uppercase: false,
+    special: false,
+  })
+
+  // Add this new state variable for phone error
+  const [phoneError, setPhoneError] = useState("")
+
   // Function to show toast notifications
   const showToast = (message: string, type: "success" | "error") => {
     const toast = document.createElement("div")
@@ -49,19 +60,39 @@ export default function RegisterPage() {
     }, 3000)
   }
 
+  // Add this function after the existing handleChange function
+  const validatePassword = (password: string) => {
+    const requirements = {
+      length: password.length >= 8,
+      lowercase: /[a-z]/.test(password),
+      uppercase: /[A-Z]/.test(password),
+      special: /[!@#$%^&*(),.?":{}|<>]/.test(password),
+    }
+
+    setPasswordRequirements(requirements)
+    return Object.values(requirements).every(Boolean)
+  }
+
+  // Modify the handleChange function to validate password when it changes
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
     setFormData((prev) => ({ ...prev, [name]: value }))
 
+    if (name === "password") {
+      validatePassword(value)
+    }
+
     if (name === "password" || name === "confirmPassword") {
       setPasswordError("")
     }
+
+    if (name === "phone") {
+      // Clear phone error when user types
+      if (phoneError) setPhoneError("")
+    }
   }
 
-  const handleCheckboxChange = (checked: boolean) => {
-    setFormData((prev) => ({ ...prev, agreeTerms: checked }))
-  }
-
+  // Modify the handleSubmit function to include validation before submission
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
@@ -70,6 +101,21 @@ export default function RegisterPage() {
     // Validate passwords match
     if (formData.password !== formData.confirmPassword) {
       setError("Passwords do not match")
+      setIsLoading(false)
+      return
+    }
+
+    // Validate password requirements
+    if (!validatePassword(formData.password)) {
+      setError("Password does not meet all requirements")
+      setIsLoading(false)
+      return
+    }
+
+    // Validate phone number (Philippine format)
+    const phoneRegex = /^(09|\+639)\d{9}$/
+    if (!phoneRegex.test(formData.phone)) {
+      setPhoneError("Please enter a valid Philippine phone number (e.g., 09123456789 or +639123456789)")
       setIsLoading(false)
       return
     }
@@ -124,6 +170,10 @@ export default function RegisterPage() {
     setShowConfirmPassword(!showConfirmPassword)
   }
 
+  const handleCheckboxChange = (checked: boolean) => {
+    setFormData({ ...formData, agreeTerms: checked })
+  }
+
   return (
     <div className="container flex flex-col items-center justify-center px-4 py-12 md:py-16 lg:py-20">
       <div className="mx-auto w-full max-w-md space-y-6">
@@ -166,11 +216,13 @@ export default function RegisterPage() {
                 id="phone"
                 name="phone"
                 type="tel"
-                placeholder="0917 123 4567"
+                placeholder="09123456789"
                 required
                 value={formData.phone}
                 onChange={handleChange}
               />
+              {phoneError && <p className="text-sm text-red-500">{phoneError}</p>}
+              <p className="text-xs text-gray-500">Format: 09123456789 or +639123456789</p>
             </div>
 
             <div className="space-y-2">
@@ -197,6 +249,45 @@ export default function RegisterPage() {
                   )}
                   <span className="sr-only">{showPassword ? "Hide password" : "Show password"}</span>
                 </button>
+              </div>
+
+              {/* Password requirements checklist */}
+              <div className="mt-2 space-y-1 text-xs">
+                <p className="font-medium">Password must contain:</p>
+                <div className="grid grid-cols-2 gap-1">
+                  <div
+                    className={`flex items-center ${passwordRequirements.length ? "text-green-600" : "text-gray-500"}`}
+                  >
+                    <div
+                      className={`mr-1 h-3 w-3 rounded-full ${passwordRequirements.length ? "bg-green-600" : "bg-gray-300"}`}
+                    ></div>
+                    At least 8 characters
+                  </div>
+                  <div
+                    className={`flex items-center ${passwordRequirements.lowercase ? "text-green-600" : "text-gray-500"}`}
+                  >
+                    <div
+                      className={`mr-1 h-3 w-3 rounded-full ${passwordRequirements.lowercase ? "bg-green-600" : "bg-gray-300"}`}
+                    ></div>
+                    Lowercase letter
+                  </div>
+                  <div
+                    className={`flex items-center ${passwordRequirements.uppercase ? "text-green-600" : "text-gray-500"}`}
+                  >
+                    <div
+                      className={`mr-1 h-3 w-3 rounded-full ${passwordRequirements.uppercase ? "bg-green-600" : "bg-gray-300"}`}
+                    ></div>
+                    Uppercase letter
+                  </div>
+                  <div
+                    className={`flex items-center ${passwordRequirements.special ? "text-green-600" : "text-gray-500"}`}
+                  >
+                    <div
+                      className={`mr-1 h-3 w-3 rounded-full ${passwordRequirements.special ? "bg-green-600" : "bg-gray-300"}`}
+                    ></div>
+                    Special character
+                  </div>
+                </div>
               </div>
             </div>
 
