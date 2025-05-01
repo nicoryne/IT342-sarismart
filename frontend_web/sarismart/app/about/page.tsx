@@ -72,7 +72,7 @@ export default function AboutPage() {
             <div className="flex items-center justify-center">
               <div className="relative h-[300px] w-full max-w-[500px] overflow-hidden rounded-2xl shadow-lg sm:h-[350px] md:h-[400px]">
                 <Image
-                  src="/placeholder.svg?height=800&width=800"
+                  src="/neighbor.png?height=800&width=800"
                   alt="SariSmart Office"
                   fill
                   className="object-cover"

@@ -341,7 +341,6 @@ export default function DashboardPage() {
       <Tabs defaultValue="all" className="space-y-4">
         <TabsList>
           <TabsTrigger value="all">All Products</TabsTrigger>
-          <TabsTrigger value="active">Active</TabsTrigger>
           <TabsTrigger value="low-stock">Low Stock</TabsTrigger>
           <TabsTrigger value="out-of-stock">Out of Stock</TabsTrigger>
         </TabsList>

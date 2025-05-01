@@ -752,37 +752,15 @@ export default function ProductsPage() {
         </div>
 
         <div className="flex items-center gap-2">
-          <Select value={category} onValueChange={setCategory}>
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Category" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Categories</SelectItem>
-              <SelectItem value="electronics">Electronics</SelectItem>
-              <SelectItem value="clothing">Clothing</SelectItem>
-              <SelectItem value="food">Food & Beverage</SelectItem>
-              <SelectItem value="home">Home Goods</SelectItem>
-            </SelectContent>
-          </Select>
 
-          <Select defaultValue="all">
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Stock Status" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Status</SelectItem>
-              <SelectItem value="in-stock">In Stock</SelectItem>
-              <SelectItem value="low-stock">Low Stock</SelectItem>
-              <SelectItem value="out-of-stock">Out of Stock</SelectItem>
-            </SelectContent>
-          </Select>
+
+          
         </div>
       </div>
 
       <Tabs defaultValue="all" className="mt-6" onValueChange={handleTabChange}>
         <TabsList>
           <TabsTrigger value="all">All Products</TabsTrigger>
-          <TabsTrigger value="active">Active</TabsTrigger>
           <TabsTrigger value="low-stock">Low Stock</TabsTrigger>
           <TabsTrigger value="out-of-stock">Out of Stock</TabsTrigger>
         </TabsList>
