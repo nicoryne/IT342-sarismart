@@ -5,6 +5,7 @@ import edu.cit.sarismart.BuildConfig
 import edu.cit.sarismart.features.user.tabs.scan.data.models.BarcodeProductResponse
 import edu.cit.sarismart.features.user.tabs.scan.domain.BarcodeApiService
 import edu.cit.sarismart.features.user.tabs.stores.data.models.Product
+import edu.cit.sarismart.features.user.tabs.stores.data.models.ProductRequest
 import edu.cit.sarismart.features.user.tabs.stores.data.models.Store
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -19,7 +20,7 @@ class BarcodeRepositoryImpl @Inject constructor(
     companion object {
         private const val UPC_DATABASE_API_KEY = ""
         private const val DEFAULT_PRODUCT_PRICE = 0.0
-        private const val DEFAULT_PRODUCT_STOCK = 10
+        private const val DEFAULT_PRODUCT_STOCK = 0
     }
 
     override suspend fun lookupBarcode(barcode: String): BarcodeProductResponse? = withContext(Dispatchers.IO) {
@@ -89,21 +90,18 @@ class BarcodeRepositoryImpl @Inject constructor(
         return null
     }
 
-    override suspend fun createProductFromBarcode(barcode: String, storeId: Long, store: Store): Product? {
+    override suspend fun createProductFromBarcode(barcode: String, storeId: Long, store: Store): ProductRequest? {
         val productInfo = lookupBarcode(barcode) ?: return null
 
         // Create a new product with the information from the barcode lookup
-        return Product(
-            id = 0, // The server will assign an ID
+        return ProductRequest(
             name = productInfo.name,
             description = productInfo.description ?: "Product added from barcode scan",
             price = productInfo.price ?: DEFAULT_PRODUCT_PRICE,
             stock = DEFAULT_PRODUCT_STOCK,
             barcode = barcode,
-            store = store,
             category = productInfo.brand.toString(),
-            reorderLevel = 1,
-            sold = 1
+            reorder_level = 1,
         )
     }
 }

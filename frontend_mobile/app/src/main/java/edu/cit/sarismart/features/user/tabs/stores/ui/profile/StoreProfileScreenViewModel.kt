@@ -1,5 +1,6 @@
 package edu.cit.sarismart.features.user.tabs.stores.ui.profile
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -9,6 +10,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import java.util.Base64
+import java.security.MessageDigest
 
 @HiltViewModel
 class StoreProfileScreenViewModel @Inject constructor(
@@ -69,6 +72,13 @@ class StoreProfileScreenViewModel @Inject constructor(
 
     private val _storeLocationError = MutableStateFlow<String?>(null)
     val storeLocationError: StateFlow<String?> = _storeLocationError
+
+    // Invitation code
+    private val _invitationCode = MutableStateFlow<String?>(null)
+    val invitationCode: StateFlow<String?> = _invitationCode
+
+    private val _isGeneratingCode = MutableStateFlow(false)
+    val isGeneratingCode: StateFlow<Boolean> = _isGeneratingCode
 
     fun updateStoreName(name: String) {
         _storeName.value = name
@@ -204,6 +214,37 @@ class StoreProfileScreenViewModel @Inject constructor(
             } catch (e: Exception) {
                 _isEditLoading.value = false
                 _isEditError.value = "Failed to update store: ${e.message}"
+            }
+        }
+    }
+
+    fun generateInvitationCode(storeId: String) {
+        _isGeneratingCode.value = true
+        _invitationCode.value = null
+
+        viewModelScope.launch {
+            try {
+                // Create a unique hash based on store ID and a timestamp
+                val timeComponent = System.currentTimeMillis().toString()
+                val storeComponent = storeId
+
+                // Create a hash using SHA-256
+                val digest = MessageDigest.getInstance("SHA-256")
+                val input = "$storeComponent:$timeComponent"
+                val hashBytes = digest.digest(input.toByteArray())
+
+                // Convert to Base64 and take first 8 characters for readability
+                val base64Hash = Base64.getEncoder().encodeToString(hashBytes)
+                _invitationCode.value = base64Hash.take(8).uppercase()
+
+                // In a real app, you would save this code to the database
+                // For now, we'll just log it
+                Log.d("StoreViewModel", "Generated invitation code: ${_invitationCode.value} for store $storeId")
+            } catch (e: Exception) {
+                Log.e("StoreViewModel", "Error generating invitation code: ${e.message}")
+                _invitationCode.value = null
+            } finally {
+                _isGeneratingCode.value = false
             }
         }
     }

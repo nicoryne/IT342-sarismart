@@ -23,6 +23,7 @@ mapsCompose = "2.15.0"
 material = "1.12.0"
 activity = "1.10.1"
 constraintlayout = "2.2.1"
+materialVersion = "1.8.0"
 navigationCompose = "2.8.9"
 navigationComposeVersion = "2.7.7"
 okhttp = "4.12.0"
@@ -49,6 +50,7 @@ androidx-datastore-preferences = { module = "androidx.datastore:datastore-prefer
 androidx-foundation = { module = "androidx.compose.foundation:foundation" }
 androidx-fragment-ktx = { module = "androidx.fragment:fragment-ktx", version.ref = "fragmentKtx" }
 androidx-hilt-navigation-compose = { module = "androidx.hilt:hilt-navigation-compose", version.ref = "hiltNavigationCompose" }
+androidx-material = { module = "androidx.compose.material:material", version.ref = "materialVersion" }
 androidx-material-icons-extended = { module = "androidx.compose.material:material-icons-extended" }
 androidx-material3 = { module = "androidx.compose.material3:material3" }
 androidx-navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "navigationCompose" }

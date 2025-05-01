@@ -303,45 +303,6 @@ fun RegisterScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // social login buttons
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                // google sign in
-                ElevatedButton(
-                    onClick = { viewModel.onRegisterWithGoogleClicked() },
-                    modifier = Modifier.weight(1f),
-                    shape = RoundedCornerShape(12.dp),
-                ) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.ic_google),
-                        contentDescription = "Google",
-                        modifier = Modifier.size(20.dp),
-                        tint = Color.Unspecified
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text("Google")
-                }
-
-                // facebook sign in
-                ElevatedButton(
-                    onClick = { viewModel.onRegisterWithFacebookClicked() },
-                    modifier = Modifier.weight(1f),
-                    shape = RoundedCornerShape(12.dp),
-                ) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.ic_facebook),
-                        contentDescription = "Facebook",
-                        modifier = Modifier.size(20.dp),
-                        tint = Color.Unspecified
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text("Facebook")
-                }
-            }
-
-            Spacer(modifier = Modifier.height(24.dp))
 
             // already have an account
             Row(

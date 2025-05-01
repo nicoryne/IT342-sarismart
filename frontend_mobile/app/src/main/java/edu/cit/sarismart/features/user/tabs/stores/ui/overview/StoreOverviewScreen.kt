@@ -2,47 +2,23 @@ package edu.cit.sarismart.features.user.tabs.stores.ui.overview
 
 import android.util.Log
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.State
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import edu.cit.sarismart.features.user.components.Header
+import edu.cit.sarismart.features.user.tabs.stores.ui.components.JoinStoreBottomSheet
 import edu.cit.sarismart.features.user.tabs.stores.ui.components.RegisterNewStoreButton
 import edu.cit.sarismart.features.user.tabs.stores.ui.components.StoreInfoBox
 import edu.cit.sarismart.features.user.tabs.stores.ui.components.StoreOverviewItem
 import edu.cit.sarismart.features.user.tabs.stores.ui.util.StoreStatus
-
-data class DummyStore (
-    val storeName: String,
-    val storeLocation: String,
-    val isOwner: Boolean,
-    val storeStatus: StoreStatus
-)
 
 @Composable
 fun StoreOverviewScreen(
@@ -51,22 +27,16 @@ fun StoreOverviewScreen(
     onSelectLocation: () -> Unit,
     onNavigateToProfile: (storeId: Long) -> Unit
 ) {
-
     val showBottomSheet by viewModel.showBottomSheet.collectAsState()
     val isSubmitLoading by viewModel.isSubmitLoading.collectAsState()
     val isSubmitError by viewModel.isSubmitError.collectAsState()
     val isSubmitSuccess by viewModel.isSubmitSuccess.collectAsState()
     val showSubmitDialog by viewModel.showSubmitDialog.collectAsState()
     val stores by viewModel.stores.collectAsState()
-
-    val dummyStores = listOf(
-        DummyStore("Store A", "Location 1", true, StoreStatus.GOOD),
-        DummyStore("Store B", "Location 2", false, StoreStatus.LOW_STOCK),
-        DummyStore("Store C", "Location 3", true, StoreStatus.OUT_OF_STOCK),
-        DummyStore("Store D", "Location 4", false, StoreStatus.GOOD),
-        DummyStore("Store E", "Location 5", true, StoreStatus.LOW_STOCK),
-        DummyStore("Store F", "Location 6", false, StoreStatus.OUT_OF_STOCK)
-    )
+    val storeStatuses by viewModel.storeStatuses.collectAsState()
+    val restockingStore by viewModel.restockingStore.collectAsState()
+    val restockingDays by viewModel.restockingDays.collectAsState()
+    val showJoinDialog by viewModel.showJoinDialog.collectAsState()
 
     LaunchedEffect(key1 = true) {
         viewModel.getStores()
@@ -98,8 +68,8 @@ fun StoreOverviewScreen(
             StoreInfoBox(
                 modifier = Modifier.weight(1f),
                 title = "Restocking due in",
-                number = "2 days",
-                subtitle = "for Oval's Place"
+                number = if (restockingDays > 0) "$restockingDays days" else "N/A",
+                subtitle = restockingStore?.storeName ?: "No stores need restocking"
             )
         }
 
@@ -119,7 +89,7 @@ fun StoreOverviewScreen(
             horizontalArrangement = Arrangement.Center
         ) {
             OutlinedButton(
-                onClick = {  },
+                onClick = { viewModel.showJoinDialog() },
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp),
                 colors = ButtonDefaults.outlinedButtonColors(
@@ -140,12 +110,14 @@ fun StoreOverviewScreen(
         LazyColumn () {
             items(stores, key = { store -> store.id }) { store ->
                 StoreOverviewItem(
-                    onStoreItemClick = { onNavigateToProfile(store.id);
-                                       Log.d("StoreOverviewScreen", "Navigating to store profile with ID: ${store.id}")},
+                    onStoreItemClick = {
+                        onNavigateToProfile(store.id)
+                        Log.d("StoreOverviewScreen", "Navigating to store profile with ID: ${store.id}")
+                    },
                     storeName = store.storeName,
                     storeLocation = store.location,
                     isOwner = true,
-                    status = StoreStatus.OUT_OF_STOCK
+                    status = storeStatuses[store.id] ?: StoreStatus.GOOD
                 )
                 Spacer(modifier = Modifier.height(16.dp))
             }
@@ -160,6 +132,13 @@ fun StoreOverviewScreen(
                 onSubmitLoading = { viewModel.onSubmitLoading() },
                 onSubmitSuccess = { viewModel.onSubmitSuccess() },
                 onSubmitError = { viewModel.onSubmitError(it) }
+            )
+        }
+
+        if (showJoinDialog) {
+            JoinStoreBottomSheet(
+                viewModel = viewModel,
+                onDismissRequest = { viewModel.dismissJoinDialog() }
             )
         }
 
@@ -201,8 +180,3 @@ fun StoreOverviewScreen(
         }
     }
 }
-
-
-
-
-

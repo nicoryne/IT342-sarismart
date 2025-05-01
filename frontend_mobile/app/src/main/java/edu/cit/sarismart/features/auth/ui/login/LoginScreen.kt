@@ -280,52 +280,6 @@ fun LoginScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // social login button
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                // google sign in
-                ElevatedButton(
-                    onClick = { viewModel.onLoginWithGoogleClicked() },
-                    modifier = Modifier.weight(1f),
-                    shape = RoundedCornerShape(12.dp),
-                    colors = ButtonDefaults.elevatedButtonColors(
-                        containerColor = MaterialTheme.colorScheme.background
-                    )
-                ) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.ic_google),
-                        contentDescription = "Google",
-                        modifier = Modifier.size(20.dp),
-                        tint = Color.Unspecified
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text("Google")
-                }
-
-                // facebook sign in
-                ElevatedButton(
-                    onClick = { viewModel.onLoginWithFacebookClicked() },
-                    modifier = Modifier.weight(1f),
-                    shape = RoundedCornerShape(12.dp),
-                    colors = ButtonDefaults.elevatedButtonColors(
-                        containerColor = MaterialTheme.colorScheme.background
-                    )
-                ) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.ic_facebook),
-                        contentDescription = "Facebook",
-                        modifier = Modifier.size(20.dp),
-                        tint = Color.Unspecified
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text("Facebook")
-                }
-            }
-
-            Spacer(modifier = Modifier.height(24.dp))
-
             // continue as guest
             OutlinedButton(
                 onClick = { viewModel.onContinueAsGuestClicked(); onNavigateToGuest() },
