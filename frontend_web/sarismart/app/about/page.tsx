@@ -158,7 +158,7 @@ export default function AboutPage() {
             {/* Team Member 1 */}
             <div className="flex flex-col items-center text-center">
               <div className="relative h-40 w-40 overflow-hidden rounded-full">
-                <Image src="/placeholder.svg?height=160&width=160" alt="Team Member" fill className="object-cover" />
+                <Image src="/porter.jpg?height=160&width=160" alt="Team Member" fill className="object-cover" />
               </div>
               <h3 className="mt-4 text-lg font-bold">Nicolo Porter</h3>
               <p className="text-[#008080]">Mobile Developer</p>
@@ -171,7 +171,7 @@ export default function AboutPage() {
             {/* Team Member 2 */}
             <div className="flex flex-col items-center text-center">
               <div className="relative h-40 w-40 overflow-hidden rounded-full">
-                <Image src="/placeholder.svg?height=160&width=160" alt="Team Member" fill className="object-cover" />
+                <Image src="/mikel.jpg?height=160&width=160" alt="Team Member" fill className="object-cover" />
               </div>
               <h3 className="mt-4 text-lg font-bold">Michael Leones</h3>
               <p className="text-[#008080]">Web Developer</p>
@@ -184,7 +184,7 @@ export default function AboutPage() {
             {/* Team Member 3 */}
             <div className="flex flex-col items-center text-center">
               <div className="relative h-40 w-40 overflow-hidden rounded-full">
-                <Image src="/placeholder.svg?height=160&width=160" alt="Team Member" fill className="object-cover" />
+                <Image src="/kenny.jpg?height=160&width=160" alt="Team Member" fill className="object-cover" />
               </div>
               <h3 className="mt-4 text-lg font-bold">John Kenny Quijote</h3>
               <p className="text-[#008080]">Backend Developer</p>
