@@ -23,6 +23,22 @@ export default function InsightsPage() {
   const [salesData, setSalesData] = useState([])
   const [inventoryData, setInventoryData] = useState([])
 
+  // Define the type for stock history entries
+  type StockHistoryEntry = {
+    description: string;
+    // Add other properties if needed
+  };
+
+  // Define the type for restock alert entries
+  type RestockAlertEntry = {
+    message: string;
+    // Add other properties if needed
+  };
+
+  // Update the state type
+  const [stockHistory, setStockHistory] = useState<StockHistoryEntry[]>([])
+  const [restockAlerts, setRestockAlerts] = useState<RestockAlertEntry[]>([])
+
   // Fetch insights when selectedStore or timeRange changes
   useEffect(() => {
     const fetchInsights = async () => {
@@ -43,6 +59,12 @@ export default function InsightsPage() {
 
         // Fetch inventory data
         await fetchInventoryData()
+
+        // Fetch stock adjustment history
+        await fetchStockHistory()
+
+        // Fetch restock alerts
+        await fetchRestockAlerts()
       } catch (error) {
         console.error("Error fetching insights:", error)
         showToast("Failed to fetch insights data", "error")
@@ -150,6 +172,127 @@ export default function InsightsPage() {
     }
   }
 
+  // Fetch stock adjustment history
+  const fetchStockHistory = async () => {
+    try {
+      const token = localStorage.getItem("token")
+      if (!token) {
+        showToast("Authentication token not found", "error")
+        return
+      }
+
+      if (selectedStore === "all") {
+        // Aggregate stock history for all stores
+        const allStockHistory = await Promise.all(
+          stores.map(async (store) => {
+            const response = await fetch(
+              `https://sarismart-backend.onrender.com/api/v1/stores/${store.id}/stock/history`,
+              {
+                method: "GET",
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                },
+              },
+            )
+            if (!response.ok) {
+              console.warn(`Failed to fetch stock history for store ${store.id}: ${response.status}`)
+              return []
+            }
+            return response.json()
+          })
+        )
+        // Flatten the aggregated data and map it to the desired format
+        const aggregatedData = allStockHistory.flat().map((entry) => ({
+          description: `${entry.productName || entry.name || "Unknown Product"} stock has been updated to ${
+            entry.newStock || "N/A"
+          } on ${new Date(entry.timestamp).toLocaleString()}`,
+        }))
+        setStockHistory(aggregatedData)
+        return
+      }
+
+      const storeExists = stores.some((store) => String(store.id) === selectedStore)
+      if (!storeExists) {
+        console.warn(`Store ${selectedStore} does not belong to the current user`)
+        setStockHistory([])
+        return
+      }
+
+      const response = await fetch(
+        `https://sarismart-backend.onrender.com/api/v1/stores/${selectedStore}/stock/history`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      )
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch stock history: ${response.status}`)
+      }
+
+      const data = await response.json()
+
+      // Map data to the desired message format
+      if (Array.isArray(data) && data.length > 0) {
+        setStockHistory(data.map((entry) => ({
+          description: `${entry.productName || entry.name || "Unknown Product"} stock has been updated to ${
+            entry.newStock || "N/A"
+          } on ${new Date(entry.timestamp).toLocaleString()}`,
+        })))
+      } else {
+        setStockHistory([])
+      }
+    } catch (error) {
+      console.error("Error fetching stock history:", error)
+      setStockHistory([])
+    }
+  }
+
+  // Fetch restock alerts
+  const fetchRestockAlerts = async () => {
+    try {
+      const token = localStorage.getItem("token")
+      if (!token) {
+        showToast("Authentication token not found", "error")
+        return
+      }
+
+      if (selectedStore === "all") {
+        setRestockAlerts([])
+        return
+      }
+
+      const storeExists = stores.some((store) => String(store.id) === selectedStore)
+      if (!storeExists) {
+        console.warn(`Store ${selectedStore} does not belong to the current user`)
+        setRestockAlerts([])
+        return
+      }
+
+      const response = await fetch(
+        `https://sarismart-backend.onrender.com/api/v1/stores/${selectedStore}/inventory/alerts`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      )
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch restock alerts: ${response.status}`)
+      }
+
+      const data = await response.json()
+      setRestockAlerts(data)
+    } catch (error) {
+      console.error("Error fetching restock alerts:", error)
+      setRestockAlerts([])
+    }
+  }
+
   // Load sample data for demonstration
   const loadSampleData = () => {
     showToast("Sample data loaded for demonstration", "info")
@@ -247,6 +390,40 @@ export default function InsightsPage() {
                         Load Sample Data
                       </Button>
                     </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Stock Adjustment History</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {stockHistory.length > 0 ? (
+                    <ul className="list-disc pl-5">
+                      {stockHistory.map((entry, index) => (
+                        <li key={index}>{entry.description}</li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p className="text-muted-foreground">No stock adjustment history available</p>
+                  )}
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Restock Alerts</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {restockAlerts.length > 0 ? (
+                    <ul>
+                      {restockAlerts.map((alert, index) => (
+                        <li key={index}>{alert.message}</li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p className="text-muted-foreground">No restock alerts available</p>
                   )}
                 </CardContent>
               </Card>
