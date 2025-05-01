@@ -686,7 +686,7 @@ export default function ProductsPage() {
             </svg>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">${inventoryMetrics.inventoryValue.toFixed(2)}</div>
+            <div className="text-2xl font-bold">₱{inventoryMetrics.inventoryValue.toFixed(2)}</div>
             <p className="text-xs text-muted-foreground">
               <span className="text-[#40E0D0]">+0%</span> from last month
             </p>
@@ -782,7 +782,7 @@ export default function ProductsPage() {
                           <TableCell>{product.category}</TableCell>
                           <TableCell className="text-center">{product.stock}</TableCell>
                           <TableCell className="text-center">{product.reorder_level}</TableCell>
-                          <TableCell className="text-right">${Number.parseFloat(product.price).toFixed(2)}</TableCell>
+                          <TableCell className="text-right">₱{Number.parseFloat(product.price).toFixed(2)}</TableCell>
                           <TableCell>
                             {product.stock <= 0 ? (
                               <span className="inline-flex items-center rounded-full bg-red-100 px-2.5 py-0.5 text-xs font-medium text-red-800">
@@ -898,7 +898,7 @@ export default function ProductsPage() {
                           <TableCell>{product.category}</TableCell>
                           <TableCell className="text-center">{product.stock}</TableCell>
                           <TableCell className="text-center">{product.reorder_level}</TableCell>
-                          <TableCell className="text-right">${Number.parseFloat(product.price).toFixed(2)}</TableCell>
+                          <TableCell className="text-right">₱{Number.parseFloat(product.price).toFixed(2)}</TableCell>
                           <TableCell>
                             <span className="inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800">
                               In stock
@@ -988,7 +988,7 @@ export default function ProductsPage() {
                           <TableCell>{product.category}</TableCell>
                           <TableCell className="text-center">{product.stock}</TableCell>
                           <TableCell className="text-center">{product.reorder_level}</TableCell>
-                          <TableCell className="text-right">${Number.parseFloat(product.price).toFixed(2)}</TableCell>
+                          <TableCell className="text-right">₱{Number.parseFloat(product.price).toFixed(2)}</TableCell>
                           <TableCell>
                             <span className="inline-flex items-center rounded-full bg-yellow-100 px-2.5 py-0.5 text-xs font-medium text-yellow-800">
                               Low stock
@@ -1078,7 +1078,7 @@ export default function ProductsPage() {
                           <TableCell>{product.category}</TableCell>
                           <TableCell className="text-center">{product.stock}</TableCell>
                           <TableCell className="text-center">{product.reorder_level}</TableCell>
-                          <TableCell className="text-right">${Number.parseFloat(product.price).toFixed(2)}</TableCell>
+                          <TableCell className="text-right">₱{Number.parseFloat(product.price).toFixed(2)}</TableCell>
                           <TableCell>
                             <span className="inline-flex items-center rounded-full bg-red-100 px-2.5 py-0.5 text-xs font-medium text-red-800">
                               Out of stock
@@ -1206,7 +1206,7 @@ export default function ProductsPage() {
                 </div>
                 <div className="grid grid-cols-3 gap-3">
                   <div className="space-y-1">
-                    <Label htmlFor="price">Price ($)</Label>
+                    <Label htmlFor="price">Price (₱)</Label>
                     <Input
                       id="price"
                       name="price"
@@ -1405,7 +1405,7 @@ export default function ProductsPage() {
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-1">
-                    <Label htmlFor="edit-price">Price ($)</Label>
+                    <Label htmlFor="edit-price">Price (₱)</Label>
                     <Input
                       id="edit-price"
                       name="price"

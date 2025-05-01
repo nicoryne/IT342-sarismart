@@ -223,7 +223,7 @@ export default function InsightsPage() {
                 <CardContent>
                   <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
                     {[
-                      { title: "Average Order Value", value: "$0.00" },
+                      { title: "Average Order Value", value: "₱0.00" },
                       { title: "Inventory Turnover", value: storeInsights.turnover },
                       { title: "Out of Stock Rate", value: "0%" },
                       { title: "Inventory Accuracy", value: "100%" },

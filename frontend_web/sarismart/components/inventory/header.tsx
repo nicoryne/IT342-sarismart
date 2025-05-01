@@ -1,11 +1,27 @@
 "use client"
 import Image from "next/image"
-import { ChevronDown, Menu } from "lucide-react"
-
+import { ChevronDown, Menu, User } from "lucide-react"
+import { useUser } from "@/hooks/user-user"
 import { Button } from "@/components/ui/button"
+import { Skeleton } from "@/components/ui/skeleton"
 
 export default function InventoryHeader() {
-  // Remove all the store-related state and functions
+  const { user, isLoading, error } = useUser()
+
+  // Get first letter of first and last name for avatar fallback
+  const getInitials = () => {
+    if (!user) return ""
+    return `${user.firstName?.[0] || ""}${user.lastName?.[0] || ""}`.toUpperCase()
+  }
+
+  // Get display name
+  const getDisplayName = () => {
+    if (!user) return ""
+    if (user.firstName && user.lastName) {
+      return `${user.firstName} ${user.lastName}`
+    }
+    return user.username || user.email || ""
+  }
 
   return (
     <header className="relative flex h-16 items-center justify-between border-b bg-white px-4 md:px-6">
@@ -17,7 +33,7 @@ export default function InventoryHeader() {
         </Button>
       </div>
 
-      {/* Center Section - Remove the store selector */}
+      {/* Center Section */}
       <div className="absolute left-1/2 transform -translate-x-1/2">
         <h1 className="text-lg font-semibold text-[#008080]">SariSmart</h1>
       </div>
@@ -25,24 +41,41 @@ export default function InventoryHeader() {
       {/* Right Section - Profile */}
       <div className="flex items-center gap-4 ml-auto">
         <div className="flex items-center gap-2">
-          <div className="relative h-8 w-8 overflow-hidden rounded-full">
-            <Image
-              src="/placeholder.svg?height=32&width=32"
-              alt="User"
-              width={32}
-              height={32}
-              className="object-cover"
-            />
-          </div>
-          <div className="hidden md:block">
-            <div className="text-sm font-medium">Rahimah</div>
-            <div className="text-xs text-gray-500">Admin</div>
-          </div>
-          <ChevronDown className="h-4 w-4 text-gray-500" />
+          {isLoading ? (
+            <>
+              <Skeleton className="h-8 w-8 rounded-full" />
+              <div className="hidden md:block">
+                <Skeleton className="h-4 w-24 mb-1" />
+                <Skeleton className="h-3 w-16" />
+              </div>
+            </>
+          ) : error ? (
+            <div className="relative h-8 w-8 overflow-hidden rounded-full bg-gray-200 flex items-center justify-center">
+              <User className="h-5 w-5 text-gray-500" />
+            </div>
+          ) : (
+            <>
+              <div className="relative h-8 w-8 overflow-hidden rounded-full bg-[#008080] flex items-center justify-center text-white">
+                {user?.profileImage ? (
+                  <Image
+                    src={user.profileImage || "/placeholder.svg"}
+                    alt={getDisplayName()}
+                    width={32}
+                    height={32}
+                    className="object-cover"
+                  />
+                ) : (
+                  <span className="text-xs font-medium">{getInitials()}</span>
+                )}
+              </div>
+              <div className="hidden md:block">
+                <div className="text-sm font-medium">{getDisplayName()}</div>
+                <div className="text-xs text-gray-500">{user?.role || "User"}</div>
+              </div>
+            </>
+          )}
         </div>
       </div>
-
-      {/* Remove all the modals related to store management */}
     </header>
   )
 }
