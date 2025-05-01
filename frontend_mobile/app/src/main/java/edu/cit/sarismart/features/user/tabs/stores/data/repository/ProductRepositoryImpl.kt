@@ -4,6 +4,7 @@ import android.util.Log
 import edu.cit.sarismart.features.user.tabs.scan.data.models.CartItem
 import edu.cit.sarismart.features.user.tabs.scan.data.repository.BarcodeRepository
 import edu.cit.sarismart.features.user.tabs.stores.data.models.Product
+import edu.cit.sarismart.features.user.tabs.stores.data.models.ProductRequest
 import edu.cit.sarismart.features.user.tabs.stores.data.models.Sale
 import edu.cit.sarismart.features.user.tabs.stores.domain.StoreInventoryApiService
 import edu.cit.sarismart.features.user.tabs.stores.domain.StoreProductApiService
@@ -85,8 +86,6 @@ class ProductRepositoryImpl @Inject constructor(
         }
     }
 
-    // Rest of the implementation remains the same
-
     override suspend fun updateProductStock(productId: Long, storeId: Long, newStock: Int): Boolean = withContext(Dispatchers.IO) {
         try {
             // Calculate the adjustment needed (negative for decrease, positive for increase)
@@ -97,6 +96,47 @@ class ProductRepositoryImpl @Inject constructor(
             return@withContext response.isSuccessful
         } catch (e: Exception) {
             Log.e("ProductRepository", "Error updating product stock", e)
+            return@withContext false
+        }
+    }
+
+    // New method to create a product
+    override suspend fun createProduct(storeId: Long, product: ProductRequest): Product? = withContext(Dispatchers.IO) {
+        try {
+            val response = storeProductApiService.createProduct(storeId, product)
+            if (response.isSuccessful) {
+                return@withContext response.body()
+            }
+            Log.e("ProductRepository", "Failed to create product: ${response.code()}")
+            return@withContext null
+        } catch (e: Exception) {
+            Log.e("ProductRepository", "Error creating product", e)
+            return@withContext null
+        }
+    }
+
+    // New method to update a product
+    override suspend fun updateProduct(storeId: Long, productId: Long, product: Product): Product? = withContext(Dispatchers.IO) {
+        try {
+            val response = storeProductApiService.modifyProduct(storeId, productId, product)
+            if (response.isSuccessful) {
+                return@withContext response.body()
+            }
+            Log.e("ProductRepository", "Failed to update product: ${response.code()}")
+            return@withContext null
+        } catch (e: Exception) {
+            Log.e("ProductRepository", "Error updating product", e)
+            return@withContext null
+        }
+    }
+
+    // New method to delete a product
+    override suspend fun deleteProduct(storeId: Long, productId: Long): Boolean = withContext(Dispatchers.IO) {
+        try {
+            val response = storeProductApiService.deleteProduct(storeId, productId)
+            return@withContext response.isSuccessful
+        } catch (e: Exception) {
+            Log.e("ProductRepository", "Error deleting product", e)
             return@withContext false
         }
     }

@@ -497,7 +497,6 @@ fun EditStoreDialog(
     )
 }
 
-// Store data class (if not already defined elsewhere)
 data class Store(
     val id: Long,
     val storeName: String,

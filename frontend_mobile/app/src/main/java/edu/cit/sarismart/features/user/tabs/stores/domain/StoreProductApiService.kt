@@ -1,6 +1,7 @@
 package edu.cit.sarismart.features.user.tabs.stores.domain
 
 import edu.cit.sarismart.features.user.tabs.stores.data.models.Product
+import edu.cit.sarismart.features.user.tabs.stores.data.models.ProductRequest
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.DELETE
@@ -18,7 +19,7 @@ interface StoreProductApiService {
     suspend fun listProducts(@Path("storeId") storeId: Long): Response<List<Product>>
 
     @POST("/api/v1/stores/{storeId}/products")
-    suspend fun createProduct(@Path("storeId") storeId: Long, @Body product: Product): Response<Product>
+    suspend fun createProduct(@Path("storeId") storeId: Long, @Body product: ProductRequest): Response<Product>
 
     @PUT("/api/v1/stores/{storeId}/products/{productId}")
     suspend fun modifyProduct(@Path("storeId") storeId: Long, @Path("productId") productId: Long, @Body product: Product): Response<Product>

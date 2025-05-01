@@ -91,6 +91,7 @@ dependencies {
 
     // Material Icons
     implementation(libs.androidx.material.icons.extended)
+    implementation(libs.androidx.material)
 
     // Google Font
     implementation(libs.androidx.ui.text.google.fonts)
@@ -107,7 +108,6 @@ dependencies {
     // Data Store
     implementation(libs.androidx.datastore.preferences)
     implementation(libs.androidx.datastore)
-
 
     // Google Maps
     implementation(libs.maps.compose)
@@ -141,7 +141,6 @@ dependencies {
 
     // Barcode Scanning
     implementation(libs.barcode.scanning)
-
 }
 
 

@@ -26,6 +26,10 @@ import edu.cit.sarismart.features.user.tabs.scan.ui.stores.StoreMenuScreen
 import edu.cit.sarismart.features.user.tabs.stores.ui.overview.MapLocationSelectionScreen
 import edu.cit.sarismart.features.user.tabs.stores.ui.overview.StoreOverviewScreen
 import edu.cit.sarismart.features.user.tabs.stores.ui.overview.StoreOverviewScreenViewModel
+import edu.cit.sarismart.features.user.tabs.stores.ui.products.AddProductScreen
+import edu.cit.sarismart.features.user.tabs.stores.ui.products.EditProductScreen
+import edu.cit.sarismart.features.user.tabs.stores.ui.products.ProductDetailScreen
+import edu.cit.sarismart.features.user.tabs.stores.ui.products.ProductListScreen
 import edu.cit.sarismart.features.user.tabs.stores.ui.profile.StoreProfileScreen
 import edu.cit.sarismart.features.user.tabs.stores.ui.profile.StoreProfileScreenViewModel
 
@@ -67,7 +71,80 @@ fun UserNavigationHost(
             StoreProfileScreen(
                 storeId = storeId,
                 onBack = { navController.popBackStack() },
-                onSelectLocation = { navController.navigate("map_location_selection_profile") }
+                onSelectLocation = { navController.navigate("map_location_selection_profile") },
+                onNavigateToProductDetail = { sId, pId ->
+                    navController.navigate("store/$sId/products/$pId")
+                },
+                onNavigateToAddProduct = { sId ->
+                    navController.navigate("store/$sId/products/add")
+                }
+            )
+        }
+
+        composable(
+            route = "store/{storeId}/products",
+            arguments = listOf(navArgument("storeId") { type = NavType.LongType })
+        ) { backStackEntry ->
+            val storeId = backStackEntry.arguments?.getLong("storeId") ?: -1L
+
+            ProductListScreen(
+                storeId = storeId,
+                onNavigateBack = { navController.popBackStack() },
+                onNavigateToAddProduct = { sId ->
+                    navController.navigate("store/$sId/products/add")
+                },
+                onNavigateToProductDetail = { sId, pId ->
+                    navController.navigate("store/$sId/products/$pId")
+                }
+            )
+        }
+
+        composable(
+            route = "store/{storeId}/products/{productId}",
+            arguments = listOf(
+                navArgument("storeId") { type = NavType.LongType },
+                navArgument("productId") { type = NavType.LongType }
+            )
+        ) { backStackEntry ->
+            val storeId = backStackEntry.arguments?.getLong("storeId") ?: -1L
+            val productId = backStackEntry.arguments?.getLong("productId") ?: -1L
+
+            ProductDetailScreen(
+                storeId = storeId,
+                productId = productId,
+                onNavigateBack = { navController.popBackStack() },
+                onNavigateToEditProduct = { sId, pId ->
+                    navController.navigate("store/$sId/products/$pId/edit")
+                }
+            )
+        }
+
+        composable(
+            route = "store/{storeId}/products/add",
+            arguments = listOf(navArgument("storeId") { type = NavType.LongType })
+        ) { backStackEntry ->
+            val storeId = backStackEntry.arguments?.getLong("storeId") ?: -1L
+
+            AddProductScreen(
+                storeId = storeId,
+                onNavigateBack = { navController.popBackStack() }
+            )
+        }
+
+        composable(
+            route = "store/{storeId}/products/{productId}/edit",
+            arguments = listOf(
+                navArgument("storeId") { type = NavType.LongType },
+                navArgument("productId") { type = NavType.LongType }
+            )
+        ) { backStackEntry ->
+            val storeId = backStackEntry.arguments?.getLong("storeId") ?: -1L
+            val productId = backStackEntry.arguments?.getLong("productId") ?: -1L
+
+            EditProductScreen(
+                storeId = storeId,
+                productId = productId,
+                onNavigateBack = { navController.popBackStack() }
             )
         }
 
