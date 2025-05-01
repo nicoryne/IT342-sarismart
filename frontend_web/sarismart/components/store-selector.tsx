@@ -3,7 +3,7 @@
 import type React from "react"
 
 import { useState } from "react"
-import { Store, Plus, Pencil, Trash2, X } from "lucide-react"
+import { Store, Plus, Pencil, Trash2, X, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
@@ -12,7 +12,7 @@ import { useStoresContext } from "@/hooks/use-stores-context"
 import { showToast } from "@/components/ui/toast-notification"
 
 export function StoreSelector() {
-  const { stores, selectedStore, setSelectedStore, addStore, updateStore, deleteStore } = useStoresContext()
+  const { stores, selectedStore, setSelectedStore, addStore, updateStore, deleteStore, isLoading } = useStoresContext()
 
   // State for store management modals
   const [isAddStoreOpen, setIsAddStoreOpen] = useState(false)
@@ -23,6 +23,7 @@ export function StoreSelector() {
   )
   const [isDeleteStoreOpen, setIsDeleteStoreOpen] = useState(false)
   const [storeToDelete, setStoreToDelete] = useState<{ id: string | number; name: string } | null>(null)
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   // Handle input changes in the form fields
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -31,12 +32,20 @@ export function StoreSelector() {
   }
 
   // Handle form submission when the Add Store button is clicked
-  const handleAddStore = (e: React.FormEvent) => {
+  const handleAddStore = async (e: React.FormEvent) => {
     e.preventDefault()
-    addStore(newStore)
-    showToast(`Store "${newStore.name}" added successfully`, "success")
-    setNewStore({ name: "", location: "" })
-    setIsAddStoreOpen(false)
+    setIsSubmitting(true)
+    try {
+      await addStore(newStore)
+      showToast(`Store "${newStore.name}" added successfully`, "success")
+      setNewStore({ name: "", location: "" })
+      setIsAddStoreOpen(false)
+    } catch (error) {
+      console.error("Error adding store:", error)
+      showToast(`Failed to add store: ${error instanceof Error ? error.message : "Unknown error"}`, "error")
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   // Handle opening the update modal
@@ -46,12 +55,20 @@ export function StoreSelector() {
   }
 
   // Handle updating a store
-  const handleUpdateStore = (e: React.FormEvent) => {
+  const handleUpdateStore = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (storeToUpdate) {
-      updateStore(storeToUpdate.id, { name: storeToUpdate.name, location: storeToUpdate.location })
+    if (!storeToUpdate) return
+
+    setIsSubmitting(true)
+    try {
+      await updateStore(storeToUpdate.id, { name: storeToUpdate.name, location: storeToUpdate.location })
       showToast(`Store "${storeToUpdate.name}" updated successfully`, "success")
       setIsUpdateStoreOpen(false)
+    } catch (error) {
+      console.error("Error updating store:", error)
+      showToast(`Failed to update store: ${error instanceof Error ? error.message : "Unknown error"}`, "error")
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
@@ -62,11 +79,19 @@ export function StoreSelector() {
   }
 
   // Handle confirming the deletion
-  const handleConfirmDelete = () => {
-    if (storeToDelete) {
-      deleteStore(storeToDelete.id)
+  const handleConfirmDelete = async () => {
+    if (!storeToDelete) return
+
+    setIsSubmitting(true)
+    try {
+      await deleteStore(storeToDelete.id)
       showToast(`Store "${storeToDelete.name}" deleted successfully`, "success")
       setIsDeleteStoreOpen(false)
+    } catch (error) {
+      console.error("Error deleting store:", error)
+      showToast(`Failed to delete store: ${error instanceof Error ? error.message : "Unknown error"}`, "error")
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
@@ -74,53 +99,66 @@ export function StoreSelector() {
     <>
       <div className="flex items-center">
         <Store className="mr-2 h-5 w-5 text-[#008080]" />
-        <Select
-          value={selectedStore}
-          onValueChange={(value) => {
-            if (value === "add-store") {
-              setIsAddStoreOpen(true)
-              return
-            }
+        {isLoading ? (
+          <div className="flex items-center">
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            <span>Loading stores...</span>
+          </div>
+        ) : (
+          <Select
+            value={selectedStore}
+            onValueChange={(value) => {
+              if (value === "add-store") {
+                setIsAddStoreOpen(true)
+                return
+              }
 
-            setSelectedStore(value)
-            showToast(
-              `Switched to ${value === "all" ? "All Stores" : stores.find((s) => String(s.id) === value)?.name}`,
-              "info",
-            )
-          }}
-        >
-          <SelectTrigger className="w-[220px]">
-            <SelectValue placeholder="Select store" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Stores</SelectItem>
-            {stores.map((store) => (
-              <div key={store.id} className="flex items-center justify-between">
-                <SelectItem value={String(store.id)}>{store.name}</SelectItem>
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => handleOpenUpdateModal(store)}
-                    className="text-blue-500 p-1 hover:bg-blue-50 rounded"
-                  >
-                    <Pencil className="h-4 w-4" />
-                  </button>
-                  <button
-                    onClick={() => handleOpenDeleteModal(store)}
-                    className="text-red-500 p-1 hover:bg-red-50 rounded"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </button>
+              setSelectedStore(value)
+              showToast(
+                `Switched to ${value === "all" ? "All Stores" : stores.find((s) => String(s.id) === value)?.name}`,
+                "info",
+              )
+            }}
+          >
+            <SelectTrigger className="w-[220px]">
+              <SelectValue placeholder="Select store" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Stores</SelectItem>
+              {stores.map((store) => (
+                <div key={store.id} className="flex items-center justify-between">
+                  <SelectItem value={String(store.id)}>{store.name}</SelectItem>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        handleOpenUpdateModal(store)
+                      }}
+                      className="text-blue-500 p-1 hover:bg-blue-50 rounded"
+                    >
+                      <Pencil className="h-4 w-4" />
+                    </button>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        handleOpenDeleteModal(store)
+                      }}
+                      className="text-red-500 p-1 hover:bg-red-50 rounded"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </div>
                 </div>
-              </div>
-            ))}
-            <SelectItem value="add-store" className="text-[#008080] font-medium">
-              <div className="flex items-center">
-                <Plus className="mr-2 h-4 w-4" />
-                Add Store
-              </div>
-            </SelectItem>
-          </SelectContent>
-        </Select>
+              ))}
+              <SelectItem value="add-store" className="text-[#008080] font-medium">
+                <div className="flex items-center">
+                  <Plus className="mr-2 h-4 w-4" />
+                  Add Store
+                </div>
+              </SelectItem>
+            </SelectContent>
+          </Select>
+        )}
       </div>
 
       {/* Add Store Modal */}
@@ -171,8 +209,15 @@ export function StoreSelector() {
                 <Button type="button" variant="outline" onClick={() => setIsAddStoreOpen(false)}>
                   Cancel
                 </Button>
-                <Button type="submit" className="bg-[#008080] hover:bg-[#005F6B]">
-                  Add Store
+                <Button type="submit" className="bg-[#008080] hover:bg-[#005F6B]" disabled={isSubmitting}>
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Adding...
+                    </>
+                  ) : (
+                    "Add Store"
+                  )}
                 </Button>
               </div>
             </form>
@@ -226,8 +271,15 @@ export function StoreSelector() {
                 <Button type="button" variant="outline" onClick={() => setIsUpdateStoreOpen(false)}>
                   Cancel
                 </Button>
-                <Button type="submit" className="bg-[#008080] hover:bg-[#005F6B]">
-                  Update Store
+                <Button type="submit" className="bg-[#008080] hover:bg-[#005F6B]" disabled={isSubmitting}>
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Updating...
+                    </>
+                  ) : (
+                    "Update Store"
+                  )}
                 </Button>
               </div>
             </form>
@@ -259,8 +311,20 @@ export function StoreSelector() {
               <Button type="button" variant="outline" onClick={() => setIsDeleteStoreOpen(false)}>
                 Cancel
               </Button>
-              <Button type="button" className="bg-red-600 hover:bg-red-700" onClick={handleConfirmDelete}>
-                Delete
+              <Button
+                type="button"
+                className="bg-red-600 hover:bg-red-700"
+                onClick={handleConfirmDelete}
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Deleting...
+                  </>
+                ) : (
+                  "Delete"
+                )}
               </Button>
             </div>
           </div>

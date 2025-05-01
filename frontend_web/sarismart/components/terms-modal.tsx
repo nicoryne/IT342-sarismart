@@ -51,7 +51,7 @@ export function TermsModal({ trigger, defaultOpen, onOpenChange }: TermsModalPro
           <div className="prose prose-gray max-w-none">
             <h2>1. Acceptance of Terms</h2>
             <p>
-              By accessing or using SariSmart's services, you agree to be bound by these Terms of Service. If you do not
+              By accessing or using SariSmart services, you agree to be bound by these Terms of Service. If you do not
               agree to these terms, please do not use our services.
             </p>
 
@@ -95,7 +95,7 @@ export function TermsModal({ trigger, defaultOpen, onOpenChange }: TermsModalPro
 
             <h2>8. Disclaimer of Warranties</h2>
             <p>
-              THE SERVICE IS PROVIDED "AS IS" WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING, BUT
+              THE SERVICE IS PROVIDED AS IS WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED, INCLUDING, BUT
               NOT LIMITED TO, IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, OR
               NON-INFRINGEMENT.
             </p>
@@ -109,7 +109,7 @@ export function TermsModal({ trigger, defaultOpen, onOpenChange }: TermsModalPro
             <h2>10. Changes to Terms</h2>
             <p>
               We reserve the right to modify these Terms at any time. We will provide notice of significant changes by
-              posting the new Terms on the service and updating the "Last Updated" date.
+              posting the new Terms on the service and updating the Last Updated date.
             </p>
 
             <h2>11. Governing Law</h2>

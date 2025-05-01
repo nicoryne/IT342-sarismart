@@ -122,7 +122,7 @@ export function PrivacyModal({ trigger, defaultOpen, onOpenChange }: PrivacyModa
               sent.
             </p>
 
-            <h2>8. Children's Privacy</h2>
+            <h2>8. Childrens Privacy</h2>
             <p>
               Our service is not intended for children under 16 years of age. We do not knowingly collect personal
               information from children under 16.
@@ -131,7 +131,7 @@ export function PrivacyModal({ trigger, defaultOpen, onOpenChange }: PrivacyModa
             <h2>9. Changes to This Privacy Policy</h2>
             <p>
               We may update our Privacy Policy from time to time. We will notify you of any changes by posting the new
-              Privacy Policy on this page and updating the "Last Updated" date.
+              Privacy Policy on this page and updating the Last Updated date.
             </p>
 
             <h2>10. Contact Us</h2>

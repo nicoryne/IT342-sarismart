@@ -21,7 +21,7 @@ export default function Home() {
               </h1>
               <p className="max-w-lg text-base text-gray-600 sm:text-lg">
                 Empowering businesses with intelligent solutions that drive growth, efficiency, and innovation in
-                today's digital landscape.
+                todays digital landscape.
               </p>
               <div className="flex flex-col gap-3 sm:flex-row">
                 <Button asChild size="lg" className="bg-[#008080] text-white hover:bg-[#005F6B]">
@@ -43,7 +43,7 @@ export default function Home() {
             <div className="flex items-center justify-center pt-8 lg:pt-0">
               <div className="relative h-[250px] w-full max-w-[500px] overflow-hidden rounded-2xl shadow-2xl sm:h-[300px] md:h-[350px] lg:h-[400px]">
                 <Image
-                  src="/placeholder.svg?height=800&width=800"
+                  src="/Sari-sari.png?height=800&width=800"
                   alt="SariSmart Technology"
                   fill
                   className="object-cover"

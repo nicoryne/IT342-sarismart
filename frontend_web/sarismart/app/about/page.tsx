@@ -104,7 +104,7 @@ export default function AboutPage() {
               <h3 className="text-xl font-bold text-[#008080]">Our Mission</h3>
               <p className="mt-2 text-gray-600">
                 To empower businesses with intelligent solutions that drive growth, efficiency, and innovation in
-                today's digital landscape.
+                todays digital landscape.
               </p>
             </div>
 
@@ -113,7 +113,7 @@ export default function AboutPage() {
               <h3 className="text-xl font-bold text-[#008080]">Our Vision</h3>
               <p className="mt-2 text-gray-600">
                 To be the global leader in smart business solutions, recognized for our innovation, reliability, and
-                positive impact on our clients' success.
+                positive impact on our clients success.
               </p>
             </div>
 
@@ -189,8 +189,8 @@ export default function AboutPage() {
               <h3 className="mt-4 text-lg font-bold">John Kenny Quijote</h3>
               <p className="text-[#008080]">Backend Developer</p>
               <p className="mt-2 text-sm text-gray-600">
-                John Kenny ensures our clients get the most value from our solutions, with a focus on long-term partnerships
-                and success.
+                John Kenny ensures our clients get the most value from our solutions, with a focus on long-term
+                partnerships and success.
               </p>
             </div>
           </div>

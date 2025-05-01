@@ -46,11 +46,17 @@ export default function ProductsPage() {
     barcode: "",
   })
 
+  // Add these state variables after the other state declarations
+  const [isEditProductOpen, setIsEditProductOpen] = useState(false)
+  const [productToEdit, setProductToEdit] = useState<any>(null)
+
   const [products, setProducts] = useState([])
+  const [filteredProducts, setFilteredProducts] = useState<Product[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [formError, setFormError] = useState<string | null>(null)
   const [formSuccess, setFormSuccess] = useState<string | null>(null)
+  const [activeTab, setActiveTab] = useState("all")
 
   const [inventoryMetrics, setInventoryMetrics] = useState({
     totalProducts: 0,
@@ -58,6 +64,20 @@ export default function ProductsPage() {
     lowStock: 0,
     inventoryValue: 0,
   })
+
+  // Define a type for the product if not already defined
+  type Product = {
+    id: string | number
+    name: string
+    category: string
+    price: number
+    stock: number
+    reorder_level: number
+    barcode?: string
+    description?: string
+    store_id: string | number // Added store_id
+    store_name?: string       // Added store_name
+  }
 
   const fetchProducts = async () => {
     setIsLoading(true)
@@ -68,41 +88,125 @@ export default function ProductsPage() {
         return
       }
 
-      const endpoint =
-        selectedStore === "all"
-          ? "https://sarismart-backend.onrender.com/api/v1/products"
-          : `https://sarismart-backend.onrender.com/api/v1/stores/${selectedStore}/products`
+      let allProducts = []
 
-      const response = await fetch(endpoint, {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
+      if (selectedStore === "all") {
+        // Fetch products from each of the user's stores and combine them
+        for (const store of stores) {
+          try {
+            const storeResponse = await fetch(
+              `https://sarismart-backend.onrender.com/api/v1/stores/${store.id}/products`,
+              {
+                method: "GET",
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                },
+              },
+            )
 
-      if (!response.ok) {
-        throw new Error("Failed to fetch products")
+            if (!storeResponse.ok) {
+              console.error(`Failed to fetch products for store ${store.id}: ${storeResponse.status}`)
+              continue
+            }
+
+            const storeProducts = await storeResponse.json()
+            // Add store information to each product
+            const productsWithStore = storeProducts.map((product: Product) => ({
+              ...product,
+              store_id: store.id,
+              store_name: store.name,
+            }))
+            allProducts.push(...productsWithStore)
+          } catch (error) {
+            console.error(`Error fetching products for store ${store.id}:`, error)
+          }
+        }
+      } else {
+        // If a specific store is selected
+        const storeInfo = stores.find((s) => s.id.toString() === selectedStore.toString())
+        if (!storeInfo) {
+          showToast("Store not found", "error")
+          setIsLoading(false)
+          return
+        }
+
+        const response = await fetch(`https://sarismart-backend.onrender.com/api/v1/stores/${selectedStore}/products`, {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        })
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch products")
+        }
+
+        const data = await response.json()
+        // Add store information to each product
+        allProducts = data.map((product: Product) => ({
+          ...product,
+          store_id: storeInfo.id,
+          store_name: storeInfo.name,
+        }))
       }
 
-      const data = await response.json()
-      setProducts(data)
-
-      calculateInventoryMetrics(data)
+      setProducts(allProducts)
+      filterProductsByTab(allProducts, activeTab)
+      calculateInventoryMetrics(allProducts)
     } catch (error) {
       console.error("Error fetching products:", error)
       showToast(`Failed to fetch products: ${error instanceof Error ? error.message : "Unknown error"}`, "error")
       setProducts([])
+      setFilteredProducts([])
     } finally {
       setIsLoading(false)
     }
   }
 
-  const calculateInventoryMetrics = (productData: any[]) => {
+  const filterProductsByTab = (productsList: Product[], tab: string) => {
+    let filtered = [...productsList]
+
+    switch (tab) {
+      case "active":
+        filtered = productsList.filter((product) => product.stock > product.reorder_level)
+        break
+      case "low-stock":
+        filtered = productsList.filter((product) => product.stock <= product.reorder_level && product.stock > 0)
+        break
+      case "out-of-stock":
+        filtered = productsList.filter((product) => product.stock <= 0)
+        break
+      default:
+        // "all" tab - no filtering needed
+        break
+    }
+
+    setFilteredProducts(filtered)
+  }
+
+  const calculateInventoryMetrics = (productData: Product[]) => {
     const uniqueCategories = new Set(productData.map((product) => product.category))
-
     const lowStockItems = productData.filter((product) => product.stock <= product.reorder_level && product.stock > 0)
-
     const totalValue = productData.reduce((sum, product) => sum + Number(product.price) * Number(product.stock), 0)
+
+    // Explicitly type storeMetrics
+    const storeMetrics: Record<string | number, { totalProducts: number; outOfStock: number; lowStock: number; value: number }> = {}
+
+    stores.forEach((store) => {
+      const storeProducts = productData.filter((product) => product.store_id.toString() === store.id.toString())
+      const outOfStock = storeProducts.filter((product) => product.stock <= 0).length
+      const lowStock = storeProducts.filter(
+        (product) => product.stock <= product.reorder_level && product.stock > 0,
+      ).length
+      const storeValue = storeProducts.reduce((sum, product) => sum + Number(product.price) * Number(product.stock), 0)
+
+      storeMetrics[store.id] = {
+        totalProducts: storeProducts.length,
+        outOfStock,
+        lowStock,
+        value: storeValue,
+      }
+    })
 
     setInventoryMetrics({
       totalProducts: productData.length,
@@ -115,6 +219,15 @@ export default function ProductsPage() {
   useEffect(() => {
     fetchProducts()
   }, [selectedStore])
+
+  useEffect(() => {
+    filterProductsByTab(products, activeTab)
+  }, [activeTab, category])
+
+  const handleTabChange = (value: string) => {
+    setActiveTab(value)
+    filterProductsByTab(products, value)
+  }
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target
@@ -281,6 +394,124 @@ export default function ProductsPage() {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
   const [productToDelete, setProductToDelete] = useState<any>(null)
 
+  // Add this function to handle opening the edit modal
+  const handleEditProduct = (product: any) => {
+    if (selectedStore === "all" && !isUserProduct(product)) {
+      showToast("You can only edit products from your own stores", "error")
+      return
+    }
+
+    setProductToEdit({
+      ...product,
+      price: Number.parseFloat(product.price).toFixed(2),
+    })
+    setIsEditProductOpen(true)
+  }
+
+  // Add this function to handle the edit form submission
+  const handleUpdateProduct = async (e: React.FormEvent) => {
+    e.preventDefault()
+
+    setFormError(null)
+    setFormSuccess(null)
+
+    if (!validateEditForm()) {
+      return
+    }
+
+    setIsSubmitting(true)
+
+    try {
+      const token = localStorage.getItem("token")
+      if (!token) {
+        setFormError("Authentication token not found. Please log in again.")
+        return
+      }
+
+      const storeId = selectedStore === "all" ? productToEdit.store_id : selectedStore
+
+      const productData = {
+        name: productToEdit.name,
+        category: productToEdit.category,
+        price: Number.parseFloat(productToEdit.price),
+        reorder_level: Number.parseInt(productToEdit.reorder_level),
+        description: productToEdit.description || "",
+        barcode: productToEdit.barcode || null,
+      }
+
+      const response = await fetch(
+        `https://sarismart-backend.onrender.com/api/v1/stores/${storeId}/products/${productToEdit.id}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(productData),
+        },
+      )
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.message || errorData.error || "Failed to update product")
+      }
+
+      setFormSuccess(`Product ${productToEdit.name} updated successfully!`)
+      showToast(`Product ${productToEdit.name} updated successfully`, "success")
+
+      setTimeout(() => {
+        setIsEditProductOpen(false)
+        setProductToEdit(null)
+        setFormSuccess(null)
+        fetchProducts()
+      }, 1500)
+    } catch (error) {
+      console.error("Error updating product:", error)
+      const errorMessage = error instanceof Error ? error.message : "Unknown error occurred"
+      setFormError(`Failed to update product: ${errorMessage}`)
+      showToast(`Failed to update product: ${errorMessage}`, "error")
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
+  // Add this function to validate the edit form
+  const validateEditForm = () => {
+    if (!productToEdit.name.trim()) {
+      setFormError("Product name is required")
+      return false
+    }
+    if (!productToEdit.category) {
+      setFormError("Category is required")
+      return false
+    }
+    if (!productToEdit.price || isNaN(Number(productToEdit.price)) || Number(productToEdit.price) <= 0) {
+      setFormError("Price must be a positive number")
+      return false
+    }
+    if (
+      !productToEdit.reorder_level ||
+      isNaN(Number(productToEdit.reorder_level)) ||
+      Number(productToEdit.reorder_level) < 0
+    ) {
+      setFormError("Reorder level must be a non-negative number")
+      return false
+    }
+    return true
+  }
+
+  // Add this function to handle input changes in the edit form
+  const handleEditInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+  ) => {
+    const { name, value } = e.target
+    setProductToEdit((prev: Product) => ({
+      ...prev,
+      [name]: value,
+    }))
+    setFormError(null)
+  }
+
   const handleDeleteProduct = (product: any) => {
     if (selectedStore === "all" && !isUserProduct(product)) {
       showToast("You can only delete products from your own stores", "error")
@@ -331,7 +562,7 @@ export default function ProductsPage() {
 
   const isUserProduct = (product: any): boolean => {
     if (selectedStore === "all") {
-      return stores.some((store) => store.id === product.store_id)
+      return stores.some((store) => store.id.toString() === product.store_id.toString())
     }
     return true
   }
@@ -499,7 +730,7 @@ export default function ProductsPage() {
         </div>
       </div>
 
-      <Tabs defaultValue="all" className="mt-6">
+      <Tabs defaultValue="all" className="mt-6" onValueChange={handleTabChange}>
         <TabsList>
           <TabsTrigger value="all">All Products</TabsTrigger>
           <TabsTrigger value="active">Active</TabsTrigger>
@@ -529,8 +760,8 @@ export default function ProductsPage() {
                         Loading products...
                       </TableCell>
                     </TableRow>
-                  ) : products.length > 0 ? (
-                    products.map((product: any) => {
+                  ) : filteredProducts.length > 0 ? (
+                    filteredProducts.map((product: any) => {
                       const canModify = isUserProduct(product)
                       return (
                         <TableRow key={product.id}>
@@ -542,7 +773,9 @@ export default function ProductsPage() {
                             {selectedStore === "all" && (
                               <div className="text-xs text-muted-foreground">
                                 Store:{" "}
-                                {stores.find((s) => s.id === product.store_id)?.name || `Store #${product.store_id}`}
+                                {product.store_name ||
+                                  stores.find((s) => s.id.toString() === product.store_id.toString())?.name ||
+                                  `Store #${product.store_id}`}
                               </div>
                             )}
                           </TableCell>
@@ -570,6 +803,7 @@ export default function ProductsPage() {
                               <Button
                                 variant="outline"
                                 size="sm"
+                                onClick={() => handleEditProduct(product)}
                                 disabled={!canModify}
                                 title={!canModify ? "You can only edit products from your own stores" : "Edit product"}
                               >
@@ -622,24 +856,270 @@ export default function ProductsPage() {
 
         <TabsContent value="active" className="mt-4">
           <Card>
-            <CardContent className="p-6">
-              <div className="text-center text-muted-foreground">No active products found.</div>
+            <CardContent className="p-0">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Product</TableHead>
+                    <TableHead>Category</TableHead>
+                    <TableHead className="text-center">Stock</TableHead>
+                    <TableHead className="text-center">Reorder Level</TableHead>
+                    <TableHead className="text-right">Price</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {isLoading ? (
+                    <TableRow>
+                      <TableCell colSpan={7} className="text-center py-8">
+                        Loading products...
+                      </TableCell>
+                    </TableRow>
+                  ) : filteredProducts.length > 0 ? (
+                    filteredProducts.map((product: any) => {
+                      const canModify = isUserProduct(product)
+                      return (
+                        <TableRow key={product.id}>
+                          <TableCell>
+                            <div className="font-medium">{product.name}</div>
+                            {product.barcode && (
+                              <div className="text-xs text-muted-foreground">Barcode: {product.barcode}</div>
+                            )}
+                            {selectedStore === "all" && (
+                              <div className="text-xs text-muted-foreground">
+                                Store:{" "}
+                                {product.store_name ||
+                                  stores.find((s) => s.id.toString() === product.store_id.toString())?.name ||
+                                  `Store #${product.store_id}`}
+                              </div>
+                            )}
+                          </TableCell>
+                          <TableCell>{product.category}</TableCell>
+                          <TableCell className="text-center">{product.stock}</TableCell>
+                          <TableCell className="text-center">{product.reorder_level}</TableCell>
+                          <TableCell className="text-right">${Number.parseFloat(product.price).toFixed(2)}</TableCell>
+                          <TableCell>
+                            <span className="inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800">
+                              In stock
+                            </span>
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <div className="flex justify-end gap-2">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleEditProduct(product)}
+                                disabled={!canModify}
+                                title={!canModify ? "You can only edit products from your own stores" : "Edit product"}
+                              >
+                                Edit
+                              </Button>
+                              <Button
+                                variant="destructive"
+                                size="sm"
+                                onClick={() => handleDeleteProduct(product)}
+                                disabled={!canModify}
+                                title={
+                                  !canModify ? "You can only delete products from your own stores" : "Delete product"
+                                }
+                              >
+                                Delete
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      )
+                    })
+                  ) : (
+                    <TableRow>
+                      <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
+                        No active products found.
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
             </CardContent>
           </Card>
         </TabsContent>
 
         <TabsContent value="low-stock" className="mt-4">
           <Card>
-            <CardContent className="p-6">
-              <div className="text-center text-muted-foreground">No low stock products found.</div>
+            <CardContent className="p-0">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Product</TableHead>
+                    <TableHead>Category</TableHead>
+                    <TableHead className="text-center">Stock</TableHead>
+                    <TableHead className="text-center">Reorder Level</TableHead>
+                    <TableHead className="text-right">Price</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {isLoading ? (
+                    <TableRow>
+                      <TableCell colSpan={7} className="text-center py-8">
+                        Loading products...
+                      </TableCell>
+                    </TableRow>
+                  ) : filteredProducts.length > 0 ? (
+                    filteredProducts.map((product: any) => {
+                      const canModify = isUserProduct(product)
+                      return (
+                        <TableRow key={product.id}>
+                          <TableCell>
+                            <div className="font-medium">{product.name}</div>
+                            {product.barcode && (
+                              <div className="text-xs text-muted-foreground">Barcode: {product.barcode}</div>
+                            )}
+                            {selectedStore === "all" && (
+                              <div className="text-xs text-muted-foreground">
+                                Store:{" "}
+                                {product.store_name ||
+                                  stores.find((s) => s.id.toString() === product.store_id.toString())?.name ||
+                                  `Store #${product.store_id}`}
+                              </div>
+                            )}
+                          </TableCell>
+                          <TableCell>{product.category}</TableCell>
+                          <TableCell className="text-center">{product.stock}</TableCell>
+                          <TableCell className="text-center">{product.reorder_level}</TableCell>
+                          <TableCell className="text-right">${Number.parseFloat(product.price).toFixed(2)}</TableCell>
+                          <TableCell>
+                            <span className="inline-flex items-center rounded-full bg-yellow-100 px-2.5 py-0.5 text-xs font-medium text-yellow-800">
+                              Low stock
+                            </span>
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <div className="flex justify-end gap-2">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleEditProduct(product)}
+                                disabled={!canModify}
+                                title={!canModify ? "You can only edit products from your own stores" : "Edit product"}
+                              >
+                                Edit
+                              </Button>
+                              <Button
+                                variant="destructive"
+                                size="sm"
+                                onClick={() => handleDeleteProduct(product)}
+                                disabled={!canModify}
+                                title={
+                                  !canModify ? "You can only delete products from your own stores" : "Delete product"
+                                }
+                              >
+                                Delete
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      )
+                    })
+                  ) : (
+                    <TableRow>
+                      <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
+                        No low stock products found.
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
             </CardContent>
           </Card>
         </TabsContent>
 
         <TabsContent value="out-of-stock" className="mt-4">
           <Card>
-            <CardContent className="p-6">
-              <div className="text-center text-muted-foreground">No out of stock products found.</div>
+            <CardContent className="p-0">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Product</TableHead>
+                    <TableHead>Category</TableHead>
+                    <TableHead className="text-center">Stock</TableHead>
+                    <TableHead className="text-center">Reorder Level</TableHead>
+                    <TableHead className="text-right">Price</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {isLoading ? (
+                    <TableRow>
+                      <TableCell colSpan={7} className="text-center py-8">
+                        Loading products...
+                      </TableCell>
+                    </TableRow>
+                  ) : filteredProducts.length > 0 ? (
+                    filteredProducts.map((product: any) => {
+                      const canModify = isUserProduct(product)
+                      return (
+                        <TableRow key={product.id}>
+                          <TableCell>
+                            <div className="font-medium">{product.name}</div>
+                            {product.barcode && (
+                              <div className="text-xs text-muted-foreground">Barcode: {product.barcode}</div>
+                            )}
+                            {selectedStore === "all" && (
+                              <div className="text-xs text-muted-foreground">
+                                Store:{" "}
+                                {product.store_name ||
+                                  stores.find((s) => s.id.toString() === product.store_id.toString())?.name ||
+                                  `Store #${product.store_id}`}
+                              </div>
+                            )}
+                          </TableCell>
+                          <TableCell>{product.category}</TableCell>
+                          <TableCell className="text-center">{product.stock}</TableCell>
+                          <TableCell className="text-center">{product.reorder_level}</TableCell>
+                          <TableCell className="text-right">${Number.parseFloat(product.price).toFixed(2)}</TableCell>
+                          <TableCell>
+                            <span className="inline-flex items-center rounded-full bg-red-100 px-2.5 py-0.5 text-xs font-medium text-red-800">
+                              Out of stock
+                            </span>
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <div className="flex justify-end gap-2">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleEditProduct(product)}
+                                disabled={!canModify}
+                                title={!canModify ? "You can only edit products from your own stores" : "Edit product"}
+                              >
+                                Edit
+                              </Button>
+                              <Button
+                                variant="destructive"
+                                size="sm"
+                                onClick={() => handleDeleteProduct(product)}
+                                disabled={!canModify}
+                                title={
+                                  !canModify ? "You can only delete products from your own stores" : "Delete product"
+                                }
+                              >
+                                Delete
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      )
+                    })
+                  ) : (
+                    <TableRow>
+                      <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
+                        No out of stock products found.
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
             </CardContent>
           </Card>
         </TabsContent>
@@ -839,6 +1319,153 @@ export default function ProductsPage() {
                 Delete
               </Button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {isEditProductOpen && productToEdit && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="relative w-full max-w-[500px] rounded-lg bg-white p-5 shadow-lg">
+            <button
+              className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none"
+              onClick={() => {
+                setIsEditProductOpen(false)
+                setProductToEdit(null)
+                setFormError(null)
+                setFormSuccess(null)
+              }}
+            >
+              <X className="h-4 w-4" />
+              <span className="sr-only">Close</span>
+            </button>
+
+            <div className="mb-4">
+              <h2 className="text-lg font-semibold leading-none tracking-tight">Edit Product</h2>
+              <p className="text-sm text-muted-foreground">Update the product details below.</p>
+            </div>
+
+            {formError && (
+              <Alert variant="destructive" className="mb-4">
+                <AlertCircle className="h-4 w-4" />
+                <AlertTitle>Error</AlertTitle>
+                <AlertDescription>{formError}</AlertDescription>
+              </Alert>
+            )}
+
+            {formSuccess && (
+              <Alert className="mb-4 bg-green-50 text-green-800 border-green-200">
+                <AlertTitle>Success</AlertTitle>
+                <AlertDescription>{formSuccess}</AlertDescription>
+              </Alert>
+            )}
+
+            <form onSubmit={handleUpdateProduct}>
+              <div className="grid gap-3 py-2">
+                <div className="space-y-1">
+                  <Label htmlFor="edit-name">Product Name</Label>
+                  <Input
+                    id="edit-name"
+                    name="name"
+                    placeholder="Enter product name"
+                    value={productToEdit.name}
+                    onChange={handleEditInputChange}
+                    required
+                  />
+                </div>
+                <div className="space-y-1">
+                  <Label htmlFor="edit-barcode">Barcode (Optional)</Label>
+                  <Input
+                    id="edit-barcode"
+                    name="barcode"
+                    placeholder="Enter product barcode"
+                    value={productToEdit.barcode || ""}
+                    onChange={handleEditInputChange}
+                  />
+                </div>
+                <div className="space-y-1">
+                  <Label htmlFor="edit-category">Category</Label>
+                  <Select
+                    value={productToEdit.category}
+                    onValueChange={(value) => {
+                      setProductToEdit((prev: Product) => ({ ...prev, category: value }))
+                      setFormError(null)
+                    }}
+                  >
+                    <SelectTrigger id="edit-category">
+                      <SelectValue placeholder="Select category" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="electronics">Electronics</SelectItem>
+                      <SelectItem value="clothing">Clothing</SelectItem>
+                      <SelectItem value="food">Food & Beverage</SelectItem>
+                      <SelectItem value="home">Home Goods</SelectItem>
+                      <SelectItem value="other">Other</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-1">
+                    <Label htmlFor="edit-price">Price ($)</Label>
+                    <Input
+                      id="edit-price"
+                      name="price"
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      placeholder="0.00"
+                      value={productToEdit.price}
+                      onChange={handleEditInputChange}
+                      required
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <Label htmlFor="edit-reorder_level">Reorder Level</Label>
+                    <Input
+                      id="edit-reorder_level"
+                      name="reorder_level"
+                      type="number"
+                      min="0"
+                      placeholder="0"
+                      value={productToEdit.reorder_level}
+                      onChange={handleEditInputChange}
+                      required
+                    />
+                  </div>
+                </div>
+                <div className="space-y-1">
+                  <Label htmlFor="edit-description">Description (Optional)</Label>
+                  <Input
+                    id="edit-description"
+                    name="description"
+                    placeholder="Enter product description"
+                    value={productToEdit.description || ""}
+                    onChange={handleEditInputChange}
+                  />
+                </div>
+                <div className="space-y-1">
+                  <Label htmlFor="edit-stock">Current Stock: {productToEdit.stock}</Label>
+                  <p className="text-xs text-muted-foreground">
+                    To adjust stock levels, use the inventory management section.
+                  </p>
+                </div>
+              </div>
+              <div className="mt-4 flex justify-end gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => {
+                    setIsEditProductOpen(false)
+                    setFormError(null)
+                    setFormSuccess(null)
+                  }}
+                >
+                  Cancel
+                </Button>
+                <Button type="submit" className="bg-[#008080] hover:bg-[#005F6B]" disabled={isSubmitting}>
+                  {isSubmitting ? "Updating..." : "Update Product"}
+                </Button>
+              </div>
+            </form>
           </div>
         </div>
       )}
