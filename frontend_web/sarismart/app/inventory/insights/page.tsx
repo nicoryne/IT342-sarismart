@@ -203,9 +203,8 @@ export default function InsightsPage() {
         )
         // Flatten the aggregated data and map it to the desired format
         const aggregatedData = allStockHistory.flat().map((entry) => ({
-          description: `${entry.product.name || "Unknown Product"} stock has been updated to ${
-            entry.newStock || "N/A"
-          } on ${new Date(entry.timestamp).toLocaleString()}`,
+          description: `${entry.product.name || "Unknown Product"} stock has been updated from ${entry.oldStock || "N/A"} to 
+          ${entry.newStock || "N/A"} on ${new Date(entry.timestamp).toLocaleString()} by ${entry.user.fullName || "N/A"}.`,
         }))
         setStockHistory(aggregatedData)
         return
