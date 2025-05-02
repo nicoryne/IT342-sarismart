@@ -21,7 +21,7 @@ type Transaction = {
   createdAt?: string;
   store: string;
   store_id?: string | number;
-  amount: number;
+  totalAmount: number;
   status: string;
 };
 
@@ -62,20 +62,20 @@ export default function HistoryPage() {
 
         // Process the data to ensure we're working with primitive values
         const processedData = Array.isArray(data)
-          ? data.map((tx: Transaction) => ({
-              id: tx.id?.toString() || "N/A",
-              product: typeof tx.product === "string" ? tx.product : "N/A",
-              date: tx.date || tx.createdAt || new Date().toISOString(),
-              store: typeof tx.store === "string" ? tx.store : "N/A",
-              amount: typeof tx.amount === "number" ? tx.amount : 0,
-              status: typeof tx.status === "string" ? tx.status : "Unknown",
-            }))
-          : []
+        ? data.map((tx: Transaction) => ({
+            id: tx.id?.toString() || "N/A",
+            product: typeof tx.product === "string" ? tx.product : "N/A",
+            date: tx.date || tx.createdAt || new Date().toISOString(),
+            store: typeof tx.store === "string" ? tx.store : "N/A",
+            totalAmount: typeof tx.totalAmount === "number" ? tx.totalAmount : 0,
+            status: typeof tx.status === "string" ? tx.status : "Unknown",
+          }))
+        : []
 
         setTransactions(processedData)
 
         // Calculate metrics
-        const totalValue = processedData.reduce((sum, tx) => sum + (tx.amount || 0), 0)
+        const totalValue = processedData.reduce((sum, tx) => sum + (tx.totalAmount || 0), 0)
         setMetrics({
           totalTransactions: processedData.length,
           totalValue,
@@ -186,7 +186,7 @@ export default function HistoryPage() {
                           {transaction.date ? new Date(transaction.date).toLocaleDateString() : "N/A"}
                         </TableCell>
                         <TableCell>{transaction.store || "N/A"}</TableCell>
-                        <TableCell className="text-right">{formatCurrency(transaction.amount || 0)}</TableCell>
+                        <TableCell className="text-right">{formatCurrency(transaction.totalAmount || 0)}</TableCell>
                         <TableCell>
                           <Badge className={getStatusColor(transaction.status)}>
                             {transaction.status || "Unknown"}

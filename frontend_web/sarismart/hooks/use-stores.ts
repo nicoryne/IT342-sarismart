@@ -389,7 +389,7 @@ export function useStores() {
             date: tx.date || tx.createdAt || new Date().toISOString(),
             store: store.name || "N/A",
             store_id: store.id,
-            amount: typeof tx.amount === "number" ? tx.amount : 0,
+            totalAmount: typeof tx.totalAmount === "number" ? tx.totalAmount : 0,
             status: typeof tx.status === "string" ? tx.status : "Completed",
           }))
           allTransactions.push(...processedTransactions)
@@ -419,7 +419,7 @@ export function useStores() {
         date: tx.date || tx.createdAt || new Date().toISOString(),
         store: storeName,
         store_id: storeId,
-        amount: typeof tx.amount === "number" ? tx.amount : 0,
+        totalAmount: typeof tx.totalAmount === "number" ? tx.totalAmount : 0,
         status: typeof tx.status === "string" ? tx.status : "Completed",
       }))
     } catch (error) {
