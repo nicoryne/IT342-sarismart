@@ -475,7 +475,7 @@ export default function ProductsPage() {
       }
 
       const response = await fetch(
-        `https://sarismart-backend.onrender.com/api/v1/stores/${storeId}/products/${productToEdit.id}`,
+        `https://sarismart-backend.onrender.com/api/v1/stores/${storeId}/owner/products/${productToEdit.id}`,
         {
           method: "PUT",
           headers: {
