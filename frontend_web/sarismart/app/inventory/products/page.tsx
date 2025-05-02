@@ -41,7 +41,7 @@ export default function ProductsPage() {
     category: "",
     price: "",
     stock: "",
-    reorder_level: "",
+    reorderLevel: "",
     description: "",
     barcode: "",
   })
@@ -72,7 +72,7 @@ export default function ProductsPage() {
     category: string
     price: number
     stock: number
-    reorder_level: number
+    reorderLevel: number
     barcode?: string
     description?: string
     store_id: string | number // Added store_id
@@ -168,10 +168,10 @@ export default function ProductsPage() {
 
     switch (tab) {
       case "active":
-        filtered = productsList.filter((product) => product.stock > product.reorder_level)
+        filtered = productsList.filter((product) => product.stock > product.reorderLevel)
         break
       case "low-stock":
-        filtered = productsList.filter((product) => product.stock <= product.reorder_level && product.stock > 0)
+        filtered = productsList.filter((product) => product.stock <= product.reorderLevel && product.stock > 0)
         break
       case "out-of-stock":
         filtered = productsList.filter((product) => product.stock <= 0)
@@ -186,7 +186,7 @@ export default function ProductsPage() {
 
   const calculateInventoryMetrics = (productData: Product[]) => {
     const uniqueCategories = new Set(productData.map((product) => product.category))
-    const lowStockItems = productData.filter((product) => product.stock <= product.reorder_level && product.stock > 0)
+    const lowStockItems = productData.filter((product) => product.stock <= product.reorderLevel && product.stock > 0)
     const totalValue = productData.reduce((sum, product) => sum + Number(product.price) * Number(product.stock), 0)
 
     // Explicitly type storeMetrics
@@ -196,7 +196,7 @@ export default function ProductsPage() {
       const storeProducts = productData.filter((product) => product.store_id.toString() === store.id.toString())
       const outOfStock = storeProducts.filter((product) => product.stock <= 0).length
       const lowStock = storeProducts.filter(
-        (product) => product.stock <= product.reorder_level && product.stock > 0,
+        (product) => product.stock <= product.reorderLevel && product.stock > 0,
       ).length
       const storeValue = storeProducts.reduce((sum, product) => sum + Number(product.price) * Number(product.stock), 0)
 
@@ -334,7 +334,7 @@ export default function ProductsPage() {
       setFormError("Stock must be a non-negative number")
       return false
     }
-    if (!newProduct.reorder_level || isNaN(Number(newProduct.reorder_level)) || Number(newProduct.reorder_level) < 0) {
+    if (!newProduct.reorderLevel || isNaN(Number(newProduct.reorderLevel)) || Number(newProduct.reorderLevel) < 0) {
       setFormError("Reorder level must be a non-negative number")
       return false
     }
@@ -374,7 +374,7 @@ export default function ProductsPage() {
         category: newProduct.category,
         price: Number.parseFloat(newProduct.price),
         stock: Number.parseInt(newProduct.stock),
-        reorder_level: Number.parseInt(newProduct.reorder_level),
+        reorderLevel: Number.parseInt(newProduct.reorderLevel),
         description: newProduct.description || "",
         barcode: newProduct.barcode || null,
         sold: 0,
@@ -407,7 +407,7 @@ export default function ProductsPage() {
           category: "",
           price: "",
           stock: "",
-          reorder_level: "",
+          reorderLevel: "",
           description: "",
           barcode: "",
         })
@@ -469,7 +469,7 @@ export default function ProductsPage() {
         name: productToEdit.name,
         category: productToEdit.category,
         price: Number.parseFloat(productToEdit.price),
-        reorder_level: Number.parseInt(productToEdit.reorder_level),
+        reorderLevel: Number.parseInt(productToEdit.reorderLevel),
         description: productToEdit.description || "",
         barcode: productToEdit.barcode || null,
       }
@@ -545,9 +545,9 @@ export default function ProductsPage() {
       return false
     }
     if (
-      !productToEdit.reorder_level ||
-      isNaN(Number(productToEdit.reorder_level)) ||
-      Number(productToEdit.reorder_level) < 0
+      !productToEdit.reorderLevel ||
+      isNaN(Number(productToEdit.reorderLevel)) ||
+      Number(productToEdit.reorderLevel) < 0
     ) {
       setFormError("Reorder level must be a non-negative number")
       return false
@@ -808,14 +808,14 @@ export default function ProductsPage() {
                           </TableCell>
                           <TableCell>{product.category}</TableCell>
                           <TableCell className="text-center">{product.stock}</TableCell>
-                          <TableCell className="text-center">{product.reorder_level}</TableCell>
+                          <TableCell className="text-center">{product.reorderLevel}</TableCell>
                           <TableCell className="text-right">₱{Number.parseFloat(product.price).toFixed(2)}</TableCell>
                           <TableCell>
                             {product.stock <= 0 ? (
                               <span className="inline-flex items-center rounded-full bg-red-100 px-2.5 py-0.5 text-xs font-medium text-red-800">
                                 Out of stock
                               </span>
-                            ) : product.stock <= product.reorder_level ? (
+                            ) : product.stock <= product.reorderLevel ? (
                               <span className="inline-flex items-center rounded-full bg-yellow-100 px-2.5 py-0.5 text-xs font-medium text-yellow-800">
                                 Low stock
                               </span>
@@ -924,7 +924,7 @@ export default function ProductsPage() {
                           </TableCell>
                           <TableCell>{product.category}</TableCell>
                           <TableCell className="text-center">{product.stock}</TableCell>
-                          <TableCell className="text-center">{product.reorder_level}</TableCell>
+                          <TableCell className="text-center">{product.reorderLevel}</TableCell>
                           <TableCell className="text-right">₱{Number.parseFloat(product.price).toFixed(2)}</TableCell>
                           <TableCell>
                             <span className="inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800">
@@ -1014,7 +1014,7 @@ export default function ProductsPage() {
                           </TableCell>
                           <TableCell>{product.category}</TableCell>
                           <TableCell className="text-center">{product.stock}</TableCell>
-                          <TableCell className="text-center">{product.reorder_level}</TableCell>
+                          <TableCell className="text-center">{product.reorderLevel}</TableCell>
                           <TableCell className="text-right">₱{Number.parseFloat(product.price).toFixed(2)}</TableCell>
                           <TableCell>
                             <span className="inline-flex items-center rounded-full bg-yellow-100 px-2.5 py-0.5 text-xs font-medium text-yellow-800">
@@ -1104,7 +1104,7 @@ export default function ProductsPage() {
                           </TableCell>
                           <TableCell>{product.category}</TableCell>
                           <TableCell className="text-center">{product.stock}</TableCell>
-                          <TableCell className="text-center">{product.reorder_level}</TableCell>
+                          <TableCell className="text-center">{product.reorderLevel}</TableCell>
                           <TableCell className="text-right">₱{Number.parseFloat(product.price).toFixed(2)}</TableCell>
                           <TableCell>
                             <span className="inline-flex items-center rounded-full bg-red-100 px-2.5 py-0.5 text-xs font-medium text-red-800">
@@ -1265,14 +1265,14 @@ export default function ProductsPage() {
                     />
                   </div>
                   <div className="space-y-1">
-                    <Label htmlFor="reorder_level">Reorder Level</Label>
+                    <Label htmlFor="reorderLevel">Reorder Level</Label>
                     <Input
-                      id="reorder_level"
-                      name="reorder_level"
+                      id="reorderLevel"
+                      name="reorderLevel"
                       type="number"
                       min="0"
                       placeholder="0"
-                      value={newProduct.reorder_level}
+                      value={newProduct.reorderLevel}
                       onChange={handleInputChange}
                       required
                     />
@@ -1455,14 +1455,14 @@ export default function ProductsPage() {
                     />
                   </div>
                   <div className="space-y-1">
-                    <Label htmlFor="edit-reorder_level">Reorder Level</Label>
+                    <Label htmlFor="edit-reorderLevel">Reorder Level</Label>
                     <Input
-                      id="edit-reorder_level"
-                      name="reorder_level"
+                      id="edit-reorderLevel"
+                      name="reorderLevel"
                       type="number"
                       min="0"
                       placeholder="0"
-                      value={productToEdit.reorder_level}
+                      value={productToEdit.reorderLevel}
                       onChange={handleEditInputChange}
                       required
                     />
