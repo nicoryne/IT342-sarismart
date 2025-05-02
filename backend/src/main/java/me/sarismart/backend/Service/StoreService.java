@@ -199,7 +199,7 @@ public class StoreService {
                 existingProduct.setCategory(product.getCategory());
                 existingProduct.setDescription(product.getDescription());
                 existingProduct.setPrice(product.getPrice());
-                existingProduct.setStock(product.getStock());
+                existingProduct.setStock(existingProduct.getStock());
                 existingProduct.setReorderLevel(product.getReorderLevel());
                 
                 storeRepository.save(store);
