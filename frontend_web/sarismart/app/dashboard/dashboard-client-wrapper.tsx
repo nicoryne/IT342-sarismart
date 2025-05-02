@@ -1,5 +1,5 @@
 "use client"
-import React from "react"
+import type React from "react"
 import { StoresProvider } from "@/hooks/use-stores-context"
 import InventorySidebar from "@/components/inventory/sidebar"
 import InventoryHeader from "@/components/inventory/header"
@@ -11,9 +11,7 @@ export default function DashboardClientWrapper({ children }: { children: React.R
         <InventorySidebar />
         <div className="flex flex-1 flex-col">
           <InventoryHeader />
-          <div className="flex-1 overflow-auto">
-            {children}
-          </div>
+          <div className="flex-1 overflow-auto">{children}</div>
         </div>
       </div>
     </StoresProvider>

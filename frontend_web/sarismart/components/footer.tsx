@@ -1,7 +1,15 @@
+"use client"
+
+import { useState } from "react"
 import Link from "next/link"
 import { Facebook, Instagram, Linkedin, Twitter } from "lucide-react"
+import { TermsModal } from "@/components/terms-modal"
+import { PrivacyModal } from "@/components/privacy-modal"
 
 export default function Footer() {
+  const [showTermsModal, setShowTermsModal] = useState(false)
+  const [showPrivacyModal, setShowPrivacyModal] = useState(false)
+
   return (
     <footer className="border-t bg-white py-8 md:py-12">
       <div className="container px-4 md:px-6">
@@ -119,12 +127,18 @@ export default function Footer() {
           <div className="flex flex-col items-center justify-between gap-4 sm:flex-row">
             <p className="text-sm text-gray-600">© {new Date().getFullYear()} SariSmart. All rights reserved.</p>
             <div className="flex space-x-4">
-              <Link href="/privacy" className="text-sm text-gray-600 hover:text-[#008080]">
+              <button
+                onClick={() => setShowPrivacyModal(true)}
+                className="text-sm text-gray-600 hover:text-[#008080] hover:underline focus:outline-none"
+              >
                 Privacy Policy
-              </Link>
-              <Link href="/terms" className="text-sm text-gray-600 hover:text-[#008080]">
+              </button>
+              <button
+                onClick={() => setShowTermsModal(true)}
+                className="text-sm text-gray-600 hover:text-[#008080] hover:underline focus:outline-none"
+              >
                 Terms of Service
-              </Link>
+              </button>
               <Link href="/cookies" className="text-sm text-gray-600 hover:text-[#008080]">
                 Cookie Policy
               </Link>
@@ -132,6 +146,12 @@ export default function Footer() {
           </div>
         </div>
       </div>
+
+      {/* Terms of Service Modal */}
+      <TermsModal defaultOpen={showTermsModal} onOpenChange={setShowTermsModal} />
+
+      {/* Privacy Policy Modal */}
+      <PrivacyModal defaultOpen={showPrivacyModal} onOpenChange={setShowPrivacyModal} />
     </footer>
   )
 }

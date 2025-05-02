@@ -52,7 +52,7 @@ export default function ContactPage() {
           <div className="mx-auto max-w-3xl text-center">
             <h1 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl md:text-5xl">Get in Touch</h1>
             <p className="mt-4 text-lg text-gray-600">
-              Have questions or ready to start your journey with SariSmart? We're here to help.
+              Have questions or ready to start your journey with SariSmart? We are here to help.
             </p>
           </div>
         </div>
@@ -95,10 +95,10 @@ export default function ContactPage() {
                   Contact Information
                 </div>
                 <h2 className="mt-4 text-2xl font-bold tracking-tight text-gray-900 sm:text-3xl">
-                  We'd Love to Hear From You
+                  We would Love to Hear From You
                 </h2>
                 <p className="mt-4 text-gray-600">
-                  Whether you have a question about our products, pricing, or just want to say hello, we're ready to
+                  Whether you have a question about our products, pricing, or just want to say hello, we are ready to
                   answer all your questions.
                 </p>
               </div>
@@ -132,7 +132,7 @@ export default function ContactPage() {
                   <div>
                     <h3 className="font-medium">Email</h3>
                     <p className="mt-1 text-gray-600">info@sarismart.com</p>
-                    <p className="text-sm text-gray-500">We'll respond as soon as possible</p>
+                    <p className="text-sm text-gray-500">We will respond as soon as possible</p>
                   </div>
                 </div>
               </div>
@@ -155,7 +155,7 @@ export default function ContactPage() {
             <div className="rounded-xl border bg-white p-6 shadow-sm md:p-8">
               <h3 className="text-xl font-bold text-gray-900">Send Us a Message</h3>
               <p className="mt-2 text-gray-600">
-                Fill out the form below and we'll get back to you as soon as possible.
+                Fill out the form below and we will get back to you as soon as possible.
               </p>
 
               <form onSubmit={handleSubmit} className="mt-6 space-y-6">
@@ -239,7 +239,7 @@ export default function ContactPage() {
         <div className="container px-4 md:px-6">
           <div className="mx-auto max-w-3xl text-center">
             <h2 className="text-2xl font-bold tracking-tight text-gray-900">Visit Our Office</h2>
-            <p className="mt-2 text-gray-600">We're located in the heart of San Francisco's tech district.</p>
+            <p className="mt-2 text-gray-600">We are located in the heart of San Francisco tech district.</p>
           </div>
 
           <div className="mt-8 overflow-hidden rounded-xl border shadow-sm">
