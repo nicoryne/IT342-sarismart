@@ -94,7 +94,7 @@ public class StoreController {
     // Must be authenticated to assign a worker to a store
     @Operation(summary = "Assign Worker to Store", description = "Assign a worker to a store")
     @PostMapping("/{storeId}/workers/{workerId}")
-    public void assignWorker(@PathVariable Long storeId, @PathVariable Long workerId) {
+    public void assignWorker(@PathVariable Long storeId, @PathVariable String workerId) {
         storeService.assignWorker(storeId, workerId);
     }
 
@@ -102,7 +102,7 @@ public class StoreController {
     // Must be authenticated to remove a worker from a store
     @Operation(summary = "Remove Worker from Store", description = "Remove a worker from a store")
     @DeleteMapping("/{storeId}/workers/{workerId}")
-    public void removeWorker(@PathVariable Long storeId, @PathVariable Long workerId) {
+    public void removeWorker(@PathVariable Long storeId, @PathVariable String workerId) {
         storeService.removeWorker(storeId, workerId);
     }
 

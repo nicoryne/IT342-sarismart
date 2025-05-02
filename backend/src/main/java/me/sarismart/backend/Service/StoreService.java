@@ -125,8 +125,6 @@ public class StoreService {
                 User worker = userRepository.findById(workerId)
                         .orElseThrow(() -> new RuntimeException("Worker not found"));
 
-                authorizeOwner(store);
-
                 store.getWorkers().add(worker);
                 storeRepository.save(store);
         }
