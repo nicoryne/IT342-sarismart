@@ -119,20 +119,20 @@ public class StoreService {
                 return storeRepository.save(existingStore);
         }
 
-        public void assignWorker(Long storeId, Long workerId) {
+        public void assignWorker(Long storeId, String workerId) {
                 Store store = storeRepository.findById(storeId)
                         .orElseThrow(() -> new RuntimeException("Store not found"));
-                User worker = userRepository.findById(workerId)
+                User worker = userRepository.findBySupabaseUid(workerId)
                         .orElseThrow(() -> new RuntimeException("Worker not found"));
 
                 store.getWorkers().add(worker);
                 storeRepository.save(store);
         }
 
-        public void removeWorker(Long storeId, Long workerId) {
+        public void removeWorker(Long storeId, String workerId) {
                 Store store = storeRepository.findById(storeId)
                         .orElseThrow(() -> new RuntimeException("Store not found"));
-                User worker = userRepository.findById(workerId)
+                User worker = userRepository.findBySupabaseUid(workerId)
                         .orElseThrow(() -> new RuntimeException("Worker not found"));
 
                 authorizeOwner(store);
