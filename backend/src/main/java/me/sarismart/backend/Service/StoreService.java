@@ -37,7 +37,7 @@ public class StoreService {
         @Autowired
         private AuthorizationService authorizationService;
 
-        private String getCurrentUserId() {
+        protected String getCurrentUserId() {
                 Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
                 if (authentication == null || !authentication.isAuthenticated()) {
                     throw new RuntimeException("User is not authenticated");
@@ -51,12 +51,12 @@ public class StoreService {
                 throw new RuntimeException("Failed to retrieve user ID from authentication principal");
         }
 
-        private void authorizeOwner(Store store) {
+        protected void authorizeOwner(Store store) {
                 String currentUserId = getCurrentUserId();
                 authorizationService.authorizeOwner(store, currentUserId);
         }
             
-        private void authorizeOwnerOrWorker(Store store) {
+        protected void authorizeOwnerOrWorker(Store store) {
                 String currentUserId = getCurrentUserId();
                 authorizationService.authorizeOwnerOrWorker(store, currentUserId);
         }
