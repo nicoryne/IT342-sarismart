@@ -172,7 +172,12 @@ export function useStores() {
   }
 
   // Function to add a new store using backend API
-  const addStore = async (newStore: { name: string; location: string }) => {
+  const addStore = async (newStore: {
+    name: string
+    location: string
+    latitude?: number
+    longitude?: number
+  }) => {
     const token = localStorage.getItem("token")
     const user = getUserFromToken(token)
 
@@ -181,19 +186,9 @@ export function useStores() {
       return
     }
 
-    // Get device location
-    const getPosition = (): Promise<GeolocationPosition> =>
-      new Promise((resolve, reject) => navigator.geolocation.getCurrentPosition(resolve, reject))
-
-    let latitude = 0
-    let longitude = 0
-    try {
-      const position = await getPosition()
-      latitude = position.coords.latitude
-      longitude = position.coords.longitude
-    } catch (error) {
-      console.warn("Could not get device location, using 0,0")
-    }
+    // Use provided coordinates or default to 0,0
+    const latitude = newStore.latitude || 0
+    const longitude = newStore.longitude || 0
 
     // Construct the request body according to your backend's Store entity
     const body = {
@@ -284,7 +279,15 @@ export function useStores() {
   }
 
   // Function to update a store
-  const updateStore = async (storeId: string | number, updatedData: { name: string; location: string }) => {
+  const updateStore = async (
+    storeId: string | number,
+    updatedData: {
+      name: string
+      location: string
+      latitude?: number
+      longitude?: number
+    },
+  ) => {
     const token = localStorage.getItem("token")
     if (!token) {
       console.error("No token found")
@@ -301,6 +304,8 @@ export function useStores() {
         body: JSON.stringify({
           storeName: updatedData.name,
           location: updatedData.location,
+          latitude: updatedData.latitude,
+          longitude: updatedData.longitude,
         }),
       })
 
@@ -311,7 +316,15 @@ export function useStores() {
       const updatedStore = await response.json()
       setStores((prev) =>
         prev.map((store) =>
-          store.id === storeId ? { ...store, name: updatedStore.storeName, location: updatedStore.location } : store,
+          store.id === storeId
+            ? {
+                ...store,
+                name: updatedStore.storeName,
+                location: updatedStore.location,
+                latitude: updatedStore.latitude,
+                longitude: updatedStore.longitude,
+              }
+            : store,
         ),
       )
     } catch (error) {
