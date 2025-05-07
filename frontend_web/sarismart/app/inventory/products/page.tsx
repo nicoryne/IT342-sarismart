@@ -76,8 +76,10 @@ export default function ProductsPage() {
     barcode?: string
     description?: string
     store_id: string | number // Added store_id
-    store_name?: string       // Added store_name
+    store_name?: string // Added store_name
   }
+
+  const [searchQuery, setSearchQuery] = useState("")
 
   const fetchProducts = async () => {
     setIsLoading(true)
@@ -164,20 +166,32 @@ export default function ProductsPage() {
   }
 
   const filterProductsByTab = (productsList: Product[], tab: string) => {
-    let filtered = [...productsList]
+    // First filter by search query if one exists
+    let filtered = productsList
+    if (searchQuery.trim() !== "") {
+      const query = searchQuery.toLowerCase()
+      filtered = productsList.filter(
+        (product) =>
+          product.name.toLowerCase().includes(query) ||
+          product.category.toLowerCase().includes(query) ||
+          (product.barcode && product.barcode.toLowerCase().includes(query)) ||
+          (product.description && product.description.toLowerCase().includes(query)),
+      )
+    }
 
+    // Then filter by tab
     switch (tab) {
-      case "active":
-        filtered = productsList.filter((product) => product.stock > product.reorderLevel)
+      case "in-stock":
+        filtered = filtered.filter((product) => product.stock > product.reorderLevel)
         break
       case "low-stock":
-        filtered = productsList.filter((product) => product.stock <= product.reorderLevel && product.stock > 0)
+        filtered = filtered.filter((product) => product.stock <= product.reorderLevel && product.stock > 0)
         break
       case "out-of-stock":
-        filtered = productsList.filter((product) => product.stock <= 0)
+        filtered = filtered.filter((product) => product.stock <= 0)
         break
       default:
-        // "all" tab - no filtering needed
+        // "all" tab - no additional filtering needed
         break
     }
 
@@ -190,7 +204,10 @@ export default function ProductsPage() {
     const totalValue = productData.reduce((sum, product) => sum + Number(product.price) * Number(product.stock), 0)
 
     // Explicitly type storeMetrics
-    const storeMetrics: Record<string | number, { totalProducts: number; outOfStock: number; lowStock: number; value: number }> = {}
+    const storeMetrics: Record<
+      string | number,
+      { totalProducts: number; outOfStock: number; lowStock: number; value: number }
+    > = {}
 
     stores.forEach((store) => {
       const storeProducts = productData.filter((product) => product.store_id.toString() === store.id.toString())
@@ -222,11 +239,15 @@ export default function ProductsPage() {
 
   useEffect(() => {
     filterProductsByTab(products, activeTab)
-  }, [activeTab, category])
+  }, [activeTab, category, searchQuery, products])
 
   const handleTabChange = (value: string) => {
     setActiveTab(value)
     filterProductsByTab(products, value)
+  }
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value)
   }
 
   // Add barcode validation function after the other validation functions
@@ -559,8 +580,6 @@ export default function ProductsPage() {
     return true
   }
 
-  
-
   const handleDeleteProduct = (product: any) => {
     if (selectedStore === "all" && !isUserProduct(product)) {
       showToast("You can only delete products from your own stores", "error")
@@ -747,20 +766,23 @@ export default function ProductsPage() {
         <div className="flex items-center gap-2">
           <div className="relative w-full md:w-[300px]">
             <Filter className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input type="search" placeholder="Search products..." className="w-full pl-8 md:w-[300px]" />
+            <Input
+              type="search"
+              placeholder="Search products..."
+              className="w-full pl-8 md:w-[300px]"
+              value={searchQuery}
+              onChange={handleSearchChange}
+            />
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
-
-
-          
-        </div>
+        <div className="flex items-center gap-2"></div>
       </div>
 
       <Tabs defaultValue="all" className="mt-6" onValueChange={handleTabChange}>
         <TabsList>
           <TabsTrigger value="all">All Products</TabsTrigger>
+          <TabsTrigger value="in-stock">In Stock</TabsTrigger>
           <TabsTrigger value="low-stock">Low Stock</TabsTrigger>
           <TabsTrigger value="out-of-stock">Out of Stock</TabsTrigger>
         </TabsList>
@@ -881,7 +903,7 @@ export default function ProductsPage() {
           </Card>
         </TabsContent>
 
-        <TabsContent value="active" className="mt-4">
+        <TabsContent value="in-stock" className="mt-4">
           <Card>
             <CardContent className="p-0">
               <Table>
@@ -961,7 +983,7 @@ export default function ProductsPage() {
                   ) : (
                     <TableRow>
                       <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
-                        No active products found.
+                        No in-stock products found.
                       </TableCell>
                     </TableRow>
                   )}

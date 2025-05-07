@@ -11,16 +11,16 @@ import { showToast } from "@/components/ui/toast-notification"
 
 // Define a type for the product
 type Product = {
-  id: string;
-  name: string;
-  price: number;
-  stock: number;
-  reorderLevel: number;
-  barcode?: string;
-  category?: string;
-  store_id?: string; // Add store_id
-  store_name?: string; // Add store_name
-};
+  id: string
+  name: string
+  price: number
+  stock: number
+  reorderLevel: number
+  barcode?: string
+  category?: string
+  store_id?: string // Add store_id
+  store_name?: string // Add store_name
+}
 
 export default function DashboardPage() {
   const { stores, selectedStore, setSelectedStore, filterProductsByStore, isLoading } = useStoresContext()
@@ -125,7 +125,9 @@ export default function DashboardPage() {
       setOutOfStockCount(outOfStock)
 
       // Filter low stock items
-      const lowStock = allProducts.filter((product: Product) => product.stock <= product.reorderLevel && product.stock > 0)
+      const lowStock = allProducts.filter(
+        (product: Product) => product.stock <= product.reorderLevel && product.stock > 0,
+      )
       setLowStockItems(lowStock)
 
       // Calculate inventory value
@@ -341,6 +343,7 @@ export default function DashboardPage() {
       <Tabs defaultValue="all" className="space-y-4">
         <TabsList>
           <TabsTrigger value="all">All Products</TabsTrigger>
+          <TabsTrigger value="in-stock">In Stock</TabsTrigger>
           <TabsTrigger value="low-stock">Low Stock</TabsTrigger>
           <TabsTrigger value="out-of-stock">Out of Stock</TabsTrigger>
         </TabsList>
@@ -414,7 +417,7 @@ export default function DashboardPage() {
           </Card>
         </TabsContent>
 
-        <TabsContent value="active" className="mt-4">
+        <TabsContent value="in-stock" className="mt-4">
           <Card>
             <CardContent className="p-0">
               <Table>
@@ -465,7 +468,7 @@ export default function DashboardPage() {
                   ) : (
                     <TableRow>
                       <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
-                        No active products found.
+                        No in-stock products found.
                       </TableCell>
                     </TableRow>
                   )}
@@ -584,7 +587,7 @@ export default function DashboardPage() {
                       ))
                   ) : (
                     <TableRow>
-                      <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
+                      <TableCell colSpan={7} className="text  -center py-8 text-muted-foreground">
                         No out of stock products found.
                       </TableCell>
                     </TableRow>
