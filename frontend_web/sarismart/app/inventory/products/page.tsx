@@ -8,7 +8,6 @@ import { Filter, Plus, X, AlertCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Separator } from "@/components/ui/separator"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -49,6 +48,7 @@ export default function ProductsPage() {
   // Add these state variables after the other state declarations
   const [isEditProductOpen, setIsEditProductOpen] = useState(false)
   const [productToEdit, setProductToEdit] = useState<any>(null)
+  const [originalStock, setOriginalStock] = useState<number>(0)
 
   const [products, setProducts] = useState([])
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([])
@@ -76,8 +76,10 @@ export default function ProductsPage() {
     barcode?: string
     description?: string
     store_id: string | number // Added store_id
-    store_name?: string       // Added store_name
+    store_name?: string // Added store_name
   }
+
+  const [searchQuery, setSearchQuery] = useState("")
 
   const fetchProducts = async () => {
     setIsLoading(true)
@@ -164,20 +166,32 @@ export default function ProductsPage() {
   }
 
   const filterProductsByTab = (productsList: Product[], tab: string) => {
-    let filtered = [...productsList]
+    // First filter by search query if one exists
+    let filtered = productsList
+    if (searchQuery.trim() !== "") {
+      const query = searchQuery.toLowerCase()
+      filtered = productsList.filter(
+        (product) =>
+          product.name.toLowerCase().includes(query) ||
+          product.category.toLowerCase().includes(query) ||
+          (product.barcode && product.barcode.toLowerCase().includes(query)) ||
+          (product.description && product.description.toLowerCase().includes(query)),
+      )
+    }
 
+    // Then filter by tab
     switch (tab) {
-      case "active":
-        filtered = productsList.filter((product) => product.stock > product.reorderLevel)
+      case "in-stock":
+        filtered = filtered.filter((product) => product.stock > product.reorderLevel)
         break
       case "low-stock":
-        filtered = productsList.filter((product) => product.stock <= product.reorderLevel && product.stock > 0)
+        filtered = filtered.filter((product) => product.stock <= product.reorderLevel && product.stock > 0)
         break
       case "out-of-stock":
-        filtered = productsList.filter((product) => product.stock <= 0)
+        filtered = filtered.filter((product) => product.stock <= 0)
         break
       default:
-        // "all" tab - no filtering needed
+        // "all" tab - no additional filtering needed
         break
     }
 
@@ -190,7 +204,10 @@ export default function ProductsPage() {
     const totalValue = productData.reduce((sum, product) => sum + Number(product.price) * Number(product.stock), 0)
 
     // Explicitly type storeMetrics
-    const storeMetrics: Record<string | number, { totalProducts: number; outOfStock: number; lowStock: number; value: number }> = {}
+    const storeMetrics: Record<
+      string | number,
+      { totalProducts: number; outOfStock: number; lowStock: number; value: number }
+    > = {}
 
     stores.forEach((store) => {
       const storeProducts = productData.filter((product) => product.store_id.toString() === store.id.toString())
@@ -222,11 +239,15 @@ export default function ProductsPage() {
 
   useEffect(() => {
     filterProductsByTab(products, activeTab)
-  }, [activeTab, category])
+  }, [activeTab, category, searchQuery, products])
 
   const handleTabChange = (value: string) => {
     setActiveTab(value)
     filterProductsByTab(products, value)
+  }
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value)
   }
 
   // Add barcode validation function after the other validation functions
@@ -440,10 +461,11 @@ export default function ProductsPage() {
       ...product,
       price: Number.parseFloat(product.price).toFixed(2),
     })
+    setOriginalStock(Number(product.stock))
     setIsEditProductOpen(true)
   }
 
-  // Add this function to handle the edit form submission
+  // Updated handleUpdateProduct function with a simpler approach
   const handleUpdateProduct = async (e: React.FormEvent) => {
     e.preventDefault()
 
@@ -465,6 +487,7 @@ export default function ProductsPage() {
 
       const storeId = selectedStore === "all" ? productToEdit.store_id : selectedStore
 
+      // First, update the product details (excluding stock)
       const productData = {
         name: productToEdit.name,
         category: productToEdit.category,
@@ -474,7 +497,7 @@ export default function ProductsPage() {
         barcode: productToEdit.barcode || null,
       }
 
-      const response = await fetch(
+      const updateResponse = await fetch(
         `https://sarismart-backend.onrender.com/api/v1/stores/${storeId}/owner/products/${productToEdit.id}`,
         {
           method: "PUT",
@@ -486,9 +509,64 @@ export default function ProductsPage() {
         },
       )
 
-      if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.message || errorData.error || "Failed to update product")
+      if (!updateResponse.ok) {
+        // Check if there's content to parse
+        const text = await updateResponse.text()
+        let errorMessage = "Failed to update product"
+
+        if (text) {
+          try {
+            const errorData = JSON.parse(text)
+            errorMessage = errorData.message || errorData.error || errorMessage
+          } catch (parseError) {
+            console.error("Error parsing error response:", parseError)
+            // Use the text as is if it's not valid JSON
+            errorMessage = text || errorMessage
+          }
+        }
+
+        throw new Error(errorMessage)
+      }
+
+      // Check if stock has changed
+      const newStock = Number(productToEdit.stock)
+      if (newStock !== originalStock) {
+        // Use the correct API format with quantity as a query parameter
+        const stockUpdateUrl = new URL(
+          `https://sarismart-backend.onrender.com/api/v1/stores/${storeId}/products/${productToEdit.id}/stock`,
+        )
+
+        // Add quantity as a query parameter
+        stockUpdateUrl.searchParams.append("quantity", newStock.toString())
+
+        console.log("Stock update URL:", stockUpdateUrl.toString())
+
+        const stockUpdateResponse = await fetch(stockUpdateUrl.toString(), {
+          method: "PATCH",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          // No body needed as we're using query parameters
+        })
+
+        if (!stockUpdateResponse.ok) {
+          // Check if there's content to parse
+          const text = await stockUpdateResponse.text()
+          console.error("Stock update error response:", text)
+
+          let errorMessage = "Failed to update stock level"
+          if (text) {
+            try {
+              const errorData = JSON.parse(text)
+              errorMessage = errorData.message || errorData.error || errorMessage
+            } catch (parseError) {
+              console.error("Error parsing error response:", parseError)
+              errorMessage = text || errorMessage
+            }
+          }
+
+          throw new Error(errorMessage)
+        }
       }
 
       setFormSuccess(`Product ${productToEdit.name} updated successfully!`)
@@ -544,6 +622,10 @@ export default function ProductsPage() {
       setFormError("Price must be a positive number")
       return false
     }
+    if (!productToEdit.stock || isNaN(Number(productToEdit.stock)) || Number(productToEdit.stock) < 0) {
+      setFormError("Stock must be a non-negative number")
+      return false
+    }
     if (
       !productToEdit.reorderLevel ||
       isNaN(Number(productToEdit.reorderLevel)) ||
@@ -558,8 +640,6 @@ export default function ProductsPage() {
     }
     return true
   }
-
-  
 
   const handleDeleteProduct = (product: any) => {
     if (selectedStore === "all" && !isUserProduct(product)) {
@@ -747,20 +827,23 @@ export default function ProductsPage() {
         <div className="flex items-center gap-2">
           <div className="relative w-full md:w-[300px]">
             <Filter className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input type="search" placeholder="Search products..." className="w-full pl-8 md:w-[300px]" />
+            <Input
+              type="search"
+              placeholder="Search products..."
+              className="w-full pl-8 md:w-[300px]"
+              value={searchQuery}
+              onChange={handleSearchChange}
+            />
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
-
-
-          
-        </div>
+        <div className="flex items-center gap-2"></div>
       </div>
 
       <Tabs defaultValue="all" className="mt-6" onValueChange={handleTabChange}>
         <TabsList>
           <TabsTrigger value="all">All Products</TabsTrigger>
+          <TabsTrigger value="in-stock">In Stock</TabsTrigger>
           <TabsTrigger value="low-stock">Low Stock</TabsTrigger>
           <TabsTrigger value="out-of-stock">Out of Stock</TabsTrigger>
         </TabsList>
@@ -881,7 +964,7 @@ export default function ProductsPage() {
           </Card>
         </TabsContent>
 
-        <TabsContent value="active" className="mt-4">
+        <TabsContent value="in-stock" className="mt-4">
           <Card>
             <CardContent className="p-0">
               <Table>
@@ -961,7 +1044,7 @@ export default function ProductsPage() {
                   ) : (
                     <TableRow>
                       <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
-                        No active products found.
+                        No in-stock products found.
                       </TableCell>
                     </TableRow>
                   )}
@@ -1217,24 +1300,14 @@ export default function ProductsPage() {
                 </div>
                 <div className="space-y-1">
                   <Label htmlFor="category">Category</Label>
-                  <Select
+                  <Input
+                    id="category"
+                    name="category"
+                    placeholder="Enter product category"
                     value={newProduct.category}
-                    onValueChange={(value) => {
-                      setNewProduct((prev) => ({ ...prev, category: value }))
-                      setFormError(null)
-                    }}
-                  >
-                    <SelectTrigger id="category">
-                      <SelectValue placeholder="Select category" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="electronics">Electronics</SelectItem>
-                      <SelectItem value="clothing">Clothing</SelectItem>
-                      <SelectItem value="food">Food & Beverage</SelectItem>
-                      <SelectItem value="home">Home Goods</SelectItem>
-                      <SelectItem value="other">Other</SelectItem>
-                    </SelectContent>
-                  </Select>
+                    onChange={handleInputChange}
+                    required
+                  />
                 </div>
                 <div className="grid grid-cols-3 gap-3">
                   <div className="space-y-1">
@@ -1420,24 +1493,14 @@ export default function ProductsPage() {
                 </div>
                 <div className="space-y-1">
                   <Label htmlFor="edit-category">Category</Label>
-                  <Select
+                  <Input
+                    id="edit-category"
+                    name="category"
+                    placeholder="Enter product category"
                     value={productToEdit.category}
-                    onValueChange={(value) => {
-                      setProductToEdit((prev: Product) => ({ ...prev, category: value }))
-                      setFormError(null)
-                    }}
-                  >
-                    <SelectTrigger id="edit-category">
-                      <SelectValue placeholder="Select category" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="electronics">Electronics</SelectItem>
-                      <SelectItem value="clothing">Clothing</SelectItem>
-                      <SelectItem value="food">Food & Beverage</SelectItem>
-                      <SelectItem value="home">Home Goods</SelectItem>
-                      <SelectItem value="other">Other</SelectItem>
-                    </SelectContent>
-                  </Select>
+                    onChange={handleEditInputChange}
+                    required
+                  />
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-1">
@@ -1479,10 +1542,18 @@ export default function ProductsPage() {
                   />
                 </div>
                 <div className="space-y-1">
-                  <Label htmlFor="edit-stock">Current Stock: {productToEdit.stock}</Label>
-                  <p className="text-xs text-muted-foreground">
-                    To adjust stock levels, use the inventory management section.
-                  </p>
+                  <Label htmlFor="edit-stock">Add Stock Quantity</Label>
+                  <Input
+                    id="edit-stock"
+                    name="stock"
+                    type="number"
+                    min="0"
+                    placeholder="0"
+                    value={productToEdit.stock}
+                    onChange={handleEditInputChange}
+                    required
+                  />
+                  <p className="text-xs text-gray-500">Current stock: {originalStock}. Enter the quantity to add.</p>
                 </div>
               </div>
               <div className="mt-4 flex justify-end gap-2">

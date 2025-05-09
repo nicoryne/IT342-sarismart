@@ -10,17 +10,27 @@ import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useStoresContext } from "@/hooks/use-stores-context"
 import { showToast } from "@/components/ui/toast-notification"
+import { MapSelector } from "@/components/map-selector"
 
 export function StoreSelector() {
   const { stores, selectedStore, setSelectedStore, addStore, updateStore, deleteStore, isLoading } = useStoresContext()
 
   // State for store management modals
   const [isAddStoreOpen, setIsAddStoreOpen] = useState(false)
-  const [newStore, setNewStore] = useState({ name: "", location: "" })
+  const [newStore, setNewStore] = useState({
+    name: "",
+    location: "",
+    latitude: 0,
+    longitude: 0,
+  })
   const [isUpdateStoreOpen, setIsUpdateStoreOpen] = useState(false)
-  const [storeToUpdate, setStoreToUpdate] = useState<{ id: string | number; name: string; location: string } | null>(
-    null,
-  )
+  const [storeToUpdate, setStoreToUpdate] = useState<{
+    id: string | number
+    name: string
+    location: string
+    latitude?: number
+    longitude?: number
+  } | null>(null)
   const [isDeleteStoreOpen, setIsDeleteStoreOpen] = useState(false)
   const [storeToDelete, setStoreToDelete] = useState<{ id: string | number; name: string } | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -38,7 +48,7 @@ export function StoreSelector() {
     try {
       await addStore(newStore)
       showToast(`Store "${newStore.name}" added successfully`, "success")
-      setNewStore({ name: "", location: "" })
+      setNewStore({ name: "", location: "", latitude: 0, longitude: 0 })
       setIsAddStoreOpen(false)
     } catch (error) {
       console.error("Error adding store:", error)
@@ -49,7 +59,13 @@ export function StoreSelector() {
   }
 
   // Handle opening the update modal
-  const handleOpenUpdateModal = (store: { id: string | number; name: string; location: string }) => {
+  const handleOpenUpdateModal = (store: {
+    id: string | number
+    name: string
+    location: string
+    latitude?: number
+    longitude?: number
+  }) => {
     setStoreToUpdate(store)
     setIsUpdateStoreOpen(true)
   }
@@ -61,7 +77,12 @@ export function StoreSelector() {
 
     setIsSubmitting(true)
     try {
-      await updateStore(storeToUpdate.id, { name: storeToUpdate.name, location: storeToUpdate.location })
+      await updateStore(storeToUpdate.id, {
+        name: storeToUpdate.name,
+        location: storeToUpdate.location,
+        latitude: storeToUpdate.latitude,
+        longitude: storeToUpdate.longitude,
+      })
       showToast(`Store "${storeToUpdate.name}" updated successfully`, "success")
       setIsUpdateStoreOpen(false)
     } catch (error) {
@@ -164,7 +185,7 @@ export function StoreSelector() {
       {/* Add Store Modal */}
       {isAddStoreOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="relative w-full max-w-[400px] rounded-lg bg-white p-5 shadow-lg">
+          <div className="relative w-full max-w-[600px] rounded-lg bg-white p-5 shadow-lg max-h-[90vh] overflow-y-auto">
             <button
               className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none"
               onClick={() => setIsAddStoreOpen(false)}
@@ -175,9 +196,7 @@ export function StoreSelector() {
 
             <div className="mb-4">
               <h2 className="text-lg font-semibold leading-none tracking-tight">Add New Store</h2>
-              <p className="text-sm text-muted-foreground">
-                Enter the store name and location. Store ID will be generated automatically.
-              </p>
+              <p className="text-sm text-muted-foreground">Enter the store name and select its location on the map.</p>
             </div>
 
             <form onSubmit={handleAddStore}>
@@ -193,12 +212,28 @@ export function StoreSelector() {
                     required
                   />
                 </div>
+
+                {/* Map selector component */}
                 <div className="space-y-1">
-                  <Label htmlFor="location">Store Location</Label>
+                  <Label htmlFor="location-map">Store Location</Label>
+                  <MapSelector
+                    onLocationSelect={(lat, lng, address) => {
+                      setNewStore((prev) => ({
+                        ...prev,
+                        location: address,
+                        latitude: lat,
+                        longitude: lng,
+                      }))
+                    }}
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <Label htmlFor="location">Location Address</Label>
                   <Input
                     id="location"
                     name="location"
-                    placeholder="Enter store location (e.g., City Center)"
+                    placeholder="Address will be filled automatically from map selection"
                     value={newStore.location}
                     onChange={handleInputChange}
                     required
@@ -228,7 +263,7 @@ export function StoreSelector() {
       {/* Update Store Modal */}
       {isUpdateStoreOpen && storeToUpdate && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="relative w-full max-w-[400px] rounded-lg bg-white p-5 shadow-lg">
+          <div className="relative w-full max-w-[600px] rounded-lg bg-white p-5 shadow-lg max-h-[90vh] overflow-y-auto">
             <button
               className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none"
               onClick={() => setIsUpdateStoreOpen(false)}
@@ -239,7 +274,7 @@ export function StoreSelector() {
 
             <div className="mb-4">
               <h2 className="text-lg font-semibold leading-none tracking-tight">Update Store</h2>
-              <p className="text-sm text-muted-foreground">Modify the store details below.</p>
+              <p className="text-sm text-muted-foreground">Modify the store details and location below.</p>
             </div>
 
             <form onSubmit={handleUpdateStore}>
@@ -255,12 +290,33 @@ export function StoreSelector() {
                     required
                   />
                 </div>
+
+                {/* Map selector component */}
                 <div className="space-y-1">
-                  <Label htmlFor="update-location">Store Location</Label>
+                  <Label htmlFor="update-location-map">Store Location</Label>
+                  <MapSelector
+                    initialLatitude={storeToUpdate.latitude}
+                    initialLongitude={storeToUpdate.longitude}
+                    onLocationSelect={(lat, lng, address) => {
+                      setStoreToUpdate(
+                        (prev) =>
+                          prev && {
+                            ...prev,
+                            location: address || prev.location,
+                            latitude: lat,
+                            longitude: lng,
+                          },
+                      )
+                    }}
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <Label htmlFor="update-location">Location Address</Label>
                   <Input
                     id="update-location"
                     name="location"
-                    placeholder="Enter store location"
+                    placeholder="Address will be filled automatically from map selection"
                     value={storeToUpdate.location}
                     onChange={(e) => setStoreToUpdate((prev) => prev && { ...prev, location: e.target.value })}
                     required

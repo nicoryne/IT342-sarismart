@@ -169,24 +169,6 @@ export default function LoginPage() {
               )}
             </Button>
           </form>
-
-          <div className="mt-6">
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <Separator className="w-full" />
-              </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-white px-2 text-gray-500">Or continue with</span>
-              </div>
-            </div>
-
-            <div className="mt-6 grid grid-cols-2 gap-3">
-              <Button variant="outline" className="col-span-2 w-full">
-                <Mail className="mr-2 h-4 w-4" />
-                Email
-              </Button>
-            </div>
-          </div>
         </div>
 
         <div className="text-center text-sm">
