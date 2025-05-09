@@ -40,22 +40,27 @@ public class CartService {
     @Transactional
     public Cart createCart(Long storeId, List<CartItem> cartItems, double totalPrice, int totalItems, String cartName) {
         if (cartItems == null || cartItems.isEmpty()) {
+            System.out.println("Cart items cannot be null or empty");
             throw new RuntimeException("Cart items cannot be null or empty");
         }
 
         if (storeId == null) {
+            System.out.println("Store ID cannot be null");
             throw new RuntimeException("Store ID cannot be null");
         }
 
         if (totalPrice <= 0) {
+            System.out.println("Total price must be greater than zero");
             throw new RuntimeException("Total price must be greater than zero");
         }
 
         if (totalItems <= 0) {
+            System.out.println("Total items must be greater than zero");
             throw new RuntimeException("Total items must be greater than zero");
         }
 
         if (cartName == null || cartName.isEmpty()) {
+            System.out.println("Cart name cannot be null or empty");
             throw new RuntimeException("Cart name cannot be null or empty");
         }
 
@@ -82,6 +87,7 @@ public class CartService {
 
             double expectedSubtotal = product.getPrice() * item.getQuantity();
             if (Double.compare(expectedSubtotal, item.getSubtotal()) != 0) {
+                System.out.println("Invalid subtotal for product: " + product.getName());
                 throw new RuntimeException("Invalid subtotal for product: " + product.getName());
             }
 

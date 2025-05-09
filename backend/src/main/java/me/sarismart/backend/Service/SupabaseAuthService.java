@@ -46,16 +46,10 @@ public class SupabaseAuthService {
         body.put("password", password);
         body.put("options", options);
 
-        System.out.println("Request body: " + new JSONObject(body));
-
         HttpEntity<Map<String, Object>> entity = new HttpEntity<>(body, headers);
 
         try {
             ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.POST, entity, String.class);
-
-            // Print status and body for debugging in Render
-            System.out.println("Supabase signUp response status: " + response.getStatusCode());
-            System.out.println("Supabase signUp response body: " + response.getBody());
 
             if (response.getStatusCode() != HttpStatus.OK && response.getStatusCode() != HttpStatus.CREATED) {
                 return ResponseEntity.status(response.getStatusCode())
@@ -101,10 +95,6 @@ public class SupabaseAuthService {
         try {
             ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.POST, entity, String.class);
 
-            // Print status and body for debugging in Render
-            System.out.println("Supabase signIn response status: " + response.getStatusCode());
-            System.out.println("Supabase signIn response body: " + response.getBody());
-
             if (response.getStatusCode().is2xxSuccessful()) {
                 JSONObject json = new JSONObject(response.getBody());
 
@@ -137,10 +127,6 @@ public class SupabaseAuthService {
         try {
             ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.POST, entity, String.class);
     
-            // Print status and body for debugging
-            System.out.println("Supabase refreshSession response status: " + response.getStatusCode());
-            System.out.println("Supabase refreshSession response body: " + response.getBody());
-    
             if (response.getStatusCode().is2xxSuccessful()) {
                 JSONObject json = new JSONObject(response.getBody());
                 return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(json.toMap());
@@ -167,10 +153,6 @@ public class SupabaseAuthService {
     
         try {
             ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
-    
-            // Print status and body for debugging in Render
-            System.out.println("Supabase getUserDetails response status: " + response.getStatusCode());
-            System.out.println("Supabase getUserDetails response body: " + response.getBody());
     
             if (response.getStatusCode().is2xxSuccessful()) {
                 JSONObject json = new JSONObject(response.getBody());
