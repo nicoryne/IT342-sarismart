@@ -4,7 +4,6 @@ import me.sarismart.backend.Entity.Cart;
 import me.sarismart.backend.Entity.CartItem;
 import me.sarismart.backend.Entity.Product;
 import me.sarismart.backend.Entity.Store;
-import me.sarismart.backend.Entity.User;
 import me.sarismart.backend.Repository.CartItemsRepository;
 import me.sarismart.backend.Repository.CartRepository;
 import me.sarismart.backend.Repository.ProductRepository;
@@ -66,8 +65,20 @@ public class CartService {
 
         String currentUserId = storeService.getCurrentUserId();
 
+        if (currentUserId == null) {
+            System.out.println("Current user ID cannot be null");
+            throw new RuntimeException("Current user ID cannot be null");
+        }
+
+        System.out.println("Current user ID: " + currentUserId);
+
         Store store = storeRepository.findById(storeId)
                 .orElseThrow(() -> new RuntimeException("Store not found"));
+
+        if (!store.getOwner().getSupabaseUid().equals(currentUserId)) {
+            System.out.println("User does not have permission to create a cart for this store");
+            throw new RuntimeException("User does not have permission to create a cart for this store");
+        }
 
         Cart cart = new Cart();
         cart.setCartName(cartName);
@@ -75,9 +86,8 @@ public class CartService {
         cart.setTotalItems(totalItems);
         cart.setStore(store);
 
-        User seller = userService.getUserBySupabaseUid(currentUserId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-        cart.setSeller(seller);
+        cart.setSeller(userService.getUserBySupabaseUid(currentUserId)
+                .orElseThrow(() -> new RuntimeException("User not found")));
 
         Cart savedCart = cartRepository.save(cart);
 
@@ -96,6 +106,7 @@ public class CartService {
             cartItemsRepository.save(item);
         }
 
+        System.out.println("Cart created successfully: " + savedCart);
         return savedCart;
     }
 
