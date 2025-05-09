@@ -11,8 +11,6 @@ import me.sarismart.backend.Repository.StoreRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import jakarta.transaction.Transactional;
-
 import java.util.List;
 
 @Service
@@ -36,7 +34,6 @@ public class CartService {
     @Autowired
     private UserService userService;
 
-    @Transactional
     public Cart createCart(Long storeId, List<CartItem> cartItems, double totalPrice, int totalItems, String cartName) {
         if (cartItems == null || cartItems.isEmpty()) {
             System.out.println("Cart items cannot be null or empty");
