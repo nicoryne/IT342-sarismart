@@ -22,13 +22,36 @@ type StockHistoryEntry = {
   user?: string
 }
 
-// Define the type for restock alert entries
+// Define the type for restock alert entries based on the API schema
+type RestockAlertProduct = {
+  id: number
+  barcode: string
+  name: string
+  category: string
+  description: string
+  price: number
+  stock: number
+  sold: number
+  reorderLevel: number
+  store: {
+    id: number
+    storeName: string
+    location: string
+    // Other store properties omitted for brevity
+  }
+}
+
+// Define the type for our formatted restock alert entries
 type RestockAlertEntry = {
+  id: number
+  productName: string
+  category: string
+  currentStock: number
+  threshold: number
+  severity: "low" | "critical"
   message: string
-  productName?: string
-  currentStock?: number
-  threshold?: number
-  severity?: "low" | "critical"
+  storeId: number
+  storeName: string
 }
 
 export default function InsightsPage() {
@@ -156,7 +179,7 @@ export default function InsightsPage() {
     }
   }
 
-  // Fetch restock alerts
+  // Fetch restock alerts - properly implemented to use the real API data
   const fetchRestockAlerts = async () => {
     try {
       const token = localStorage.getItem("token")
@@ -165,76 +188,94 @@ export default function InsightsPage() {
         return
       }
 
+      let alertsToDisplay: RestockAlertEntry[] = []
+
       if (selectedStore === "all") {
-        // For demo purposes, create some sample alerts
-        const sampleAlerts = [
-          {
-            message: "Coca-Cola is running low on stock (5 remaining, threshold: 10)",
-            productName: "Coca-Cola",
-            currentStock: 5,
-            threshold: 10,
-            severity: "low",
-          },
-          {
-            message: "Rice is critically low on stock (2 remaining, threshold: 15)",
-            productName: "Rice",
-            currentStock: 2,
-            threshold: 15,
-            severity: "critical",
-          },
-        ] as RestockAlertEntry[]
-        setRestockAlerts(sampleAlerts)
-        return
-      }
+        // Fetch alerts for all stores
+        const allAlerts = await Promise.all(
+          stores.map(async (store) => {
+            try {
+              const response = await fetch(
+                `https://sarismart-backend.onrender.com/api/v1/stores/${store.id}/inventory/alerts`,
+                {
+                  method: "GET",
+                  headers: {
+                    Authorization: `Bearer ${token}`,
+                  },
+                },
+              )
 
-      const storeExists = stores.some((store) => String(store.id) === selectedStore)
-      if (!storeExists) {
-        console.warn(`Store ${selectedStore} does not belong to the current user`)
-        setRestockAlerts([])
-        return
-      }
+              if (!response.ok) {
+                console.warn(`Failed to fetch alerts for store ${store.id}: ${response.status}`)
+                return []
+              }
 
-      const response = await fetch(
-        `https://sarismart-backend.onrender.com/api/v1/stores/${selectedStore}/inventory/alerts`,
-        {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        },
-      )
+              const data: RestockAlertProduct[] = await response.json()
+              return data.map((product) => formatRestockAlert(product, String(store.name)))
+            } catch (error) {
+              console.error(`Error fetching alerts for store ${store.id}:`, error)
+              return []
+            }
+          }),
+        )
 
-      if (!response.ok) {
-        throw new Error(`Failed to fetch restock alerts: ${response.status}`)
-      }
-
-      const data = await response.json()
-
-      // For demo purposes, if no alerts are returned, create some sample ones
-      if (Array.isArray(data) && data.length === 0) {
-        const sampleAlerts = [
-          {
-            message: "Coca-Cola is running low on stock (5 remaining, threshold: 10)",
-            productName: "Coca-Cola",
-            currentStock: 5,
-            threshold: 10,
-            severity: "low",
-          },
-          {
-            message: "Rice is critically low on stock (2 remaining, threshold: 15)",
-            productName: "Rice",
-            currentStock: 2,
-            threshold: 15,
-            severity: "critical",
-          },
-        ] as RestockAlertEntry[]
-        setRestockAlerts(sampleAlerts)
+        // Combine all alerts from all stores
+        alertsToDisplay = allAlerts.flat()
       } else {
-        setRestockAlerts(data)
+        // Verify the selected store belongs to the user
+        const storeExists = stores.some((store) => String(store.id) === selectedStore)
+        if (!storeExists) {
+          console.warn(`Store ${selectedStore} does not belong to the current user`)
+          setRestockAlerts([])
+          return
+        }
+
+        const storeName = stores.find((store) => String(store.id) === selectedStore)?.name || "Unknown Store"
+
+        const response = await fetch(
+          `https://sarismart-backend.onrender.com/api/v1/stores/${selectedStore}/inventory/alerts`,
+          {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          },
+        )
+
+        if (!response.ok) {
+          throw new Error(`Failed to fetch restock alerts: ${response.status}`)
+        }
+
+        const data: RestockAlertProduct[] = await response.json()
+        alertsToDisplay = data.map((product) => formatRestockAlert(product, storeName))
       }
+
+      setRestockAlerts(alertsToDisplay)
     } catch (error) {
       console.error("Error fetching restock alerts:", error)
       setRestockAlerts([])
+    }
+  }
+
+  // Helper function to format restock alerts from API data
+  const formatRestockAlert = (product: RestockAlertProduct, storeName: string): RestockAlertEntry => {
+    // Calculate severity based on how far below reorder level
+    const stockRatio = product.stock / product.reorderLevel
+    const severity = stockRatio <= 0.3 ? "critical" : "low"
+
+    // Create a formatted message
+    const message = `${product.name} is ${severity === "critical" ? "critically" : ""} low on stock (${product.stock} remaining, threshold: ${product.reorderLevel})`
+
+    return {
+      id: product.id,
+      productName: product.name,
+      category: product.category,
+      currentStock: product.stock,
+      threshold: product.reorderLevel,
+      severity: severity,
+      message: message,
+      storeId: product.store?.id || 0,
+      storeName: product.store?.storeName || storeName,
     }
   }
 
@@ -354,9 +395,9 @@ export default function InsightsPage() {
               <ScrollArea className="h-[400px] pr-4">
                 {restockAlerts.length > 0 ? (
                   <div className="space-y-4">
-                    {restockAlerts.map((alert, index) => (
+                    {restockAlerts.map((alert) => (
                       <div
-                        key={index}
+                        key={alert.id}
                         className={`rounded-lg border p-3 ${
                           alert.severity === "critical"
                             ? "border-destructive/50 bg-destructive/5"
@@ -366,7 +407,7 @@ export default function InsightsPage() {
                         <div className="flex flex-col space-y-1.5">
                           <div className="flex items-center justify-between">
                             <h3 className="font-semibold text-sm flex items-center gap-1">
-                              {alert.productName || "Unknown Product"}
+                              {alert.productName}
                               <Badge
                                 variant={alert.severity === "critical" ? "destructive" : "outline"}
                                 className="ml-2 text-xs"
@@ -377,11 +418,16 @@ export default function InsightsPage() {
                           </div>
                           <div className="flex items-center gap-2 text-sm">
                             <span className="text-muted-foreground">Current stock:</span>
-                            <span className="font-medium">{alert.currentStock || "N/A"}</span>
+                            <span className="font-medium">{alert.currentStock}</span>
                             <span className="text-muted-foreground">Threshold:</span>
-                            <span className="font-medium">{alert.threshold || "N/A"}</span>
+                            <span className="font-medium">{alert.threshold}</span>
                           </div>
-                          <div className="text-xs text-muted-foreground mt-1">{alert.message}</div>
+                          {selectedStore === "all" && (
+                            <div className="text-xs text-muted-foreground">Store: {alert.storeName}</div>
+                          )}
+                          <div className="text-xs text-muted-foreground mt-1">
+                            <span className="font-medium text-xs">{alert.category}</span> category
+                          </div>
                         </div>
                       </div>
                     ))}
