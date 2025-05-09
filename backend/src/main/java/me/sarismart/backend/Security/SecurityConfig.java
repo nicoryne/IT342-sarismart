@@ -93,6 +93,12 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/api/v1/stores/{storeId}/reports/monthly").hasAuthority("authenticated") // Get monthly sales report
                 .requestMatchers(HttpMethod.GET, "/api/v1/stores/{storeId}/reports/inventory").hasAuthority("authenticated") // Get inventory status report
 
+                // Cart-related endpoints
+                .requestMatchers(HttpMethod.POST, "/api/v1/carts").hasAuthority("authenticated") // Create a cart
+                .requestMatchers(HttpMethod.GET, "/api/v1/carts/store/{storeId}").hasAuthority("authenticated") // Get carts by store ID
+                .requestMatchers(HttpMethod.GET, "/api/v1/carts/owner/{ownerId}").hasAuthority("authenticated") // Get carts by owner ID
+                .requestMatchers(HttpMethod.GET, "/api/v1/carts/search").hasAuthority("authenticated") // Search carts by cart name
+
                 // Default rule: All other requests require authentication
                 .anyRequest().authenticated()
             )
