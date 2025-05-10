@@ -27,11 +27,28 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                                     @NonNull HttpServletResponse response,
                                     @NonNull FilterChain filterChain) throws ServletException, IOException {
 
+        String token = null;
+
         String authHeader = request.getHeader("Authorization");
-
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
-            String token = authHeader.substring(7);
+            token = authHeader.substring(7);
+        } else {
+            String[] fallbackHeaders = {"X-Authorization", "Auth", "X-Auth-Token"};
+            for (String header : fallbackHeaders) {
+                String fallbackHeader = request.getHeader(header);
+                if (fallbackHeader != null && !fallbackHeader.isEmpty()) {
+                    if (fallbackHeader.startsWith("Bearer ")) {
+                        token = fallbackHeader.substring(7);
+                    } else {
+                        token = fallbackHeader;
+                    }
+                    System.out.println("Token found in fallback header: " + header);
+                    break;
+                }
+            }
+        }
 
+        if (token != null) {
             try {
                 Claims claims = jwtUtil.validateToken(token);
 
@@ -56,7 +73,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                 return;
             }
         } else {
-            System.out.println("Authorization header is missing or does not start with 'Bearer '");
+            System.out.println("No valid token found in headers");
         }
 
         filterChain.doFilter(request, response);
