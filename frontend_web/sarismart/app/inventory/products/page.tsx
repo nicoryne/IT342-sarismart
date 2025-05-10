@@ -739,9 +739,6 @@ export default function ProductsPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{inventoryMetrics.totalProducts}</div>
-            <p className="text-xs text-muted-foreground">
-              <span className="text-[#40E0D0]">+0 items</span> from last month
-            </p>
           </CardContent>
         </Card>
 
@@ -765,9 +762,6 @@ export default function ProductsPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{inventoryMetrics.categories}</div>
-            <p className="text-xs text-muted-foreground">
-              <span className="text-[#40E0D0]">+0 categories</span> from last month
-            </p>
           </CardContent>
         </Card>
 
@@ -792,9 +786,6 @@ export default function ProductsPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{inventoryMetrics.lowStock}</div>
-            <p className="text-xs text-muted-foreground">
-              <span className="text-red-500">+0 items</span> from last week
-            </p>
           </CardContent>
         </Card>
 
@@ -816,9 +807,6 @@ export default function ProductsPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">₱{inventoryMetrics.inventoryValue.toFixed(2)}</div>
-            <p className="text-xs text-muted-foreground">
-              <span className="text-[#40E0D0]">+0%</span> from last month
-            </p>
           </CardContent>
         </Card>
       </div>
@@ -835,6 +823,38 @@ export default function ProductsPage() {
               onChange={handleSearchChange}
             />
           </div>
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => {
+              fetchProducts()
+              showToast("Refreshing product data...", "info")
+            }}
+            disabled={isLoading}
+            title="Refresh products"
+          >
+            {isLoading ? (
+              <div className="h-4 w-4 animate-spin rounded-full border-2 border-[#008080] border-t-transparent" />
+            ) : (
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="h-4 w-4"
+              >
+                <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" />
+                <path d="M21 3v5h-5" />
+                <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" />
+                <path d="M8 16H3v5" />
+              </svg>
+            )}
+          </Button>
         </div>
 
         <div className="flex items-center gap-2"></div>
