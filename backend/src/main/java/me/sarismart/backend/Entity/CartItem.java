@@ -1,5 +1,6 @@
 package me.sarismart.backend.Entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -16,6 +17,7 @@ public class CartItem {
 
     @ManyToOne
     @JoinColumn(name = "cart_id", nullable = false)
+    @JsonIgnoreProperties({"cartName", "totalPrice", "totalItems", "dateCreated", "store", "seller", "cartItems"})
     private Cart cart;
 
     @ManyToOne
