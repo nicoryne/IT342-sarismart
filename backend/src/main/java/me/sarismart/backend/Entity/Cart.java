@@ -3,6 +3,7 @@ package me.sarismart.backend.Entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
@@ -24,6 +25,9 @@ public class Cart {
 
     @Column(nullable = false)
     private int totalItems;
+
+    @Column(nullable = false)
+    private LocalDateTime dateCreated;
 
     @OneToMany(mappedBy = "cart", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<CartItem> cartItems;
