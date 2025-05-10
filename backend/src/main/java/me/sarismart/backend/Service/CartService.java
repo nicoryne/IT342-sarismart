@@ -9,6 +9,8 @@ import me.sarismart.backend.Repository.CartRepository;
 import me.sarismart.backend.Repository.ProductRepository;
 import me.sarismart.backend.Repository.StoreRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -29,10 +31,21 @@ public class CartService {
     private StoreRepository storeRepository;
 
     @Autowired
-    private StoreService storeService;
-
-    @Autowired
     private UserService userService;
+
+    protected String getCurrentUserId() {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            if (authentication == null || !authentication.isAuthenticated()) {
+                throw new RuntimeException("User is not authenticated");
+            }
+        
+            Object principal = authentication.getPrincipal();
+            if (principal instanceof String userId) {
+                return userId;
+            }
+        
+            throw new RuntimeException("Failed to retrieve user ID from authentication principal");
+    }
 
     public Cart createCart(Long storeId, List<CartItem> cartItems, double totalPrice, int totalItems, String cartName) {
         if (cartItems == null || cartItems.isEmpty()) {
@@ -60,7 +73,7 @@ public class CartService {
             throw new RuntimeException("Cart name cannot be null or empty");
         }
 
-        String currentUserId = storeService.getCurrentUserId();
+        String currentUserId = getCurrentUserId();
 
         if (currentUserId == null) {
             System.out.println("Current user ID cannot be null");
