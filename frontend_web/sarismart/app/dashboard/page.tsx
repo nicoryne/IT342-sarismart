@@ -6,8 +6,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
 import { useStoresContext } from "@/hooks/use-stores-context"
 import { StoreSelector } from "@/components/store-selector"
-import { Loader2 } from "lucide-react"
+import { Loader2, RefreshCw } from "lucide-react"
 import { showToast } from "@/components/ui/toast-notification"
+import { Button } from "@/components/ui/button"
 
 // Define a type for the product
 type Product = {
@@ -34,6 +35,7 @@ export default function DashboardPage() {
   const [loadingProducts, setLoadingProducts] = useState(false)
   const [lowStockItems, setLowStockItems] = useState([])
   const [outOfStockCount, setOutOfStockCount] = useState(0)
+  const [isRefreshing, setIsRefreshing] = useState(false)
 
   // Fetch store metrics when selectedStore changes
   useEffect(() => {
@@ -147,7 +149,15 @@ export default function DashboardPage() {
       showToast(`Failed to fetch products: ${error instanceof Error ? error.message : "Unknown error"}`, "error")
     } finally {
       setLoadingProducts(false)
+      setIsRefreshing(false)
     }
+  }
+
+  // Handle manual refresh
+  const handleRefresh = () => {
+    setIsRefreshing(true)
+    showToast("Refreshing dashboard data...", "info")
+    fetchProducts()
   }
 
   // Format currency
@@ -163,6 +173,19 @@ export default function DashboardPage() {
     <main className="flex-1 overflow-auto p-4 md:p-6">
       <div className="mb-6 flex items-center justify-between">
         <StoreSelector />
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={handleRefresh}
+          disabled={isLoading || loadingProducts || isRefreshing}
+          title="Refresh dashboard"
+        >
+          {isLoading || loadingProducts || isRefreshing ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <RefreshCw className="h-4 w-4" />
+          )}
+        </Button>
       </div>
 
       <div className="mb-6">
@@ -197,9 +220,6 @@ export default function DashboardPage() {
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{storeData.totalProducts}</div>
-                <p className="text-xs text-muted-foreground">
-                  <span className="text-[#40E0D0]">+0 items</span> from last month
-                </p>
               </CardContent>
             </Card>
 
@@ -224,9 +244,6 @@ export default function DashboardPage() {
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{storeData.lowStock}</div>
-                <p className="text-xs text-muted-foreground">
-                  <span className="text-red-500">+0 items</span> from last week
-                </p>
               </CardContent>
             </Card>
 
@@ -249,9 +266,6 @@ export default function DashboardPage() {
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{outOfStockCount}</div>
-                <p className="text-xs text-muted-foreground">
-                  <span className="text-red-500">+0 items</span> from yesterday
-                </p>
               </CardContent>
             </Card>
 
@@ -273,9 +287,6 @@ export default function DashboardPage() {
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">{formatCurrency(storeData.inventoryValue)}</div>
-                <p className="text-xs text-muted-foreground">
-                  <span className="text-[#40E0D0]">+0%</span> from last month
-                </p>
               </CardContent>
             </Card>
           </div>
@@ -587,7 +598,7 @@ export default function DashboardPage() {
                       ))
                   ) : (
                     <TableRow>
-                      <TableCell colSpan={7} className="text  -center py-8 text-muted-foreground">
+                      <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
                         No out of stock products found.
                       </TableCell>
                     </TableRow>
